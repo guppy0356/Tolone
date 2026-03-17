@@ -1,69 +1,99 @@
-# Architectural Playground: Facade + Presenter Pattern
+# Tolone
 
-This repository is a dedicated playground for experimenting with the **Facade + Presenter** pattern in modern React applications. It uses a monorepo structure to host multiple "theme" apps (e.g., Todo, CMS) sharing a common UI library and a centralized OpenAPI schema.
+A pnpm monorepo for experimenting with the Facade + Presenter pattern in React.
 
-## 🏗 Key Concepts
+## Project Structure
 
-- **Facade + Presenter Pattern**: Decoupling data orchestration (Facade) and UI logic (Presenter) from pure rendering (View).
-- **OpenAPI-Driven Development**: The `openapi.yaml` at the root serves as the Single Source of Truth for both API mocking and TypeScript types.
-- **Type-Safe Fetching**: Uses `openapi-fetch` for lightweight, schema-guaranteed API communication.
-- **Instant Mocking**: Uses [Prism](https://stoplight.io/open-source/prism) to provide a mock backend instantly from the YAML schema.
-
-## 📁 Project Structure
-
-```text
+```
 .
-├── openapi.yaml          # Central API specification (Source of Truth)
-├── pnpm-workspace.yaml   # Monorepo configuration
-├── apps/
-│   ├── todo/             # Example: Todo application experiment
-│   │   └── src/api/      # Generated types (v1.d.ts) reside here
-│   └── cms/              # Example: CMS dashboard experiment
-└── packages/
-    └── ui/               # Shared UI components (shadcn/ui based)
+├── docs/
+│   └── architecture.md       # Detailed 4-layer architecture guide
+├── packages/
+│   └── tailwind/             # Shared TailwindCSS package
+├── playgrounds/
+│   └── todo/                 # Todo app (reference implementation)
+└── scripts/
+    └── new-playground.mjs    # Playground scaffold script
 ```
 
-## 🚀 Getting Started
-
-### 1. Installation
+## Setup
 
 ```bash
 pnpm install
 ```
 
-### 2. Start Infrastructure (Mock Server & Typegen Watcher)
-
-Run the following command at the root to start the Prism mock server and a file watcher that automatically regenerates TypeScript types whenever `openapi.yaml` is modified:
+## Creating a Playground
 
 ```bash
-pnpm dev:infra
+pnpm new:playground <name>
 ```
 
-- **Mock Server**: Runs at `http://127.0.0.1:4010`
-- **Typegen**: Automatically updates `./apps/*/src/api/v1.d.ts`
+This generates the following structure:
 
-### 3. Run an App
+```
+playgrounds/<name>/
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+├── vitest.config.ts
+├── index.html
+└── src/
+    ├── main.tsx              # MSW initialization + React render
+    ├── app.css               # Tailwind import
+    ├── vite-env.d.ts
+    ├── lib/
+    │   └── api-client.ts     # ky instance
+    ├── features/             # Implement features here
+    ├── mocks/
+    │   ├── handlers.ts       # MSW handlers
+    │   └── browser.ts        # MSW worker
+    └── test/
+        └── setup.ts
+```
 
-Navigate to an app directory and start the Next.js development server:
+## Dev Server
 
 ```bash
-cd apps/todo
-pnpm dev
+# Start a specific playground
+pnpm --filter @tolone/<name> dev
+
+# Example: todo
+pnpm --filter @tolone/todo dev
 ```
 
-## 🛠 Development Workflow
+Open `http://localhost:5173` in your browser.
 
-1.  **Define Schema**: Update the root `openapi.yaml` with your desired API endpoints.
-2.  **Auto-Sync**: The `watcher` will detect changes and update the type definitions inside each app's `src/api/` directory.
-3.  **Implement Facade**: Create a `.facade.ts` using `openapi-fetch` to interact with the mock server.
-4.  **Implement Presenter**: Create a `.presenter.ts` to manage local state and UI logic.
-5.  **Build View**: Create a `.component.tsx` to render the UI using props from the Presenter.
+## Running Tests
 
-## 🧪 Experiments Included
+```bash
+# Single playground
+pnpm --filter @tolone/<name> test
 
-- **Pattern A (Todo)**: Basic CRUD with local state management.
-- **Pattern B (CMS)**: Complex forms, validation, and dashboard layouts.
-- **Pattern C (Advanced UI)**: Deeply nested components with state synchronization using Context or Sloting.
+# All playgrounds
+pnpm test
+```
 
----
-*Generated with ❤️ for architectural excellence.*
+## Architecture
+
+Uses the 4-layer Lahan pattern. See [docs/architecture.md](./docs/architecture.md) for full details.
+
+```
+API → Facade → Presenter → Component
+```
+
+| Layer | File | Responsibility |
+|---|---|---|
+| API | `{Feature}.api.ts` | HTTP calls + type definitions |
+| Facade | `{Feature}.facade.ts` | Server state management |
+| Presenter | `{Feature}.presenter.ts` | Local UI state |
+| Component | `{Feature}.component.tsx` | Rendering only |
+
+Features are placed under `src/features/{feature-name}/`.
+
+## Tech Stack
+
+- React 19 + TypeScript
+- Vite + TailwindCSS v4
+- MSW v2 (API mocking)
+- ky (HTTP client)
+- Vitest + Testing Library

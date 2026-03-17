@@ -1,9 +1,25 @@
 import { useState, useCallback } from "react";
-import type { useTodoFacade } from "./Todo.facade";
+import type { TodoFacade } from "./Todo.facade";
 
-type Props = Pick<ReturnType<typeof useTodoFacade>, "addTodo">;
+export interface TodoPresenter {
+  todos: TodoFacade["todos"];
+  loading: boolean;
+  error: Error | null;
+  toggleTodo: TodoFacade["toggleTodo"];
+  deleteTodo: TodoFacade["deleteTodo"];
+  newTitle: string;
+  setNewTitle: (value: string) => void;
+  handleSubmit: () => Promise<void>;
+}
 
-export function useTodoPresenter({ addTodo }: Props) {
+export function useTodoPresenter({
+  todos,
+  loading,
+  error,
+  addTodo,
+  toggleTodo,
+  deleteTodo,
+}: TodoFacade): TodoPresenter {
   const [newTitle, setNewTitle] = useState("");
 
   const handleSubmit = useCallback(async () => {
@@ -13,5 +29,14 @@ export function useTodoPresenter({ addTodo }: Props) {
     setNewTitle("");
   }, [newTitle, addTodo]);
 
-  return { newTitle, setNewTitle, handleSubmit } as const;
+  return {
+    todos,
+    loading,
+    error,
+    toggleTodo,
+    deleteTodo,
+    newTitle,
+    setNewTitle,
+    handleSubmit,
+  };
 }

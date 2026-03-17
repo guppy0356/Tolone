@@ -1,20 +1,19 @@
 import { memo } from "react";
-import type { useTodoFacade } from "./Todo.facade";
-import type { useTodoPresenter } from "./Todo.presenter";
+import { useTodoPresenter } from "./Todo.presenter";
+import type { TodoFacade } from "./Todo.facade";
 
-type Props = ReturnType<typeof useTodoFacade> &
-  ReturnType<typeof useTodoPresenter>;
+export const TodoComponent = memo(function TodoComponent(props: TodoFacade) {
+  const {
+    todos,
+    loading,
+    error,
+    toggleTodo,
+    deleteTodo,
+    newTitle,
+    setNewTitle,
+    handleSubmit,
+  } = useTodoPresenter(props);
 
-export const TodoComponent = memo(function TodoComponent({
-  todos,
-  loading,
-  error,
-  toggleTodo,
-  deleteTodo,
-  newTitle,
-  setNewTitle,
-  handleSubmit,
-}: Props) {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
 

@@ -1,7 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { todoApi, type Todo, type CreateTodoInput } from "./Todo.api";
 
-export function useTodoFacade() {
+export interface TodoFacade {
+  todos: Todo[];
+  loading: boolean;
+  error: Error | null;
+  addTodo: (input: CreateTodoInput) => Promise<void>;
+  toggleTodo: (id: string, completed: boolean) => Promise<void>;
+  deleteTodo: (id: string) => Promise<void>;
+}
+
+export function useTodoFacade(): TodoFacade {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -38,5 +47,5 @@ export function useTodoFacade() {
     setTodos((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  return { todos, loading, error, addTodo, toggleTodo, deleteTodo } as const;
+  return { todos, loading, error, addTodo, toggleTodo, deleteTodo };
 }

@@ -1,14 +1,12 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { useTodoFacade } from "./features/todo/Todo.facade";
-import { useTodoPresenter } from "./features/todo/Todo.presenter";
 import { TodoComponent } from "./features/todo/Todo.component";
 import "./app.css";
 
 function TodoPage() {
   const facade = useTodoFacade();
-  const presenter = useTodoPresenter({ addTodo: facade.addTodo });
-  return <TodoComponent {...facade} {...presenter} />;
+  return <TodoComponent {...facade} />;
 }
 
 async function enableMocking() {

@@ -17,6 +17,21 @@ API → Facade → Presenter → Component
 | Presenter | `{Feature}.presenter.ts` | Local UI state (forms, validation) | React hook |
 | Component | `{Feature}.component.tsx` | Rendering only, memoized | React component |
 
+### Data Flow
+
+```
+Container (main.tsx)
+  → calls Facade hook
+  → passes facade return value as props to Component
+
+Component (memo)
+  → receives Facade data as props
+  → calls Presenter hook internally, forwarding those props
+  → renders using only Presenter return values
+```
+
+The Component never receives Presenter output from outside. The Presenter is always called **inside** the Component.
+
 ### File Placement
 
 ```
@@ -26,6 +41,37 @@ src/features/{feature-name}/
 ├── {Feature}.presenter.ts
 ├── {Feature}.component.tsx
 └── {Feature}.component.test.tsx
+```
+
+---
+
+## Type Patterns
+
+Use **explicit interfaces** for hook props and return types instead of `ReturnType<typeof ...>`.
+
+```ts
+// Facade — export the return type as a named interface
+export interface TodoFacade {
+  todos: Todo[];
+  loading: boolean;
+  error: Error | null;
+  addTodo: (input: CreateTodoInput) => Promise<void>;
+}
+export function useTodoFacade(): TodoFacade { ... }
+
+// Presenter — receive the Facade interface as props, export its own return interface
+export interface TodoPresenter {
+  todos: TodoFacade["todos"];
+  loading: boolean;
+  handleSubmit: () => Promise<void>;
+}
+export function useTodoPresenter(props: TodoFacade): TodoPresenter { ... }
+
+// Component — props type is the Facade interface (Presenter is called internally)
+export const TodoComponent = memo(function TodoComponent(props: TodoFacade) {
+  const { ... } = useTodoPresenter(props);
+  return ...;
+});
 ```
 
 ---
@@ -75,6 +121,7 @@ export const todoApi = {
 - Call the API layer to fetch and update data
 - Manage loading and error states
 - No UI logic (forms, validation, etc.)
+- Export an explicit interface for the return type
 - Return action functions + data + status
 
 ```ts
@@ -82,7 +129,16 @@ export const todoApi = {
 import { useState, useEffect, useCallback } from "react";
 import { todoApi, type Todo, type CreateTodoInput } from "./Todo.api";
 
-export function useTodoFacade() {
+export interface TodoFacade {
+  todos: Todo[];
+  loading: boolean;
+  error: Error | null;
+  addTodo: (input: CreateTodoInput) => Promise<void>;
+  toggleTodo: (id: string, completed: boolean) => Promise<void>;
+  deleteTodo: (id: string) => Promise<void>;
+}
+
+export function useTodoFacade(): TodoFacade {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -104,31 +160,22 @@ export function useTodoFacade() {
     fetchTodos();
   }, [fetchTodos]);
 
-  const addTodo = useCallback(
-    async (input: CreateTodoInput) => {
-      const todo = await todoApi.create(input);
-      setTodos((prev) => [...prev, todo]);
-    },
-    [],
-  );
+  const addTodo = useCallback(async (input: CreateTodoInput) => {
+    const todo = await todoApi.create(input);
+    setTodos((prev) => [...prev, todo]);
+  }, []);
 
-  const toggleTodo = useCallback(
-    async (id: string, completed: boolean) => {
-      const updated = await todoApi.update(id, { completed });
-      setTodos((prev) => prev.map((t) => (t.id === id ? updated : t)));
-    },
-    [],
-  );
+  const toggleTodo = useCallback(async (id: string, completed: boolean) => {
+    const updated = await todoApi.update(id, { completed });
+    setTodos((prev) => prev.map((t) => (t.id === id ? updated : t)));
+  }, []);
 
-  const deleteTodo = useCallback(
-    async (id: string) => {
-      await todoApi.delete(id);
-      setTodos((prev) => prev.filter((t) => t.id !== id));
-    },
-    [],
-  );
+  const deleteTodo = useCallback(async (id: string) => {
+    await todoApi.delete(id);
+    setTodos((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
-  return { todos, loading, error, addTodo, toggleTodo, deleteTodo } as const;
+  return { todos, loading, error, addTodo, toggleTodo, deleteTodo };
 }
 ```
 
@@ -137,19 +184,36 @@ export function useTodoFacade() {
 **Responsibility**: Local UI state management (form input, validation, UI toggles)
 
 **Rules**:
-- Receive Facade return values as props
-- Define props type using `Pick<ReturnType<typeof use{Feature}Facade>, ...>`
+- Receive the full Facade return value as props
 - Manage form input values, validation, UI toggles, etc.
-- No direct server communication (call actions via Facade)
+- No direct server communication (delegate to Facade action callbacks)
+- Return **everything** the Component needs to render (including forwarded Facade data)
+- Export an explicit interface for the return type
 
 ```ts
 // Todo.presenter.ts
 import { useState, useCallback } from "react";
-import type { useTodoFacade } from "./Todo.facade";
+import type { TodoFacade } from "./Todo.facade";
 
-type Props = Pick<ReturnType<typeof useTodoFacade>, "addTodo">;
+export interface TodoPresenter {
+  todos: TodoFacade["todos"];
+  loading: boolean;
+  error: Error | null;
+  toggleTodo: TodoFacade["toggleTodo"];
+  deleteTodo: TodoFacade["deleteTodo"];
+  newTitle: string;
+  setNewTitle: (value: string) => void;
+  handleSubmit: () => Promise<void>;
+}
 
-export function useTodoPresenter({ addTodo }: Props) {
+export function useTodoPresenter({
+  todos,
+  loading,
+  error,
+  addTodo,
+  toggleTodo,
+  deleteTodo,
+}: TodoFacade): TodoPresenter {
   const [newTitle, setNewTitle] = useState("");
 
   const handleSubmit = useCallback(async () => {
@@ -159,7 +223,16 @@ export function useTodoPresenter({ addTodo }: Props) {
     setNewTitle("");
   }, [newTitle, addTodo]);
 
-  return { newTitle, setNewTitle, handleSubmit } as const;
+  return {
+    todos,
+    loading,
+    error,
+    toggleTodo,
+    deleteTodo,
+    newTitle,
+    setNewTitle,
+    handleSubmit,
+  };
 }
 ```
 
@@ -169,29 +242,29 @@ export function useTodoPresenter({ addTodo }: Props) {
 
 **Rules**:
 - Wrap with `memo`
-- Props type is `ReturnType<typeof use{Feature}Facade>` + `ReturnType<typeof use{Feature}Presenter>`
-- No logic — receive event handlers from props
-- Only apply CSS classes
+- Props type is the Facade interface
+- Call the Presenter hook **internally**, forwarding props
+- Render using only Presenter return values
+- No business logic — only JSX and CSS classes
 
 ```tsx
 // Todo.component.tsx
 import { memo } from "react";
-import type { useTodoFacade } from "./Todo.facade";
-import type { useTodoPresenter } from "./Todo.presenter";
+import { useTodoPresenter } from "./Todo.presenter";
+import type { TodoFacade } from "./Todo.facade";
 
-type Props = ReturnType<typeof useTodoFacade> &
-  ReturnType<typeof useTodoPresenter>;
+export const TodoComponent = memo(function TodoComponent(props: TodoFacade) {
+  const {
+    todos,
+    loading,
+    error,
+    toggleTodo,
+    deleteTodo,
+    newTitle,
+    setNewTitle,
+    handleSubmit,
+  } = useTodoPresenter(props);
 
-export const TodoComponent = memo(function TodoComponent({
-  todos,
-  loading,
-  error,
-  toggleTodo,
-  deleteTodo,
-  newTitle,
-  setNewTitle,
-  handleSubmit,
-}: Props) {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
@@ -230,7 +303,7 @@ export const TodoComponent = memo(function TodoComponent({
               onChange={() => toggleTodo(todo.id, !todo.completed)}
               className="size-4"
             />
-            <span className={todo.completed ? "flex-1 line-through text-gray-400" : "flex-1"}>
+            <span className={todo.completed ? "flex-1 text-gray-400 line-through" : "flex-1"}>
               {todo.title}
             </span>
             <button
@@ -251,18 +324,16 @@ export const TodoComponent = memo(function TodoComponent({
 
 ## Wiring a Feature Together
 
-To render a feature, connect Facade → Presenter → Component:
+The Container (e.g. `main.tsx`) only calls the Facade and passes its return value to the Component. The Component calls the Presenter internally.
 
 ```tsx
-// In main.tsx or App.tsx
+// main.tsx
 import { useTodoFacade } from "./features/todo/Todo.facade";
-import { useTodoPresenter } from "./features/todo/Todo.presenter";
 import { TodoComponent } from "./features/todo/Todo.component";
 
 function TodoPage() {
   const facade = useTodoFacade();
-  const presenter = useTodoPresenter({ addTodo: facade.addTodo });
-  return <TodoComponent {...facade} {...presenter} />;
+  return <TodoComponent {...facade} />;
 }
 ```
 
@@ -318,7 +389,7 @@ export const handlers = [
 
 ## Writing Tests
 
-Write unit tests for each layer. Use `@testing-library/react` for component tests.
+Component tests pass Facade-shaped props. Since the Component calls the Presenter internally, tests exercise both layers together.
 
 ```tsx
 // Todo.component.test.tsx
@@ -326,8 +397,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { TodoComponent } from "./Todo.component";
+import type { TodoFacade } from "./Todo.facade";
 
-const baseProps = {
+const baseFacade: TodoFacade = {
   todos: [
     { id: "1", title: "Test todo", completed: false },
     { id: "2", title: "Done todo", completed: true },
@@ -337,52 +409,28 @@ const baseProps = {
   addTodo: vi.fn(),
   toggleTodo: vi.fn(),
   deleteTodo: vi.fn(),
-  newTitle: "",
-  setNewTitle: vi.fn(),
-  handleSubmit: vi.fn(),
 };
 
 describe("TodoComponent", () => {
   it("renders todos", () => {
-    render(<TodoComponent {...baseProps} />);
+    render(<TodoComponent {...baseFacade} />);
     expect(screen.getByText("Test todo")).toBeInTheDocument();
     expect(screen.getByText("Done todo")).toBeInTheDocument();
   });
 
   it("shows loading state", () => {
-    render(<TodoComponent {...baseProps} loading={true} />);
+    render(<TodoComponent {...baseFacade} loading={true} />);
     expect(screen.getByText("Loading...")).toBeInTheDocument();
   });
 
-  it("shows error state", () => {
-    render(
-      <TodoComponent {...baseProps} error={new Error("Network error")} />,
-    );
-    expect(screen.getByText("Error: Network error")).toBeInTheDocument();
-  });
-
-  it("calls toggleTodo when checkbox clicked", async () => {
+  it("submits new todo via form", async () => {
+    const addTodo = vi.fn();
     const user = userEvent.setup();
-    render(<TodoComponent {...baseProps} />);
-    const checkboxes = screen.getAllByRole("checkbox");
-    await user.click(checkboxes[0]);
-    expect(baseProps.toggleTodo).toHaveBeenCalledWith("1", true);
-  });
-
-  it("calls deleteTodo when delete button clicked", async () => {
-    const user = userEvent.setup();
-    render(<TodoComponent {...baseProps} />);
-    const deleteButtons = screen.getAllByText("Delete");
-    await user.click(deleteButtons[0]);
-    expect(baseProps.deleteTodo).toHaveBeenCalledWith("1");
-  });
-
-  it("calls handleSubmit on form submit", async () => {
-    const user = userEvent.setup();
-    render(<TodoComponent {...baseProps} />);
-    const button = screen.getByText("Add");
-    await user.click(button);
-    expect(baseProps.handleSubmit).toHaveBeenCalled();
+    render(<TodoComponent {...baseFacade} addTodo={addTodo} />);
+    const input = screen.getByPlaceholderText("What needs to be done?");
+    await user.type(input, "New todo");
+    await user.click(screen.getByText("Add"));
+    expect(addTodo).toHaveBeenCalledWith({ title: "New todo" });
   });
 });
 ```
@@ -410,9 +458,9 @@ Usage in the API layer:
 
 1. Create `src/features/{feature-name}/` directory
 2. `{Feature}.api.ts` — type definitions + API function object
-3. `{Feature}.facade.ts` — `use{Feature}Facade` hook
-4. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook
-5. `{Feature}.component.tsx` — `{Feature}Component` (memo)
-6. `{Feature}.component.test.tsx` — component tests
+3. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface
+4. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook + `{Feature}Presenter` interface
+5. `{Feature}.component.tsx` — `{Feature}Component` (memo, calls Presenter internally)
+6. `{Feature}.component.test.tsx` — component tests with Facade-shaped props
 7. Add mock handlers to `src/mocks/handlers.ts`
-8. Wire the feature in `main.tsx`
+8. Wire the feature in `main.tsx` (Container calls Facade, passes to Component)

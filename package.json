@@ -1,13 +1,15 @@
 {
   "name": "Tolone",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "new:playground": "node scripts/new-playground.mjs",
+    "dev": "pnpm --filter @tolone/* dev",
+    "test": "pnpm -r test"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  },
   "packageManager": "pnpm@10.30.3"
 }

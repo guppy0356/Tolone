@@ -9,8 +9,6 @@ const baseFacade: TodoFacade = {
     { id: "1", title: "Test todo", completed: false },
     { id: "2", title: "Done todo", completed: true },
   ],
-  loading: false,
-  error: null,
   addTodo: vi.fn(),
   toggleTodo: vi.fn(),
   deleteTodo: vi.fn(),
@@ -21,18 +19,6 @@ describe("TodoComponent", () => {
     render(<TodoComponent {...baseFacade} />);
     expect(screen.getByText("Test todo")).toBeInTheDocument();
     expect(screen.getByText("Done todo")).toBeInTheDocument();
-  });
-
-  it("shows loading state", () => {
-    render(<TodoComponent {...baseFacade} loading={true} />);
-    expect(screen.getByText("Loading...")).toBeInTheDocument();
-  });
-
-  it("shows error state", () => {
-    render(
-      <TodoComponent {...baseFacade} error={new Error("Network error")} />,
-    );
-    expect(screen.getByText("Error: Network error")).toBeInTheDocument();
   });
 
   it("calls toggleTodo when checkbox clicked", async () => {

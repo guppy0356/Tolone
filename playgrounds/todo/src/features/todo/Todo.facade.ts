@@ -1,11 +1,13 @@
 import { useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useSuspenseQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { todoApi, type Todo, type CreateTodoInput } from "./Todo.api";
 
 export interface TodoFacade {
   todos: Todo[];
-  loading: boolean;
-  error: Error | null;
   addTodo: (input: CreateTodoInput) => Promise<void>;
   toggleTodo: (id: string, completed: boolean) => Promise<void>;
   deleteTodo: (id: string) => Promise<void>;
@@ -18,7 +20,7 @@ const todoKeys = {
 export function useTodoFacade(): TodoFacade {
   const queryClient = useQueryClient();
 
-  const { data, isPending, error } = useQuery({
+  const { data } = useSuspenseQuery({
     queryKey: todoKeys.all,
     queryFn: todoApi.getAll,
   });
@@ -61,9 +63,7 @@ export function useTodoFacade(): TodoFacade {
   );
 
   return {
-    todos: data ?? [],
-    loading: isPending,
-    error: error,
+    todos: data,
     addTodo,
     toggleTodo,
     deleteTodo,

@@ -3,8 +3,6 @@ import type { TodoFacade } from "./Todo.facade";
 
 export interface TodoPresenter {
   todos: TodoFacade["todos"];
-  loading: boolean;
-  error: Error | null;
   toggleTodo: TodoFacade["toggleTodo"];
   deleteTodo: TodoFacade["deleteTodo"];
   newTitle: string;
@@ -14,8 +12,6 @@ export interface TodoPresenter {
 
 export function useTodoPresenter({
   todos,
-  loading,
-  error,
   addTodo,
   toggleTodo,
   deleteTodo,
@@ -31,8 +27,6 @@ export function useTodoPresenter({
 
   return {
     todos,
-    loading,
-    error,
     toggleTodo,
     deleteTodo,
     newTitle,

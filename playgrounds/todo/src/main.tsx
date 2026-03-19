@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useTodoFacade } from "./features/todo/Todo.facade";
@@ -21,7 +21,9 @@ enableMocking().then(() => {
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <TodoPage />
+        <Suspense fallback={<p>Loading...</p>}>
+          <TodoPage />
+        </Suspense>
       </QueryClientProvider>
     </StrictMode>,
   );

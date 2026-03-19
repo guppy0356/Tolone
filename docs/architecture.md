@@ -13,7 +13,7 @@ API → Facade → Presenter → Component
 | Layer | File | Responsibility | Form |
 |---|---|---|---|
 | API | `{Feature}.api.ts` | HTTP communication + type definitions | Plain function object |
-| Facade | `{Feature}.facade.ts` | Server state (TanStack Query: useQuery + useMutation) | React hook |
+| Facade | `{Feature}.facade.ts` | Server state (TanStack Query: useSuspenseQuery + useMutation) | React hook |
 | Presenter | `{Feature}.presenter.ts` | Local UI state (forms, validation) | React hook |
 | Component | `{Feature}.component.tsx` | Rendering only, memoized | React component |
 
@@ -51,18 +51,16 @@ Use **explicit interfaces** for hook props and return types instead of `ReturnTy
 
 ```ts
 // Facade — export the return type as a named interface
+// Loading/error states are handled by Suspense/ErrorBoundary, not the Facade interface
 export interface TodoFacade {
   todos: Todo[];
-  loading: boolean;
-  error: Error | null;
   addTodo: (input: CreateTodoInput) => Promise<void>;
 }
-export function useTodoFacade(): TodoFacade { ... }  // internally uses useQuery + useMutation
+export function useTodoFacade(): TodoFacade { ... }  // internally uses useSuspenseQuery + useMutation
 
 // Presenter — receive the Facade interface as props, export its own return interface
 export interface TodoPresenter {
   todos: TodoFacade["todos"];
-  loading: boolean;
   handleSubmit: () => Promise<void>;
 }
 export function useTodoPresenter(props: TodoFacade): TodoPresenter { ... }
@@ -117,24 +115,27 @@ export const todoApi = {
 **Responsibility**: Server state management (fetching and mutating data)
 
 **Rules**:
-- Use `useQuery` + `useMutation` + `useQueryClient` from TanStack Query
+- Use `useSuspenseQuery` + `useMutation` + `useQueryClient` from TanStack Query
 - Call the API layer via query/mutation functions
-- Normalize TanStack Query state to a clean interface (`isPending` → `loading`, `data ?? []`, etc.)
+- Loading state is handled by `Suspense` boundaries, errors by `ErrorBoundary` — the Facade interface does not include `loading` or `error`
+- `useSuspenseQuery` guarantees `data` is always defined (never `undefined`)
 - No UI logic (forms, validation, etc.)
 - Export an explicit interface for the return type
-- Return action functions + data + status
+- Return action functions + data
 - Define query keys as a constant object for reuse
 
 ```ts
 // Todo.facade.ts
 import { useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useSuspenseQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { todoApi, type Todo, type CreateTodoInput } from "./Todo.api";
 
 export interface TodoFacade {
   todos: Todo[];
-  loading: boolean;
-  error: Error | null;
   addTodo: (input: CreateTodoInput) => Promise<void>;
   toggleTodo: (id: string, completed: boolean) => Promise<void>;
   deleteTodo: (id: string) => Promise<void>;
@@ -147,7 +148,7 @@ const todoKeys = {
 export function useTodoFacade(): TodoFacade {
   const queryClient = useQueryClient();
 
-  const { data, isPending, error } = useQuery({
+  const { data } = useSuspenseQuery({
     queryKey: todoKeys.all,
     queryFn: todoApi.getAll,
   });
@@ -190,9 +191,7 @@ export function useTodoFacade(): TodoFacade {
   );
 
   return {
-    todos: data ?? [],
-    loading: isPending,
-    error: error,
+    todos: data,
     addTodo,
     toggleTodo,
     deleteTodo,
@@ -218,8 +217,6 @@ import type { TodoFacade } from "./Todo.facade";
 
 export interface TodoPresenter {
   todos: TodoFacade["todos"];
-  loading: boolean;
-  error: Error | null;
   toggleTodo: TodoFacade["toggleTodo"];
   deleteTodo: TodoFacade["deleteTodo"];
   newTitle: string;
@@ -229,8 +226,6 @@ export interface TodoPresenter {
 
 export function useTodoPresenter({
   todos,
-  loading,
-  error,
   addTodo,
   toggleTodo,
   deleteTodo,
@@ -246,8 +241,6 @@ export function useTodoPresenter({
 
   return {
     todos,
-    loading,
-    error,
     toggleTodo,
     deleteTodo,
     newTitle,
@@ -277,17 +270,12 @@ import type { TodoFacade } from "./Todo.facade";
 export const TodoComponent = memo(function TodoComponent(props: TodoFacade) {
   const {
     todos,
-    loading,
-    error,
     toggleTodo,
     deleteTodo,
     newTitle,
     setNewTitle,
     handleSubmit,
   } = useTodoPresenter(props);
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
 
   return (
     <div className="mx-auto max-w-lg p-4">
@@ -349,6 +337,7 @@ The Container (e.g. `main.tsx`) only calls the Facade and passes its return valu
 
 ```tsx
 // main.tsx
+import { Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useTodoFacade } from "./features/todo/Todo.facade";
 import { TodoComponent } from "./features/todo/Todo.component";
@@ -362,7 +351,9 @@ function TodoPage() {
 
 // Inside render:
 <QueryClientProvider client={queryClient}>
-  <TodoPage />
+  <Suspense fallback={<p>Loading...</p>}>
+    <TodoPage />
+  </Suspense>
 </QueryClientProvider>
 ```
 
@@ -433,8 +424,6 @@ const baseFacade: TodoFacade = {
     { id: "1", title: "Test todo", completed: false },
     { id: "2", title: "Done todo", completed: true },
   ],
-  loading: false,
-  error: null,
   addTodo: vi.fn(),
   toggleTodo: vi.fn(),
   deleteTodo: vi.fn(),
@@ -445,11 +434,6 @@ describe("TodoComponent", () => {
     render(<TodoComponent {...baseFacade} />);
     expect(screen.getByText("Test todo")).toBeInTheDocument();
     expect(screen.getByText("Done todo")).toBeInTheDocument();
-  });
-
-  it("shows loading state", () => {
-    render(<TodoComponent {...baseFacade} loading={true} />);
-    expect(screen.getByText("Loading...")).toBeInTheDocument();
   });
 
   it("submits new todo via form", async () => {
@@ -487,9 +471,9 @@ Usage in the API layer:
 
 1. Create `src/features/{feature-name}/` directory
 2. `{Feature}.api.ts` — type definitions + API function object
-3. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (useQuery + useMutation)
+3. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (useSuspenseQuery + useMutation)
 4. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook + `{Feature}Presenter` interface
 5. `{Feature}.component.tsx` — `{Feature}Component` (memo, calls Presenter internally)
 6. `{Feature}.component.test.tsx` — component tests with Facade-shaped props
 7. Add mock handlers to `src/mocks/handlers.ts`
-8. Wire the feature in `main.tsx` (Container calls Facade, passes to Component; ensure `QueryClientProvider` wraps the app)
+8. Wire the feature in `main.tsx` (Container calls Facade, passes to Component; ensure `QueryClientProvider` + `Suspense` wrap the app)

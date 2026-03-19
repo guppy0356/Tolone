@@ -5,17 +5,12 @@ import type { TodoFacade } from "./Todo.facade";
 export const TodoComponent = memo(function TodoComponent(props: TodoFacade) {
   const {
     todos,
-    loading,
-    error,
     toggleTodo,
     deleteTodo,
     newTitle,
     setNewTitle,
     handleSubmit,
   } = useTodoPresenter(props);
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
 
   return (
     <div className="mx-auto max-w-lg p-4">

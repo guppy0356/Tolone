@@ -13,7 +13,7 @@ API → Facade → Presenter → Component
 | Layer | File | Responsibility | Form |
 |---|---|---|---|
 | API | `{Feature}.api.ts` | HTTP communication + type definitions | Plain function object |
-| Facade | `{Feature}.facade.ts` | Server state (useState + useEffect + useCallback) | React hook |
+| Facade | `{Feature}.facade.ts` | Server state (TanStack Query: useQuery + useMutation) | React hook |
 | Presenter | `{Feature}.presenter.ts` | Local UI state (forms, validation) | React hook |
 | Component | `{Feature}.component.tsx` | Rendering only, memoized | React component |
 
@@ -57,7 +57,7 @@ export interface TodoFacade {
   error: Error | null;
   addTodo: (input: CreateTodoInput) => Promise<void>;
 }
-export function useTodoFacade(): TodoFacade { ... }
+export function useTodoFacade(): TodoFacade { ... }  // internally uses useQuery + useMutation
 
 // Presenter — receive the Facade interface as props, export its own return interface
 export interface TodoPresenter {
@@ -117,16 +117,18 @@ export const todoApi = {
 **Responsibility**: Server state management (fetching and mutating data)
 
 **Rules**:
-- Use only `useState` + `useEffect` + `useCallback`
-- Call the API layer to fetch and update data
-- Manage loading and error states
+- Use `useQuery` + `useMutation` + `useQueryClient` from TanStack Query
+- Call the API layer via query/mutation functions
+- Normalize TanStack Query state to a clean interface (`isPending` → `loading`, `data ?? []`, etc.)
 - No UI logic (forms, validation, etc.)
 - Export an explicit interface for the return type
 - Return action functions + data + status
+- Define query keys as a constant object for reuse
 
 ```ts
 // Todo.facade.ts
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { todoApi, type Todo, type CreateTodoInput } from "./Todo.api";
 
 export interface TodoFacade {
@@ -138,44 +140,63 @@ export interface TodoFacade {
   deleteTodo: (id: string) => Promise<void>;
 }
 
+const todoKeys = {
+  all: ["todos"] as const,
+};
+
 export function useTodoFacade(): TodoFacade {
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchTodos = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await todoApi.getAll();
-      setTodos(data);
-    } catch (e) {
-      setError(e instanceof Error ? e : new Error("Failed to fetch todos"));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { data, isPending, error } = useQuery({
+    queryKey: todoKeys.all,
+    queryFn: todoApi.getAll,
+  });
 
-  useEffect(() => {
-    fetchTodos();
-  }, [fetchTodos]);
+  const addMutation = useMutation({
+    mutationFn: (input: CreateTodoInput) => todoApi.create(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
+  });
 
-  const addTodo = useCallback(async (input: CreateTodoInput) => {
-    const todo = await todoApi.create(input);
-    setTodos((prev) => [...prev, todo]);
-  }, []);
+  const toggleMutation = useMutation({
+    mutationFn: ({ id, completed }: { id: string; completed: boolean }) =>
+      todoApi.update(id, { completed }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
+  });
 
-  const toggleTodo = useCallback(async (id: string, completed: boolean) => {
-    const updated = await todoApi.update(id, { completed });
-    setTodos((prev) => prev.map((t) => (t.id === id ? updated : t)));
-  }, []);
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => todoApi.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
+  });
 
-  const deleteTodo = useCallback(async (id: string) => {
-    await todoApi.delete(id);
-    setTodos((prev) => prev.filter((t) => t.id !== id));
-  }, []);
+  const addTodo = useCallback(
+    async (input: CreateTodoInput) => {
+      await addMutation.mutateAsync(input);
+    },
+    [addMutation],
+  );
 
-  return { todos, loading, error, addTodo, toggleTodo, deleteTodo };
+  const toggleTodo = useCallback(
+    async (id: string, completed: boolean) => {
+      await toggleMutation.mutateAsync({ id, completed });
+    },
+    [toggleMutation],
+  );
+
+  const deleteTodo = useCallback(
+    async (id: string) => {
+      await deleteMutation.mutateAsync(id);
+    },
+    [deleteMutation],
+  );
+
+  return {
+    todos: data ?? [],
+    loading: isPending,
+    error: error,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+  };
 }
 ```
 
@@ -328,13 +349,21 @@ The Container (e.g. `main.tsx`) only calls the Facade and passes its return valu
 
 ```tsx
 // main.tsx
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useTodoFacade } from "./features/todo/Todo.facade";
 import { TodoComponent } from "./features/todo/Todo.component";
+
+const queryClient = new QueryClient();
 
 function TodoPage() {
   const facade = useTodoFacade();
   return <TodoComponent {...facade} />;
 }
+
+// Inside render:
+<QueryClientProvider client={queryClient}>
+  <TodoPage />
+</QueryClientProvider>
 ```
 
 ---
@@ -458,9 +487,9 @@ Usage in the API layer:
 
 1. Create `src/features/{feature-name}/` directory
 2. `{Feature}.api.ts` — type definitions + API function object
-3. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface
+3. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (useQuery + useMutation)
 4. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook + `{Feature}Presenter` interface
 5. `{Feature}.component.tsx` — `{Feature}Component` (memo, calls Presenter internally)
 6. `{Feature}.component.test.tsx` — component tests with Facade-shaped props
 7. Add mock handlers to `src/mocks/handlers.ts`
-8. Wire the feature in `main.tsx` (Container calls Facade, passes to Component)
+8. Wire the feature in `main.tsx` (Container calls Facade, passes to Component; ensure `QueryClientProvider` wraps the app)

@@ -9,6 +9,9 @@ catalogs:
     '@tailwindcss/vite':
       specifier: ^4.0.0
       version: 4.2.1
+    '@tanstack/react-query':
+      specifier: ^5.0.0
+      version: 5.91.2
     ky:
       specifier: ^1.0.0
       version: 1.14.3
@@ -47,6 +50,9 @@ importers:
 
   playgrounds/todo:
     dependencies:
+      '@tanstack/react-query':
+        specifier: 'catalog:'
+        version: 5.91.2(react@19.2.4)
       ky:
         specifier: 'catalog:'
         version: 1.14.3
@@ -677,6 +683,14 @@ packages:
     resolution: {integrity: sha512-TBf2sJjYeb28jD2U/OhwdW0bbOsxkWPwQ7SrqGf9sVcoYwZj7rkXljroBO9wKBut9XnmQLXanuDUeqQK0lGg/w==}
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
+
+  '@tanstack/query-core@5.91.2':
+    resolution: {integrity: sha512-Uz2pTgPC1mhqrrSGg18RKCWT/pkduAYtxbcyIyKBhw7dTWjXZIzqmpzO2lBkyWr4hlImQgpu1m1pei3UnkFRWw==}
+
+  '@tanstack/react-query@5.91.2':
+    resolution: {integrity: sha512-GClLPzbM57iFXv+FlvOUL56XVe00PxuTaVEyj1zAObhRiKF008J5vedmaq7O6ehs+VmPHe8+PUQhMuEyv8d9wQ==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@testing-library/dom@10.4.1':
     resolution: {integrity: sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==}
@@ -2001,6 +2015,13 @@ snapshots:
       '@tailwindcss/oxide': 4.2.1
       tailwindcss: 4.2.1
       vite: 6.4.1(jiti@2.6.1)(lightningcss@1.31.1)
+
+  '@tanstack/query-core@5.91.2': {}
+
+  '@tanstack/react-query@5.91.2(react@19.2.4)':
+    dependencies:
+      '@tanstack/query-core': 5.91.2
+      react: 19.2.4
 
   '@testing-library/dom@10.4.1':
     dependencies:

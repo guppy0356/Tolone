@@ -40,6 +40,7 @@ const packageJson = `{
     "test": "vitest run"
   },
   "dependencies": {
+    "@tanstack/react-query": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "ky": "catalog:"
@@ -108,7 +109,10 @@ const indexHtml = `<!doctype html>
 
 const mainTsx = `import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./app.css";
+
+const queryClient = new QueryClient();
 
 async function enableMocking() {
   const { worker } = await import("./mocks/browser");
@@ -118,9 +122,11 @@ async function enableMocking() {
 enableMocking().then(() => {
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
-      <div>
-        <h1>${pascal} Playground</h1>
-      </div>
+      <QueryClientProvider client={queryClient}>
+        <div>
+          <h1>${pascal} Playground</h1>
+        </div>
+      </QueryClientProvider>
     </StrictMode>,
   );
 });

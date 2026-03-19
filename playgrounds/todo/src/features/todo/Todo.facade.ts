@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { todoApi, type Todo, type CreateTodoInput } from "./Todo.api";
 
 export interface TodoFacade {
@@ -10,42 +11,61 @@ export interface TodoFacade {
   deleteTodo: (id: string) => Promise<void>;
 }
 
+const todoKeys = {
+  all: ["todos"] as const,
+};
+
 export function useTodoFacade(): TodoFacade {
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchTodos = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await todoApi.getAll();
-      setTodos(data);
-    } catch (e) {
-      setError(e instanceof Error ? e : new Error("Failed to fetch todos"));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { data, isPending, error } = useQuery({
+    queryKey: todoKeys.all,
+    queryFn: todoApi.getAll,
+  });
 
-  useEffect(() => {
-    fetchTodos();
-  }, [fetchTodos]);
+  const addMutation = useMutation({
+    mutationFn: (input: CreateTodoInput) => todoApi.create(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
+  });
 
-  const addTodo = useCallback(async (input: CreateTodoInput) => {
-    const todo = await todoApi.create(input);
-    setTodos((prev) => [...prev, todo]);
-  }, []);
+  const toggleMutation = useMutation({
+    mutationFn: ({ id, completed }: { id: string; completed: boolean }) =>
+      todoApi.update(id, { completed }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
+  });
 
-  const toggleTodo = useCallback(async (id: string, completed: boolean) => {
-    const updated = await todoApi.update(id, { completed });
-    setTodos((prev) => prev.map((t) => (t.id === id ? updated : t)));
-  }, []);
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => todoApi.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
+  });
 
-  const deleteTodo = useCallback(async (id: string) => {
-    await todoApi.delete(id);
-    setTodos((prev) => prev.filter((t) => t.id !== id));
-  }, []);
+  const addTodo = useCallback(
+    async (input: CreateTodoInput) => {
+      await addMutation.mutateAsync(input);
+    },
+    [addMutation],
+  );
 
-  return { todos, loading, error, addTodo, toggleTodo, deleteTodo };
+  const toggleTodo = useCallback(
+    async (id: string, completed: boolean) => {
+      await toggleMutation.mutateAsync({ id, completed });
+    },
+    [toggleMutation],
+  );
+
+  const deleteTodo = useCallback(
+    async (id: string) => {
+      await deleteMutation.mutateAsync(id);
+    },
+    [deleteMutation],
+  );
+
+  return {
+    todos: data ?? [],
+    loading: isPending,
+    error: error,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+  };
 }

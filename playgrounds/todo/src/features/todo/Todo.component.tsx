@@ -2,6 +2,43 @@ import { memo } from "react";
 import { useTodoPresenter } from "./Todo.presenter";
 import type { TodoFacade } from "./Todo.facade";
 
+export function TodoSkeleton() {
+  return (
+    <div className="mx-auto max-w-lg p-4">
+      <h1 className="mb-4 text-2xl font-bold">Todos</h1>
+
+      <div className="mb-4 flex gap-2">
+        <input
+          type="text"
+          disabled
+          placeholder="What needs to be done?"
+          className="flex-1 rounded border px-3 py-2"
+        />
+        <button
+          type="button"
+          disabled
+          className="rounded bg-blue-500 px-4 py-2 text-white opacity-50"
+        >
+          Add
+        </button>
+      </div>
+
+      <ul className="space-y-2">
+        {Array.from({ length: 3 }, (_, i) => (
+          <li
+            key={i}
+            className="flex animate-pulse items-center gap-2 rounded border p-2"
+          >
+            <div className="size-4 rounded bg-gray-200" />
+            <div className="h-4 flex-1 rounded bg-gray-200" />
+            <div className="h-4 w-12 rounded bg-gray-200" />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export const TodoComponent = memo(function TodoComponent(props: TodoFacade) {
   const {
     todos,

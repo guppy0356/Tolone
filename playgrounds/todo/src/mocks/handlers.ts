@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse, delay } from "msw";
 import type { Todo, CreateTodoInput } from "../features/todo/Todo.api";
 
 let todos: Todo[] = [
@@ -8,7 +8,8 @@ let todos: Todo[] = [
 let nextId = 3;
 
 export const handlers = [
-  http.get("/api/todos", () => {
+  http.get("/api/todos", async () => {
+    await delay(2000);
     return HttpResponse.json(todos);
   }),
 

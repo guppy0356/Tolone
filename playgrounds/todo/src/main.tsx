@@ -2,7 +2,7 @@ import { StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useTodoFacade } from "./features/todo/Todo.facade";
-import { TodoComponent } from "./features/todo/Todo.component";
+import { TodoComponent, TodoSkeleton } from "./features/todo/Todo.component";
 import "./app.css";
 
 const queryClient = new QueryClient();
@@ -21,7 +21,7 @@ enableMocking().then(() => {
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <Suspense fallback={<p>Loading...</p>}>
+        <Suspense fallback={<TodoSkeleton />}>
           <TodoPage />
         </Suspense>
       </QueryClientProvider>

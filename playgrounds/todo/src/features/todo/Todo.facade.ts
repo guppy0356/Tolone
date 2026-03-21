@@ -27,18 +27,58 @@ export function useTodoFacade(): TodoFacade {
 
   const addMutation = useMutation({
     mutationFn: (input: CreateTodoInput) => todoApi.create(input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
+    onMutate: async (input) => {
+      await queryClient.cancelQueries({ queryKey: todoKeys.all });
+      const previous = queryClient.getQueryData<Todo[]>(todoKeys.all);
+      queryClient.setQueryData<Todo[]>(todoKeys.all, (old) => [
+        ...(old ?? []),
+        { id: crypto.randomUUID(), title: input.title, completed: false },
+      ]);
+      return { previous };
+    },
+    onError: (_err, _input, context) => {
+      queryClient.setQueryData(todoKeys.all, context?.previous);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: todoKeys.all });
+    },
   });
 
   const toggleMutation = useMutation({
     mutationFn: ({ id, completed }: { id: string; completed: boolean }) =>
       todoApi.update(id, { completed }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
+    onMutate: async ({ id, completed }) => {
+      await queryClient.cancelQueries({ queryKey: todoKeys.all });
+      const previous = queryClient.getQueryData<Todo[]>(todoKeys.all);
+      queryClient.setQueryData<Todo[]>(todoKeys.all, (old) =>
+        (old ?? []).map((t) => (t.id === id ? { ...t, completed } : t)),
+      );
+      return { previous };
+    },
+    onError: (_err, _input, context) => {
+      queryClient.setQueryData(todoKeys.all, context?.previous);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: todoKeys.all });
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => todoApi.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: todoKeys.all });
+      const previous = queryClient.getQueryData<Todo[]>(todoKeys.all);
+      queryClient.setQueryData<Todo[]>(todoKeys.all, (old) =>
+        (old ?? []).filter((t) => t.id !== id),
+      );
+      return { previous };
+    },
+    onError: (_err, _input, context) => {
+      queryClient.setQueryData(todoKeys.all, context?.previous);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: todoKeys.all });
+    },
   });
 
   const addTodo = useCallback(

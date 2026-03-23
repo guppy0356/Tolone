@@ -1,5 +1,5 @@
 import { http, HttpResponse, delay } from "msw";
-import type { Todo, CreateTodoInput } from "../features/todo/Todo.api";
+import type { Todo, CreateTodoInput, UpdateTodoInput } from "../features/todo/Todo.api";
 
 let todos: Todo[] = [
   { id: "1", title: "Learn React", completed: false },
@@ -22,7 +22,7 @@ export const handlers = [
 
   http.patch("/api/todos/:id", async ({ params, request }) => {
     const { id } = params;
-    const updates = (await request.json()) as Partial<Todo>;
+    const updates = (await request.json()) as UpdateTodoInput;
     const index = todos.findIndex((t) => t.id === id);
     if (index === -1) {
       return new HttpResponse(null, { status: 404 });

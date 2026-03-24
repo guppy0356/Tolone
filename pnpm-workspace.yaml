@@ -4,6 +4,7 @@ packages:
 
 catalog:
   '@tanstack/react-query': ^5.0.0
+  '@tanstack/react-router': ^1.0.0
   '@tailwindcss/vite': ^4.0.0
   ky: ^1.0.0
   msw: ^2.0.0

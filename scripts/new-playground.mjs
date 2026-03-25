@@ -41,6 +41,7 @@ const packageJson = `{
   },
   "dependencies": {
     "@tanstack/react-query": "catalog:",
+    "@tanstack/react-router": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "ky": "catalog:"

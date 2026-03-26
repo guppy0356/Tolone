@@ -84,6 +84,7 @@ export const TodoComponent = memo(function TodoComponent(props: TodoFacade) {
 - Pure functions only — no React dependency
 - Use the `api` client from `src/lib/api-client.ts`
 - Define and export response types in this file
+- Derive input types from the base type with `Pick` / `Partial` (e.g. `Pick<Todo, "title">`)
 - No error handling (delegate to the caller)
 
 ```ts
@@ -96,9 +97,8 @@ export type Todo = {
   completed: boolean;
 };
 
-export type CreateTodoInput = {
-  title: string;
-};
+export type CreateTodoInput = Pick<Todo, "title">;
+export type UpdateTodoInput = Partial<Pick<Todo, "title" | "completed">>;
 
 export const todoApi = {
   getAll: () => api.get("todos").json<Todo[]>(),
@@ -123,6 +123,7 @@ export const todoApi = {
 - Export an explicit interface for the return type
 - Return action functions + data
 - Define query keys as a constant object for reuse
+- Use optimistic updates (`onMutate` / `onError` / `onSettled`) for instant UI feedback
 
 ```ts
 // Todo.facade.ts
@@ -153,21 +154,30 @@ export function useTodoFacade(): TodoFacade {
     queryFn: todoApi.getAll,
   });
 
+  // Optimistic update pattern:
+  //   onMutate  — cancel queries, snapshot previous, update cache optimistically
+  //   onError   — rollback to snapshot
+  //   onSettled — invalidate to refetch from server
   const addMutation = useMutation({
     mutationFn: (input: CreateTodoInput) => todoApi.create(input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
+    onMutate: async (input) => {
+      await queryClient.cancelQueries({ queryKey: todoKeys.all });
+      const previous = queryClient.getQueryData<Todo[]>(todoKeys.all);
+      queryClient.setQueryData<Todo[]>(todoKeys.all, (old) => [
+        ...(old ?? []),
+        { id: crypto.randomUUID(), title: input.title, completed: false },
+      ]);
+      return { previous };
+    },
+    onError: (_err, _input, context) => {
+      queryClient.setQueryData(todoKeys.all, context?.previous);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: todoKeys.all });
+    },
   });
 
-  const toggleMutation = useMutation({
-    mutationFn: ({ id, completed }: { id: string; completed: boolean }) =>
-      todoApi.update(id, { completed }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => todoApi.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
-  });
+  // toggleMutation, deleteMutation follow the same pattern ...
 
   const addTodo = useCallback(
     async (input: CreateTodoInput) => {
@@ -176,19 +186,7 @@ export function useTodoFacade(): TodoFacade {
     [addMutation],
   );
 
-  const toggleTodo = useCallback(
-    async (id: string, completed: boolean) => {
-      await toggleMutation.mutateAsync({ id, completed });
-    },
-    [toggleMutation],
-  );
-
-  const deleteTodo = useCallback(
-    async (id: string) => {
-      await deleteMutation.mutateAsync(id);
-    },
-    [deleteMutation],
-  );
+  // ...
 
   return {
     todos: data,
@@ -339,8 +337,14 @@ The Container (e.g. `main.tsx`) only calls the Facade and passes its return valu
 // main.tsx
 import { Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  createRouter,
+  createRootRoute,
+  createRoute,
+  RouterProvider,
+} from "@tanstack/react-router";
 import { useTodoFacade } from "./features/todo/Todo.facade";
-import { TodoComponent } from "./features/todo/Todo.component";
+import { TodoComponent, TodoSkeleton } from "./features/todo/Todo.component";
 
 const queryClient = new QueryClient();
 
@@ -349,11 +353,24 @@ function TodoPage() {
   return <TodoComponent {...facade} />;
 }
 
+const rootRoute = createRootRoute();
+
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/",
+  component: () => (
+    <Suspense fallback={<TodoSkeleton />}>
+      <TodoPage />
+    </Suspense>
+  ),
+});
+
+const routeTree = rootRoute.addChildren([indexRoute]);
+const router = createRouter({ routeTree });
+
 // Inside render:
 <QueryClientProvider client={queryClient}>
-  <Suspense fallback={<p>Loading...</p>}>
-    <TodoPage />
-  </Suspense>
+  <RouterProvider router={router} />
 </QueryClientProvider>
 ```
 
@@ -476,4 +493,4 @@ Usage in the API layer:
 5. `{Feature}.component.tsx` — `{Feature}Component` (memo, calls Presenter internally)
 6. `{Feature}.component.test.tsx` — component tests with Facade-shaped props
 7. Add mock handlers to `src/mocks/handlers.ts`
-8. Wire the feature in `main.tsx` (Container calls Facade, passes to Component; ensure `QueryClientProvider` + `Suspense` wrap the app)
+8. Wire the feature in `main.tsx` (add route with `Suspense` fallback; Container calls Facade, passes to Component)

@@ -106,7 +106,10 @@ and implement following docs/architecture.md.
 ## Tech Stack
 
 - React 19 + TypeScript
+- TanStack Query 5 + TanStack Router 1
 - Vite + TailwindCSS v4
-- MSW v2 (API mocking)
+- MSW v2 + openapi-msw (type-safe mock handlers)
+- openapi-typescript (schema → type generation)
+- vite-plugin-checker (dev server type checking)
 - ky (HTTP client)
 - Vitest + Testing Library

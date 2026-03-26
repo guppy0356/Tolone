@@ -19,6 +19,9 @@ pnpm --filter @tolone/todo test
 
 # Scaffold a new playground
 pnpm new:playground <name>
+
+# Generate OpenAPI types (after editing openapi.yaml)
+pnpm --filter @tolone/todo generate:api
 ```
 
 No linter is configured. Tests use Vitest with jsdom + Testing Library.

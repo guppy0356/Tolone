@@ -28,7 +28,7 @@ No linter is configured. Tests use Vitest with jsdom + Testing Library.
 
 ## Architecture
 
-This is a pnpm monorepo for experimenting with a **4-layer "Lahan" pattern**. Each playground in `playgrounds/` implements features using this architecture. The full specification lives in `docs/architecture.md`.
+This is a pnpm monorepo for experimenting with a **4-layer architecture** (API → Facade → Presenter → Component). Each playground in `playgrounds/` implements features using this architecture. The full specification lives in @docs/architecture.md — always read it before implementing features.
 
 ### Layer flow: API → Facade → Presenter → Component
 

@@ -61,7 +61,7 @@ Component tests pass Facade-shaped props with `vi.fn()` mocks. Since the Compone
 
 ## Tech Stack
 
-React 19, TanStack Query 5, TanStack Router 1, Vite 6, Vitest 3, TailwindCSS 4, MSW 2, ky 1, TypeScript 5.7
+React 19, TanStack Query 5, TanStack Router 1, Vite 6, Vitest 3, TailwindCSS 4, MSW 2, openapi-msw 2, openapi-typescript 7, ky 1, TypeScript 5.7, vite-plugin-checker
 
 ## Workspace Layout
 

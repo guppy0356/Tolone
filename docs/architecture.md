@@ -12,7 +12,7 @@ API → Facade → Presenter → Component
 
 | Layer | File | Responsibility | Form |
 |---|---|---|---|
-| API | `{Feature}.api.ts` | HTTP communication + type definitions | Plain function object |
+| API | `{Feature}.api.ts` | HTTP communication + types (from OpenAPI) | Plain function object |
 | Facade | `{Feature}.facade.ts` | Server state (TanStack Query: useSuspenseQuery + useMutation) | React hook |
 | Presenter | `{Feature}.presenter.ts` | Local UI state (forms, validation) | React hook |
 | Component | `{Feature}.component.tsx` | Rendering only, memoized | React component |
@@ -83,22 +83,18 @@ export const TodoComponent = memo(function TodoComponent(props: TodoFacade) {
 **Rules**:
 - Pure functions only — no React dependency
 - Use the `api` client from `src/lib/api-client.ts`
-- Define and export response types in this file
-- Derive input types from the base type with `Pick` / `Partial` (e.g. `Pick<Todo, "title">`)
+- Types are derived from the OpenAPI schema via `openapi-typescript` generated types
+- Re-export types as named aliases for use by other layers
 - No error handling (delegate to the caller)
 
 ```ts
 // Todo.api.ts
 import { api } from "../../lib/api-client";
+import type { components } from "../../types/openapi";
 
-export type Todo = {
-  id: string;
-  title: string;
-  completed: boolean;
-};
-
-export type CreateTodoInput = Pick<Todo, "title">;
-export type UpdateTodoInput = Partial<Pick<Todo, "title" | "completed">>;
+export type Todo = components["schemas"]["Todo"];
+export type CreateTodoInput = components["schemas"]["CreateTodoInput"];
+export type UpdateTodoInput = components["schemas"]["UpdateTodoInput"];
 
 export const todoApi = {
   getAll: () => api.get("todos").json<Todo[]>(),
@@ -378,12 +374,17 @@ const router = createRouter({ routeTree });
 
 ## Writing MSW Handlers
 
-Use the MSW v2 API to implement mock handlers.
+Use `openapi-msw` for type-safe mock handlers. The `createOpenApiHttp<paths>()` function returns a typed `http` object where response status codes and bodies are checked against the OpenAPI schema at compile time.
 
 ```ts
 // src/mocks/handlers.ts
-import { http, HttpResponse } from "msw";
-import type { Todo, CreateTodoInput } from "../features/todo/Todo.api";
+import { delay } from "msw";
+import { createOpenApiHttp } from "openapi-msw";
+import type { paths, components } from "../types/openapi";
+
+type Todo = components["schemas"]["Todo"];
+
+const http = createOpenApiHttp<paths>();
 
 let todos: Todo[] = [
   { id: "1", title: "Learn React", completed: false },
@@ -392,32 +393,31 @@ let todos: Todo[] = [
 let nextId = 3;
 
 export const handlers = [
-  http.get("/api/todos", () => {
-    return HttpResponse.json(todos);
+  http.get("/api/todos", async ({ response }) => {
+    await delay(2000);
+    return response(200).json(todos);
   }),
 
-  http.post("/api/todos", async ({ request }) => {
-    const { title } = (await request.json()) as CreateTodoInput;
-    const todo: Todo = { id: String(nextId++), title, completed: false };
+  http.post("/api/todos", async ({ request, response }) => {
+    const body = await request.json();
+    const todo: Todo = { id: String(nextId++), title: body.title, completed: false };
     todos.push(todo);
-    return HttpResponse.json(todo, { status: 201 });
+    return response(201).json(todo);
   }),
 
-  http.patch("/api/todos/:id", async ({ params, request }) => {
-    const { id } = params;
-    const updates = (await request.json()) as Partial<Todo>;
-    const index = todos.findIndex((t) => t.id === id);
+  http.patch("/api/todos/{id}", async ({ params, request, response }) => {
+    const updates = await request.json();
+    const index = todos.findIndex((t) => t.id === params.id);
     if (index === -1) {
-      return new HttpResponse(null, { status: 404 });
+      return response(404).empty();
     }
     todos[index] = { ...todos[index], ...updates };
-    return HttpResponse.json(todos[index]);
+    return response(200).json(todos[index]);
   }),
 
-  http.delete("/api/todos/:id", ({ params }) => {
-    const { id } = params;
-    todos = todos.filter((t) => t.id !== String(id));
-    return new HttpResponse(null, { status: 204 });
+  http.delete("/api/todos/{id}", ({ params, response }) => {
+    todos = todos.filter((t) => t.id !== params.id);
+    return response(204).empty();
   }),
 ];
 ```
@@ -484,13 +484,36 @@ Usage in the API layer:
 
 ---
 
+## OpenAPI Schema & Type Generation
+
+Each playground defines its API contract in `src/openapi.yaml`. Types are generated and used for both the API layer and MSW handlers.
+
+**Flow:**
+```
+src/openapi.yaml → openapi-typescript → src/types/openapi.d.ts
+                                        ├── Todo.api.ts (import types)
+                                        └── handlers.ts (openapi-msw: type-safe responses)
+```
+
+**Commands:**
+```bash
+# Generate types from schema
+pnpm --filter @tolone/todo generate:api
+```
+
+**Type safety:** `vite-plugin-checker` runs `tsc` during dev, so mismatches between the schema and handler/API code surface as errors in the terminal and browser overlay.
+
+---
+
 ## Checklist for Adding a New Feature
 
-1. Create `src/features/{feature-name}/` directory
-2. `{Feature}.api.ts` — type definitions + API function object
-3. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (useSuspenseQuery + useMutation)
-4. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook + `{Feature}Presenter` interface
-5. `{Feature}.component.tsx` — `{Feature}Component` (memo, calls Presenter internally)
-6. `{Feature}.component.test.tsx` — component tests with Facade-shaped props
-7. Add mock handlers to `src/mocks/handlers.ts`
-8. Wire the feature in `main.tsx` (add route with `Suspense` fallback; Container calls Facade, passes to Component)
+1. Define endpoints and schemas in `src/openapi.yaml`
+2. Run `pnpm generate:api` to generate types
+3. Create `src/features/{feature-name}/` directory
+4. `{Feature}.api.ts` — import generated types + API function object
+5. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (useSuspenseQuery + useMutation)
+6. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook + `{Feature}Presenter` interface
+7. `{Feature}.component.tsx` — `{Feature}Component` (memo, calls Presenter internally)
+8. `{Feature}.component.test.tsx` — component tests with Facade-shaped props
+9. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw`
+10. Wire the feature in `main.tsx` (add route with `Suspense` fallback; Container calls Facade, passes to Component)

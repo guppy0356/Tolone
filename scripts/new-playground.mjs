@@ -111,9 +111,30 @@ const indexHtml = `<!doctype html>
 const mainTsx = `import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  createRouter,
+  createRootRoute,
+  createRoute,
+  RouterProvider,
+} from "@tanstack/react-router";
 import "./app.css";
 
 const queryClient = new QueryClient();
+
+const rootRoute = createRootRoute();
+
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/",
+  component: () => (
+    <div>
+      <h1>${pascal} Playground</h1>
+    </div>
+  ),
+});
+
+const routeTree = rootRoute.addChildren([indexRoute]);
+const router = createRouter({ routeTree });
 
 async function enableMocking() {
   const { worker } = await import("./mocks/browser");
@@ -124,9 +145,7 @@ enableMocking().then(() => {
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <div>
-          <h1>${pascal} Playground</h1>
-        </div>
+        <RouterProvider router={router} />
       </QueryClientProvider>
     </StrictMode>,
   );

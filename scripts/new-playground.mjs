@@ -18,6 +18,7 @@ const dirs = [
   join(root, "src", "lib"),
   join(root, "src", "features"),
   join(root, "src", "mocks"),
+  join(root, "src", "types"),
   join(root, "src", "test"),
   join(root, "public"),
 ];
@@ -37,11 +38,13 @@ const packageJson = `{
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate:api": "openapi-typescript src/openapi.yaml -o src/types/openapi.d.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
+    "openapi-msw": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "ky": "catalog:"
@@ -54,8 +57,10 @@ const packageJson = `{
     "tailwindcss": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "vite": "^6.0.0",
+    "vite-plugin-checker": "catalog:",
     "vitest": "catalog:",
     "msw": "catalog:",
+    "openapi-typescript": "catalog:",
     "@testing-library/react": "^16.0.0",
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/user-event": "^14.0.0",
@@ -74,9 +79,10 @@ const tsconfig = `{
 const viteConfig = `import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import checker from "vite-plugin-checker";
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), checker({ typescript: true })],
 });
 `;
 

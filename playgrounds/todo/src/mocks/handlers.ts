@@ -1,5 +1,11 @@
-import { http, HttpResponse, delay } from "msw";
-import type { Todo, CreateTodoInput, UpdateTodoInput } from "../features/todo/Todo.api";
+import { delay } from "msw";
+import { createOpenApiHttp } from "openapi-msw";
+import type { paths } from "../types/openapi";
+import type { components } from "../types/openapi";
+
+type Todo = components["schemas"]["Todo"];
+
+const http = createOpenApiHttp<paths>();
 
 let todos: Todo[] = [
   { id: "1", title: "Learn React", completed: false },
@@ -8,32 +14,30 @@ let todos: Todo[] = [
 let nextId = 3;
 
 export const handlers = [
-  http.get("/api/todos", async () => {
+  http.get("/api/todos", async ({ response }) => {
     await delay(2000);
-    return HttpResponse.json(todos);
+    return response(200).json(todos);
   }),
 
-  http.post("/api/todos", async ({ request }) => {
-    const { title } = (await request.json()) as CreateTodoInput;
-    const todo: Todo = { id: String(nextId++), title, completed: false };
+  http.post("/api/todos", async ({ request, response }) => {
+    const body = await request.json();
+    const todo: Todo = { id: String(nextId++), title: body.title, completed: false };
     todos.push(todo);
-    return HttpResponse.json(todo, { status: 201 });
+    return response(201).json(todo);
   }),
 
-  http.patch("/api/todos/:id", async ({ params, request }) => {
-    const { id } = params;
-    const updates = (await request.json()) as UpdateTodoInput;
-    const index = todos.findIndex((t) => t.id === id);
+  http.patch("/api/todos/{id}", async ({ params, request, response }) => {
+    const updates = await request.json();
+    const index = todos.findIndex((t) => t.id === params.id);
     if (index === -1) {
-      return new HttpResponse(null, { status: 404 });
+      return response(404).empty();
     }
     todos[index] = { ...todos[index], ...updates };
-    return HttpResponse.json(todos[index]);
+    return response(200).json(todos[index]);
   }),
 
-  http.delete("/api/todos/:id", ({ params }) => {
-    const { id } = params;
-    todos = todos.filter((t) => t.id !== String(id));
-    return new HttpResponse(null, { status: 204 });
+  http.delete("/api/todos/{id}", ({ params, response }) => {
+    todos = todos.filter((t) => t.id !== params.id);
+    return response(204).empty();
   }),
 ];

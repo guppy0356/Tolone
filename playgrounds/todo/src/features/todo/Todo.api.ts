@@ -1,13 +1,9 @@
 import { api } from "../../lib/api-client";
+import type { components } from "../../types/openapi";
 
-export type Todo = {
-  id: string;
-  title: string;
-  completed: boolean;
-};
-
-export type CreateTodoInput = Pick<Todo, "title">;
-export type UpdateTodoInput = Partial<Pick<Todo, "title" | "completed">>;
+export type Todo = components["schemas"]["Todo"];
+export type CreateTodoInput = components["schemas"]["CreateTodoInput"];
+export type UpdateTodoInput = components["schemas"]["UpdateTodoInput"];
 
 export const todoApi = {
   getAll: () => api.get("todos").json<Todo[]>(),

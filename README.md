@@ -90,6 +90,19 @@ API → Facade → Presenter → Component
 
 Features are placed under `src/features/{feature-name}/`.
 
+## Sample Prompt for Claude
+
+```
+Create a bookmark management playground.
+
+Features:
+- List, add, and delete bookmarks
+- Filter by tags
+
+Scaffold with `pnpm new:playground bookmark`, then define openapi.yaml
+and implement following docs/architecture.md.
+```
+
 ## Tech Stack
 
 - React 19 + TypeScript

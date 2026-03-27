@@ -67,7 +67,9 @@ export type $defs = Record<string, never>;
 export interface operations {
     getTodos: {
         parameters: {
-            query?: never;
+            query?: {
+                owner?: components["schemas"]["FamilyMember"][];
+            };
             header?: never;
             path?: never;
             cookie?: never;

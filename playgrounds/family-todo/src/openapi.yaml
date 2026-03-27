@@ -7,6 +7,16 @@ paths:
   /api/todos:
     get:
       operationId: getTodos
+      parameters:
+        - name: owner
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/FamilyMember"
+          style: form
+          explode: true
       responses:
         "200":
           description: List of all family todos

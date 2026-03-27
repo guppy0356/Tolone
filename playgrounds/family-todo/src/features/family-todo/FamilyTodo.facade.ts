@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useTransition } from "react";
 import {
   useSuspenseQuery,
   useMutation,
@@ -13,6 +13,7 @@ import {
 
 export interface FamilyTodoFacade {
   todos: FamilyTodo[];
+  isFilterPending: boolean;
   currentUser: FamilyMember;
   setCurrentUser: (member: FamilyMember) => void;
   selectedMembers: FamilyMember[];
@@ -35,6 +36,7 @@ export function useFamilyTodoFacade(
 ): FamilyTodoFacade {
   const queryClient = useQueryClient();
   const [selectedMembers, setSelectedMembers] = useState<FamilyMember[]>([]);
+  const [isFilterPending, startTransition] = useTransition();
 
   const queryKey = selectedMembers.length > 0
     ? todoKeys.filtered(selectedMembers)
@@ -130,19 +132,24 @@ export function useFamilyTodoFacade(
   );
 
   const toggleMemberSelection = useCallback((member: FamilyMember) => {
-    setSelectedMembers((prev) =>
-      prev.includes(member)
-        ? prev.filter((m) => m !== member)
-        : [...prev, member],
-    );
+    startTransition(() => {
+      setSelectedMembers((prev) =>
+        prev.includes(member)
+          ? prev.filter((m) => m !== member)
+          : [...prev, member],
+      );
+    });
   }, []);
 
   const removeMember = useCallback((member: FamilyMember) => {
-    setSelectedMembers((prev) => prev.filter((m) => m !== member));
+    startTransition(() => {
+      setSelectedMembers((prev) => prev.filter((m) => m !== member));
+    });
   }, []);
 
   return {
     todos: data,
+    isFilterPending,
     currentUser,
     setCurrentUser,
     selectedMembers,

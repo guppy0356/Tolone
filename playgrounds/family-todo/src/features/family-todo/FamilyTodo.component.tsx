@@ -18,6 +18,7 @@ export const FamilyTodoComponent = memo(function FamilyTodoComponent(
     currentUser,
     setCurrentUser,
     todos,
+    isFilterPending,
     selectedMembers,
     filterSearch,
     setFilterSearch,
@@ -221,7 +222,7 @@ export const FamilyTodoComponent = memo(function FamilyTodoComponent(
         )}
       </div>
 
-      <ul className="space-y-2">
+      <ul className={`space-y-2 transition-opacity ${isFilterPending ? "opacity-50" : ""}`}>
         {todos.map((todo) => {
           const own = isOwnTodo(todo);
           return (

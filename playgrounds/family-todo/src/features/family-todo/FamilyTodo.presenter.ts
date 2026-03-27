@@ -7,6 +7,7 @@ export interface FamilyTodoPresenter {
   currentUser: FamilyMember;
   setCurrentUser: (member: FamilyMember) => void;
   todos: FamilyTodo[];
+  isFilterPending: boolean;
   selectedMembers: FamilyTodoFacade["selectedMembers"];
   toggleMemberSelection: FamilyTodoFacade["toggleMemberSelection"];
   removeMember: FamilyTodoFacade["removeMember"];
@@ -27,6 +28,7 @@ export interface FamilyTodoPresenter {
 
 export function useFamilyTodoPresenter({
   todos,
+  isFilterPending,
   currentUser,
   setCurrentUser,
   selectedMembers,
@@ -88,6 +90,7 @@ export function useFamilyTodoPresenter({
     currentUser,
     setCurrentUser,
     todos,
+    isFilterPending,
     selectedMembers,
     toggleMemberSelection,
     removeMember,

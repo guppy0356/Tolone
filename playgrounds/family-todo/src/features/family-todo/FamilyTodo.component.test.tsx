@@ -10,6 +10,7 @@ const baseFacade: FamilyTodoFacade = {
     { id: "2", title: "Fix bicycle", completed: false, owner: "Papa" },
     { id: "3", title: "Do homework", completed: true, owner: "Taro" },
   ],
+  isFilterPending: false,
   currentUser: "Papa",
   setCurrentUser: vi.fn(),
   selectedMembers: [],

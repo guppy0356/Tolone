@@ -1,0 +1,44 @@
+{
+  "name": "@tolone/family-todo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "generate:api": "openapi-typescript src/openapi.yaml -o src/types/openapi.d.ts"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-router": "catalog:",
+    "openapi-msw": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "ky": "catalog:"
+  },
+  "devDependencies": {
+    "@tolone/tailwind": "workspace:*",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "tailwindcss": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "vite": "^6.0.0",
+    "vite-plugin-checker": "catalog:",
+    "vitest": "catalog:",
+    "msw": "catalog:",
+    "openapi-typescript": "catalog:",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/user-event": "^14.0.0",
+    "jsdom": "^25.0.0",
+    "typescript": "^5.7.0"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}

@@ -1,0 +1,105 @@
+openapi: 3.1.0
+info:
+  title: Family Todo API
+  version: 0.1.0
+
+paths:
+  /api/todos:
+    get:
+      operationId: getTodos
+      responses:
+        "200":
+          description: List of all family todos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FamilyTodo"
+    post:
+      operationId: createTodo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFamilyTodoInput"
+      responses:
+        "201":
+          description: Created todo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FamilyTodo"
+
+  /api/todos/{id}:
+    patch:
+      operationId: updateTodo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFamilyTodoInput"
+      responses:
+        "200":
+          description: Updated todo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FamilyTodo"
+        "404":
+          description: Todo not found
+    delete:
+      operationId: deleteTodo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+components:
+  schemas:
+    FamilyMember:
+      type: string
+      enum: [Papa, Mama, Taro, Hanako]
+
+    FamilyTodo:
+      type: object
+      required: [id, title, completed, owner]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        completed:
+          type: boolean
+        owner:
+          $ref: "#/components/schemas/FamilyMember"
+
+    CreateFamilyTodoInput:
+      type: object
+      required: [title, owner]
+      properties:
+        title:
+          type: string
+        owner:
+          $ref: "#/components/schemas/FamilyMember"
+
+    UpdateFamilyTodoInput:
+      type: object
+      properties:
+        title:
+          type: string
+        completed:
+          type: boolean

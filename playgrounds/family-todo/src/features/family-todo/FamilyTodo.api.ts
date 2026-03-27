@@ -14,7 +14,14 @@ export const FAMILY_MEMBERS: FamilyMember[] = [
 ];
 
 export const familyTodoApi = {
-  getAll: () => api.get("todos").json<FamilyTodo[]>(),
+  getAll: (owners?: FamilyMember[]) =>
+    api
+      .get("todos", {
+        searchParams: owners?.length
+          ? owners.map((o) => ["owner", o])
+          : undefined,
+      })
+      .json<FamilyTodo[]>(),
   create: (input: CreateFamilyTodoInput) =>
     api.post("todos", { json: input }).json<FamilyTodo>(),
   update: (id: string, input: UpdateFamilyTodoInput) =>

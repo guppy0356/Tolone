@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   useSuspenseQuery,
   useMutation,
@@ -15,6 +15,9 @@ export interface FamilyTodoFacade {
   todos: FamilyTodo[];
   currentUser: FamilyMember;
   setCurrentUser: (member: FamilyMember) => void;
+  selectedMembers: FamilyMember[];
+  toggleMemberSelection: (member: FamilyMember) => void;
+  removeMember: (member: FamilyMember) => void;
   addTodo: (input: CreateFamilyTodoInput) => Promise<void>;
   toggleTodo: (id: string, completed: boolean) => Promise<void>;
   deleteTodo: (id: string) => Promise<void>;
@@ -22,6 +25,8 @@ export interface FamilyTodoFacade {
 
 const todoKeys = {
   all: ["family-todos"] as const,
+  filtered: (owners: FamilyMember[]) =>
+    [...todoKeys.all, { owners }] as const,
 };
 
 export function useFamilyTodoFacade(
@@ -29,18 +34,25 @@ export function useFamilyTodoFacade(
   setCurrentUser: (member: FamilyMember) => void,
 ): FamilyTodoFacade {
   const queryClient = useQueryClient();
+  const [selectedMembers, setSelectedMembers] = useState<FamilyMember[]>([]);
+
+  const queryKey = selectedMembers.length > 0
+    ? todoKeys.filtered(selectedMembers)
+    : todoKeys.all;
 
   const { data } = useSuspenseQuery({
-    queryKey: todoKeys.all,
-    queryFn: familyTodoApi.getAll,
+    queryKey,
+    queryFn: () => familyTodoApi.getAll(
+      selectedMembers.length > 0 ? selectedMembers : undefined,
+    ),
   });
 
   const addMutation = useMutation({
     mutationFn: (input: CreateFamilyTodoInput) => familyTodoApi.create(input),
     onMutate: async (input) => {
-      await queryClient.cancelQueries({ queryKey: todoKeys.all });
-      const previous = queryClient.getQueryData<FamilyTodo[]>(todoKeys.all);
-      queryClient.setQueryData<FamilyTodo[]>(todoKeys.all, (old) => [
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<FamilyTodo[]>(queryKey);
+      queryClient.setQueryData<FamilyTodo[]>(queryKey, (old) => [
         ...(old ?? []),
         {
           id: crypto.randomUUID(),
@@ -52,7 +64,7 @@ export function useFamilyTodoFacade(
       return { previous };
     },
     onError: (_err, _input, context) => {
-      queryClient.setQueryData(todoKeys.all, context?.previous);
+      queryClient.setQueryData(queryKey, context?.previous);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: todoKeys.all });
@@ -63,15 +75,15 @@ export function useFamilyTodoFacade(
     mutationFn: ({ id, completed }: { id: string; completed: boolean }) =>
       familyTodoApi.update(id, { completed }),
     onMutate: async ({ id, completed }) => {
-      await queryClient.cancelQueries({ queryKey: todoKeys.all });
-      const previous = queryClient.getQueryData<FamilyTodo[]>(todoKeys.all);
-      queryClient.setQueryData<FamilyTodo[]>(todoKeys.all, (old) =>
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<FamilyTodo[]>(queryKey);
+      queryClient.setQueryData<FamilyTodo[]>(queryKey, (old) =>
         (old ?? []).map((t) => (t.id === id ? { ...t, completed } : t)),
       );
       return { previous };
     },
     onError: (_err, _input, context) => {
-      queryClient.setQueryData(todoKeys.all, context?.previous);
+      queryClient.setQueryData(queryKey, context?.previous);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: todoKeys.all });
@@ -81,15 +93,15 @@ export function useFamilyTodoFacade(
   const deleteMutation = useMutation({
     mutationFn: (id: string) => familyTodoApi.delete(id),
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: todoKeys.all });
-      const previous = queryClient.getQueryData<FamilyTodo[]>(todoKeys.all);
-      queryClient.setQueryData<FamilyTodo[]>(todoKeys.all, (old) =>
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<FamilyTodo[]>(queryKey);
+      queryClient.setQueryData<FamilyTodo[]>(queryKey, (old) =>
         (old ?? []).filter((t) => t.id !== id),
       );
       return { previous };
     },
     onError: (_err, _input, context) => {
-      queryClient.setQueryData(todoKeys.all, context?.previous);
+      queryClient.setQueryData(queryKey, context?.previous);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: todoKeys.all });
@@ -117,10 +129,25 @@ export function useFamilyTodoFacade(
     [deleteMutation],
   );
 
+  const toggleMemberSelection = useCallback((member: FamilyMember) => {
+    setSelectedMembers((prev) =>
+      prev.includes(member)
+        ? prev.filter((m) => m !== member)
+        : [...prev, member],
+    );
+  }, []);
+
+  const removeMember = useCallback((member: FamilyMember) => {
+    setSelectedMembers((prev) => prev.filter((m) => m !== member));
+  }, []);
+
   return {
     todos: data,
     currentUser,
     setCurrentUser,
+    selectedMembers,
+    toggleMemberSelection,
+    removeMember,
     addTodo,
     toggleTodo,
     deleteTodo,

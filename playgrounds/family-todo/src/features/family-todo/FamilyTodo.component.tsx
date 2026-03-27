@@ -17,7 +17,7 @@ export const FamilyTodoComponent = memo(function FamilyTodoComponent(
   const {
     currentUser,
     setCurrentUser,
-    filteredTodos,
+    todos,
     selectedMembers,
     filterSearch,
     setFilterSearch,
@@ -222,7 +222,7 @@ export const FamilyTodoComponent = memo(function FamilyTodoComponent(
       </div>
 
       <ul className="space-y-2">
-        {filteredTodos.map((todo) => {
+        {todos.map((todo) => {
           const own = isOwnTodo(todo);
           return (
             <li

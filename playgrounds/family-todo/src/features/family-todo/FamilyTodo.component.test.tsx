@@ -12,6 +12,9 @@ const baseFacade: FamilyTodoFacade = {
   ],
   currentUser: "Papa",
   setCurrentUser: vi.fn(),
+  selectedMembers: [],
+  toggleMemberSelection: vi.fn(),
+  removeMember: vi.fn(),
   addTodo: vi.fn(),
   toggleTodo: vi.fn(),
   deleteTodo: vi.fn(),
@@ -84,47 +87,43 @@ describe("FamilyTodoComponent", () => {
     expect(addTodo).not.toHaveBeenCalled();
   });
 
-  it("filters todos by selecting a member", async () => {
+  it("calls toggleMemberSelection when selecting a member", async () => {
+    const toggleMemberSelection = vi.fn();
     const user = userEvent.setup();
-    render(<FamilyTodoComponent {...baseFacade} />);
-    // Open filter dropdown
+    render(
+      <FamilyTodoComponent
+        {...baseFacade}
+        toggleMemberSelection={toggleMemberSelection}
+      />,
+    );
     await user.click(screen.getByRole("combobox", { name: "Filter by member" }));
-    // Select Mama from the dropdown list
     await user.click(screen.getByRole("button", { name: /Mama/ }));
-    // Only Mama's todo should be visible
-    expect(screen.getByText("Buy groceries")).toBeInTheDocument();
-    expect(screen.queryByText("Fix bicycle")).not.toBeInTheDocument();
-    expect(screen.queryByText("Do homework")).not.toBeInTheDocument();
+    expect(toggleMemberSelection).toHaveBeenCalledWith("Mama");
   });
 
-  it("supports multi-select filtering", async () => {
-    const user = userEvent.setup();
-    render(<FamilyTodoComponent {...baseFacade} />);
-    // Open dropdown
-    await user.click(screen.getByRole("combobox", { name: "Filter by member" }));
-    // Select Mama (dropdown stays open for multi-select)
-    await user.click(screen.getByRole("button", { name: /Mama/ }));
-    // Select Taro as well
-    await user.click(screen.getByRole("button", { name: /Taro/ }));
-    // Close dropdown
-    await user.click(screen.getByRole("combobox", { name: "Filter by member" }));
-    // Mama's and Taro's todos visible, Papa's hidden
-    expect(screen.getByText("Buy groceries")).toBeInTheDocument();
-    expect(screen.getByText("Do homework")).toBeInTheDocument();
-    expect(screen.queryByText("Fix bicycle")).not.toBeInTheDocument();
+  it("shows chips for selected members", () => {
+    render(
+      <FamilyTodoComponent
+        {...baseFacade}
+        selectedMembers={["Mama", "Taro"]}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Remove Mama" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove Taro" })).toBeInTheDocument();
   });
 
-  it("removes a member chip to broaden the filter", async () => {
+  it("calls removeMember when clicking chip remove button", async () => {
+    const removeMember = vi.fn();
     const user = userEvent.setup();
-    render(<FamilyTodoComponent {...baseFacade} />);
-    // Select Mama
-    await user.click(screen.getByRole("combobox", { name: "Filter by member" }));
-    await user.click(screen.getByRole("button", { name: /Mama/ }));
-    expect(screen.queryByText("Fix bicycle")).not.toBeInTheDocument();
-    // Remove Mama chip → back to all
+    render(
+      <FamilyTodoComponent
+        {...baseFacade}
+        selectedMembers={["Mama"]}
+        removeMember={removeMember}
+      />,
+    );
     await user.click(screen.getByRole("button", { name: "Remove Mama" }));
-    expect(screen.getByText("Fix bicycle")).toBeInTheDocument();
-    expect(screen.getByText("Buy groceries")).toBeInTheDocument();
+    expect(removeMember).toHaveBeenCalledWith("Mama");
   });
 
   it("switches current user", async () => {

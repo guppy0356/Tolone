@@ -6,14 +6,14 @@ import type { FamilyTodoFacade } from "./FamilyTodo.facade";
 export interface FamilyTodoPresenter {
   currentUser: FamilyMember;
   setCurrentUser: (member: FamilyMember) => void;
-  filteredTodos: FamilyTodo[];
-  selectedMembers: FamilyMember[];
+  todos: FamilyTodo[];
+  selectedMembers: FamilyTodoFacade["selectedMembers"];
+  toggleMemberSelection: FamilyTodoFacade["toggleMemberSelection"];
+  removeMember: FamilyTodoFacade["removeMember"];
   filterSearch: string;
   setFilterSearch: (value: string) => void;
   filterOpen: boolean;
   toggleFilter: () => void;
-  toggleMemberSelection: (member: FamilyMember) => void;
-  removeMember: (member: FamilyMember) => void;
   filteredMemberOptions: FamilyMember[];
   filterRef: React.RefObject<HTMLDivElement | null>;
   inputRef: React.RefObject<HTMLInputElement | null>;
@@ -29,12 +29,14 @@ export function useFamilyTodoPresenter({
   todos,
   currentUser,
   setCurrentUser,
+  selectedMembers,
+  toggleMemberSelection,
+  removeMember,
   addTodo,
   toggleTodo,
   deleteTodo,
 }: FamilyTodoFacade): FamilyTodoPresenter {
   const [newTitle, setNewTitle] = useState("");
-  const [selectedMembers, setSelectedMembers] = useState<FamilyMember[]>([]);
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterSearch, setFilterSearch] = useState("");
   const filterRef = useRef<HTMLDivElement | null>(null);
@@ -52,14 +54,6 @@ export function useFamilyTodoPresenter({
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [filterOpen]);
-
-  const filteredTodos = useMemo(
-    () =>
-      selectedMembers.length === 0
-        ? todos
-        : todos.filter((t) => selectedMembers.includes(t.owner)),
-    [todos, selectedMembers],
-  );
 
   const filteredMemberOptions = useMemo(() => {
     if (!filterSearch.trim()) return FAMILY_MEMBERS;
@@ -85,18 +79,6 @@ export function useFamilyTodoPresenter({
     });
   }, []);
 
-  const toggleMemberSelection = useCallback((member: FamilyMember) => {
-    setSelectedMembers((prev) =>
-      prev.includes(member)
-        ? prev.filter((m) => m !== member)
-        : [...prev, member],
-    );
-  }, []);
-
-  const removeMember = useCallback((member: FamilyMember) => {
-    setSelectedMembers((prev) => prev.filter((m) => m !== member));
-  }, []);
-
   const isOwnTodo = useCallback(
     (todo: FamilyTodo) => todo.owner === currentUser,
     [currentUser],
@@ -105,14 +87,14 @@ export function useFamilyTodoPresenter({
   return {
     currentUser,
     setCurrentUser,
-    filteredTodos,
+    todos,
     selectedMembers,
+    toggleMemberSelection,
+    removeMember,
     filterSearch,
     setFilterSearch,
     filterOpen,
     toggleFilter,
-    toggleMemberSelection,
-    removeMember,
     filteredMemberOptions,
     filterRef,
     inputRef,

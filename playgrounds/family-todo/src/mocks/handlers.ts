@@ -16,9 +16,15 @@ let todos: FamilyTodo[] = [
 let nextId = 6;
 
 export const handlers = [
-  http.get("/api/todos", async ({ response }) => {
+  http.get("/api/todos", async ({ request, response }) => {
     await delay(500);
-    return response(200).json(todos);
+    const url = new URL(request.url);
+    const owners = url.searchParams.getAll("owner");
+    const filtered =
+      owners.length > 0
+        ? todos.filter((t) => owners.includes(t.owner))
+        : todos;
+    return response(200).json(filtered);
   }),
 
   http.post("/api/todos", async ({ request, response }) => {

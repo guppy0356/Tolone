@@ -507,13 +507,15 @@ pnpm --filter @tolone/todo generate:api
 
 ## Checklist for Adding a New Feature
 
-1. Define endpoints and schemas in `src/openapi.yaml`
-2. Run `pnpm generate:api` to generate types
+Commit after each step. Do not batch multiple steps into one commit.
+
+1. Define endpoints and schemas in `src/openapi.yaml` → **commit**
+2. Run `pnpm generate:api` to generate types → **commit**
 3. Create `src/features/{feature-name}/` directory
-4. `{Feature}.api.ts` — import generated types + API function object
-5. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (useSuspenseQuery + useMutation)
-6. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook + `{Feature}Presenter` interface
+4. `{Feature}.api.ts` — import generated types + API function object → **commit**
+5. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (useSuspenseQuery + useMutation) → **commit**
+6. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook + `{Feature}Presenter` interface → **commit**
 7. `{Feature}.component.tsx` — `{Feature}Component` (memo, calls Presenter internally)
-8. `{Feature}.component.test.tsx` — component tests with Facade-shaped props
-9. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw`
-10. Wire the feature in `main.tsx` (add route with `Suspense` fallback; Container calls Facade, passes to Component)
+8. `{Feature}.component.test.tsx` — component tests with Facade-shaped props; run `pnpm test` to verify → **commit** (Component + tests together)
+9. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
+10. Wire the feature in `main.tsx` (add route with `Suspense` fallback; Container calls Facade, passes to Component) → **commit**

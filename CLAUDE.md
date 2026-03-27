@@ -62,6 +62,20 @@ src/features/{feature-name}/
 
 Component tests pass Facade-shaped props with `vi.fn()` mocks. Since the Component calls Presenter internally, tests exercise both Component and Presenter layers together.
 
+## Commit Strategy
+
+When implementing a new feature, **commit after each step** of the checklist in docs/architecture.md. Do not batch multiple steps into one commit.
+
+Typical commit sequence:
+1. Scaffold + openapi.yaml → commit
+2. generate:api (type generation) → commit
+3. API layer → commit
+4. Facade layer → commit
+5. Presenter layer → commit
+6. MSW handlers → commit
+7. Component + tests (run tests before committing) → commit
+8. Wire in main.tsx → commit
+
 ## Tech Stack
 
 React 19, TanStack Query 5, TanStack Router 1, Vite 6, Vitest 3, TailwindCSS 4, MSW 2, openapi-msw 2, openapi-typescript 7, ky 1, TypeScript 5.7, vite-plugin-checker

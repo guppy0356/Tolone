@@ -6,19 +6,33 @@ import type { FamilyTodoFilterProps } from "./FamilyTodoFilter.presenter";
 
 const baseProps: FamilyTodoFilterProps = {
   selectedMembers: [],
-  selectMember: vi.fn(),
+  filterTodos: vi.fn(),
 };
 
 describe("FamilyTodoFilter", () => {
-  it("calls selectMember when selecting a member", async () => {
-    const selectMember = vi.fn();
+  it("calls filterTodos with added member when selecting", async () => {
+    const filterTodos = vi.fn();
     const user = userEvent.setup();
-    render(
-      <FamilyTodoFilter {...baseProps} selectMember={selectMember} />,
-    );
+    render(<FamilyTodoFilter {...baseProps} filterTodos={filterTodos} />);
     await user.click(screen.getByRole("combobox", { name: "Filter by member" }));
     await user.click(screen.getByRole("button", { name: /Mama/ }));
-    expect(selectMember).toHaveBeenCalledWith("Mama");
+    expect(filterTodos).toHaveBeenCalledWith(["Mama"]);
+  });
+
+  it("calls filterTodos with removed member when deselecting", async () => {
+    const filterTodos = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <FamilyTodoFilter
+        selectedMembers={["Mama", "Taro"]}
+        filterTodos={filterTodos}
+      />,
+    );
+    await user.click(screen.getByRole("combobox", { name: "Filter by member" }));
+    // Click the dropdown option, not the chip remove button
+    const options = screen.getAllByRole("button", { name: /Mama/ });
+    await user.click(options[options.length - 1]);
+    expect(filterTodos).toHaveBeenCalledWith(["Taro"]);
   });
 
   it("shows chips for selected members", () => {
@@ -29,18 +43,17 @@ describe("FamilyTodoFilter", () => {
     expect(screen.getByRole("button", { name: "Remove Taro" })).toBeInTheDocument();
   });
 
-  it("calls selectMember when clicking chip remove button", async () => {
-    const selectMember = vi.fn();
+  it("calls filterTodos with member removed when clicking chip remove button", async () => {
+    const filterTodos = vi.fn();
     const user = userEvent.setup();
     render(
       <FamilyTodoFilter
-        {...baseProps}
         selectedMembers={["Mama"]}
-        selectMember={selectMember}
+        filterTodos={filterTodos}
       />,
     );
     await user.click(screen.getByRole("button", { name: "Remove Mama" }));
-    expect(selectMember).toHaveBeenCalledWith("Mama");
+    expect(filterTodos).toHaveBeenCalledWith([]);
   });
 
   it("shows 'All members' when nothing is selected", () => {

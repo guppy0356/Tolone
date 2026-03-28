@@ -5,10 +5,9 @@ import {
 } from "./FamilyTodoFilter.presenter";
 import { MEMBER_AVATARS } from "./member-avatars";
 
-export const FamilyTodoFilter = memo(function FamilyTodoFilter({
-  selectedMembers,
-  selectMember,
-}: FamilyTodoFilterProps) {
+export const FamilyTodoFilter = memo(function FamilyTodoFilter(
+  props: FamilyTodoFilterProps,
+) {
   const {
     filterSearch,
     setFilterSearch,
@@ -17,7 +16,11 @@ export const FamilyTodoFilter = memo(function FamilyTodoFilter({
     filteredMemberOptions,
     filterRef,
     inputRef,
-  } = useFamilyTodoFilterPresenter();
+    selectMember,
+    removeMember,
+  } = useFamilyTodoFilterPresenter(props);
+
+  const { selectedMembers } = props;
 
   return (
     <div ref={filterRef} className="relative mb-4">
@@ -54,13 +57,13 @@ export const FamilyTodoFilter = memo(function FamilyTodoFilter({
                   aria-label={`Remove ${m}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    selectMember(m);
+                    removeMember(m);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.stopPropagation();
                       e.preventDefault();
-                      selectMember(m);
+                      removeMember(m);
                     }
                   }}
                   className="ml-0.5 cursor-pointer rounded-sm p-0 transition-colors hover:bg-gray-200"

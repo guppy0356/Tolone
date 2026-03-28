@@ -4,7 +4,7 @@ import { FAMILY_MEMBERS } from "./FamilyTodo.api";
 
 export interface FamilyTodoFilterProps {
   selectedMembers: FamilyMember[];
-  selectMember: (member: FamilyMember) => void;
+  filterTodos: (members: FamilyMember[]) => void;
 }
 
 export interface FamilyTodoFilterPresenter {
@@ -15,9 +15,14 @@ export interface FamilyTodoFilterPresenter {
   filteredMemberOptions: FamilyMember[];
   filterRef: React.RefObject<HTMLDivElement | null>;
   inputRef: React.RefObject<HTMLInputElement | null>;
+  selectMember: (member: FamilyMember) => void;
+  removeMember: (member: FamilyMember) => void;
 }
 
-export function useFamilyTodoFilterPresenter(): FamilyTodoFilterPresenter {
+export function useFamilyTodoFilterPresenter({
+  selectedMembers,
+  filterTodos,
+}: FamilyTodoFilterProps): FamilyTodoFilterPresenter {
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterSearch, setFilterSearch] = useState("");
   const filterRef = useRef<HTMLDivElement | null>(null);
@@ -53,6 +58,23 @@ export function useFamilyTodoFilterPresenter(): FamilyTodoFilterPresenter {
     });
   }, []);
 
+  const selectMember = useCallback(
+    (member: FamilyMember) => {
+      const next = selectedMembers.includes(member)
+        ? selectedMembers.filter((m) => m !== member)
+        : [...selectedMembers, member];
+      filterTodos(next);
+    },
+    [selectedMembers, filterTodos],
+  );
+
+  const removeMember = useCallback(
+    (member: FamilyMember) => {
+      filterTodos(selectedMembers.filter((m) => m !== member));
+    },
+    [selectedMembers, filterTodos],
+  );
+
   return {
     filterSearch,
     setFilterSearch,
@@ -61,5 +83,7 @@ export function useFamilyTodoFilterPresenter(): FamilyTodoFilterPresenter {
     filteredMemberOptions,
     filterRef,
     inputRef,
+    selectMember,
+    removeMember,
   };
 }

@@ -18,7 +18,8 @@ export const FamilyTodoComponent = memo(function FamilyTodoComponent(
     currentUser,
     setCurrentUser,
     todos,
-    isFilterPending,
+    isPending,
+    isFetching,
     selectedMembers,
     filterSearch,
     setFilterSearch,
@@ -222,7 +223,10 @@ export const FamilyTodoComponent = memo(function FamilyTodoComponent(
         )}
       </div>
 
-      <ul className={`space-y-2 transition-opacity ${isFilterPending ? "opacity-50" : ""}`}>
+      {isPending ? (
+        <FamilyTodoSkeleton />
+      ) : (
+      <ul className={`space-y-2 transition-opacity ${isFetching ? "opacity-50" : ""}`}>
         {todos.map((todo) => {
           const own = isOwnTodo(todo);
           return (
@@ -260,6 +264,7 @@ export const FamilyTodoComponent = memo(function FamilyTodoComponent(
           );
         })}
       </ul>
+      )}
     </div>
   );
 });

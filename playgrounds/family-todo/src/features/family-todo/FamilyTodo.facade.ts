@@ -1,8 +1,9 @@
-import { useState, useCallback, useTransition } from "react";
+import { useState, useCallback } from "react";
 import {
-  useSuspenseQuery,
+  useQuery,
   useMutation,
   useQueryClient,
+  keepPreviousData,
 } from "@tanstack/react-query";
 import {
   familyTodoApi,
@@ -13,7 +14,8 @@ import {
 
 export interface FamilyTodoFacade {
   todos: FamilyTodo[];
-  isFilterPending: boolean;
+  isPending: boolean;
+  isFetching: boolean;
   currentUser: FamilyMember;
   setCurrentUser: (member: FamilyMember) => void;
   selectedMembers: FamilyMember[];
@@ -36,17 +38,17 @@ export function useFamilyTodoFacade(
 ): FamilyTodoFacade {
   const queryClient = useQueryClient();
   const [selectedMembers, setSelectedMembers] = useState<FamilyMember[]>([]);
-  const [isFilterPending, startTransition] = useTransition();
 
   const queryKey = selectedMembers.length > 0
     ? todoKeys.filtered(selectedMembers)
     : todoKeys.all;
 
-  const { data } = useSuspenseQuery({
+  const { data, isPending, isFetching } = useQuery({
     queryKey,
     queryFn: () => familyTodoApi.getAll(
       selectedMembers.length > 0 ? selectedMembers : undefined,
     ),
+    placeholderData: keepPreviousData,
   });
 
   const addMutation = useMutation({
@@ -132,24 +134,21 @@ export function useFamilyTodoFacade(
   );
 
   const toggleMemberSelection = useCallback((member: FamilyMember) => {
-    startTransition(() => {
-      setSelectedMembers((prev) =>
-        prev.includes(member)
-          ? prev.filter((m) => m !== member)
-          : [...prev, member],
-      );
-    });
+    setSelectedMembers((prev) =>
+      prev.includes(member)
+        ? prev.filter((m) => m !== member)
+        : [...prev, member],
+    );
   }, []);
 
   const removeMember = useCallback((member: FamilyMember) => {
-    startTransition(() => {
-      setSelectedMembers((prev) => prev.filter((m) => m !== member));
-    });
+    setSelectedMembers((prev) => prev.filter((m) => m !== member));
   }, []);
 
   return {
-    todos: data,
-    isFilterPending,
+    todos: data ?? [],
+    isPending,
+    isFetching,
     currentUser,
     setCurrentUser,
     selectedMembers,

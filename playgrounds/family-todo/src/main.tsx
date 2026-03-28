@@ -1,4 +1,4 @@
-import { StrictMode, Suspense, useState } from "react";
+import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -8,10 +8,7 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { useFamilyTodoFacade } from "./features/family-todo/FamilyTodo.facade";
-import {
-  FamilyTodoComponent,
-  FamilyTodoSkeleton,
-} from "./features/family-todo/FamilyTodo.component";
+import { FamilyTodoComponent } from "./features/family-todo/FamilyTodo.component";
 import type { FamilyMember } from "./features/family-todo/FamilyTodo.api";
 import "./app.css";
 
@@ -28,11 +25,7 @@ const rootRoute = createRootRoute();
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => (
-    <Suspense fallback={<FamilyTodoSkeleton />}>
-      <FamilyTodoPage />
-    </Suspense>
-  ),
+  component: FamilyTodoPage,
 });
 
 const routeTree = rootRoute.addChildren([indexRoute]);

@@ -5,18 +5,17 @@ import { FamilyTodoList } from "./FamilyTodoList.component";
 import { FamilyTodoSkeleton } from "./FamilyTodoSkeleton";
 import { MEMBER_AVATARS } from "./member-avatars";
 
-export function FamilyTodoPage(facade: FamilyTodoFacade) {
-  const {
-    todos,
-    isPending,
-    isFetching,
-    currentUser,
-    selectedMembers,
-    filterTodos,
-    addTodo,
-    toggleTodo,
-    deleteTodo,
-  } = facade;
+export function FamilyTodoPage({
+  todos,
+  isPending,
+  isFetching,
+  currentUser,
+  selectedMembers,
+  filterTodos,
+  addTodo,
+  toggleTodo,
+  deleteTodo,
+}: FamilyTodoFacade) {
 
   return (
     <div className="mx-auto max-w-lg p-4">

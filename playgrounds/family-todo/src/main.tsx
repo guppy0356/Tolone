@@ -8,16 +8,16 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { useFamilyTodoFacade } from "./features/family-todo/FamilyTodo.facade";
-import { FamilyTodoComponent } from "./features/family-todo/FamilyTodo.component";
+import { FamilyTodoPage } from "./features/family-todo/FamilyTodoPage";
 import type { FamilyMember } from "./features/family-todo/FamilyTodo.api";
 import "./app.css";
 
 const queryClient = new QueryClient();
 
-function FamilyTodoPage() {
+function FamilyTodoContainer() {
   const [currentUser, setCurrentUser] = useState<FamilyMember>("Papa");
   const facade = useFamilyTodoFacade(currentUser, setCurrentUser);
-  return <FamilyTodoComponent {...facade} />;
+  return <FamilyTodoPage {...facade} />;
 }
 
 const rootRoute = createRootRoute();
@@ -25,7 +25,7 @@ const rootRoute = createRootRoute();
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: FamilyTodoPage,
+  component: FamilyTodoContainer,
 });
 
 const routeTree = rootRoute.addChildren([indexRoute]);

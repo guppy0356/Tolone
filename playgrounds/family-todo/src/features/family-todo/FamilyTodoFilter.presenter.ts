@@ -1,9 +1,14 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import type { FamilyMember, FamilyTodo } from "./FamilyTodo.api";
+import type { FamilyMember } from "./FamilyTodo.api";
 import { FAMILY_MEMBERS } from "./FamilyTodo.api";
-import type { FamilyTodoFacade } from "./FamilyTodo.facade";
 
-export interface FamilyTodoPresenter {
+export interface FamilyTodoFilterProps {
+  selectedMembers: FamilyMember[];
+  toggleMemberSelection: (member: FamilyMember) => void;
+  removeMember: (member: FamilyMember) => void;
+}
+
+export interface FamilyTodoFilterPresenter {
   filterSearch: string;
   setFilterSearch: (value: string) => void;
   filterOpen: boolean;
@@ -11,17 +16,9 @@ export interface FamilyTodoPresenter {
   filteredMemberOptions: FamilyMember[];
   filterRef: React.RefObject<HTMLDivElement | null>;
   inputRef: React.RefObject<HTMLInputElement | null>;
-  newTitle: string;
-  setNewTitle: (value: string) => void;
-  handleSubmit: () => Promise<void>;
-  isOwnTodo: (todo: FamilyTodo) => boolean;
 }
 
-export function useFamilyTodoPresenter({
-  currentUser,
-  addTodo,
-}: FamilyTodoFacade): FamilyTodoPresenter {
-  const [newTitle, setNewTitle] = useState("");
+export function useFamilyTodoFilterPresenter(): FamilyTodoFilterPresenter {
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterSearch, setFilterSearch] = useState("");
   const filterRef = useRef<HTMLDivElement | null>(null);
@@ -46,13 +43,6 @@ export function useFamilyTodoPresenter({
     return FAMILY_MEMBERS.filter((m) => m.toLowerCase().includes(q));
   }, [filterSearch]);
 
-  const handleSubmit = useCallback(async () => {
-    const trimmed = newTitle.trim();
-    if (!trimmed) return;
-    await addTodo({ title: trimmed, owner: currentUser });
-    setNewTitle("");
-  }, [newTitle, addTodo, currentUser]);
-
   const toggleFilter = useCallback(() => {
     setFilterOpen((prev) => {
       if (prev) {
@@ -64,11 +54,6 @@ export function useFamilyTodoPresenter({
     });
   }, []);
 
-  const isOwnTodo = useCallback(
-    (todo: FamilyTodo) => todo.owner === currentUser,
-    [currentUser],
-  );
-
   return {
     filterSearch,
     setFilterSearch,
@@ -77,9 +62,5 @@ export function useFamilyTodoPresenter({
     filteredMemberOptions,
     filterRef,
     inputRef,
-    newTitle,
-    setNewTitle,
-    handleSubmit,
-    isOwnTodo,
   };
 }

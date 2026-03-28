@@ -12,12 +12,27 @@ let todos: FamilyTodo[] = [
   { id: "3", title: "Do homework", completed: false, owner: "Taro" },
   { id: "4", title: "Practice piano", completed: true, owner: "Hanako" },
   { id: "5", title: "Walk the dog", completed: false, owner: "Taro" },
+  { id: "6", title: "Cook dinner", completed: false, owner: "Mama" },
+  { id: "7", title: "Mow the lawn", completed: false, owner: "Papa" },
+  { id: "8", title: "Read a book", completed: true, owner: "Hanako" },
+  { id: "9", title: "Clean the room", completed: false, owner: "Taro" },
+  { id: "10", title: "Do laundry", completed: false, owner: "Mama" },
+  { id: "11", title: "Water the plants", completed: true, owner: "Papa" },
+  { id: "12", title: "Feed the cat", completed: false, owner: "Hanako" },
+  { id: "13", title: "Study math", completed: false, owner: "Taro" },
+  { id: "14", title: "Call grandma", completed: false, owner: "Mama" },
+  { id: "15", title: "Fix the shelf", completed: false, owner: "Papa" },
+  { id: "16", title: "Draw a picture", completed: true, owner: "Hanako" },
+  { id: "17", title: "Soccer practice", completed: false, owner: "Taro" },
+  { id: "18", title: "Prepare lunch boxes", completed: false, owner: "Mama" },
+  { id: "19", title: "Change light bulb", completed: false, owner: "Papa" },
+  { id: "20", title: "Write diary", completed: false, owner: "Hanako" },
 ];
-let nextId = 6;
+let nextId = 21;
 
 export const handlers = [
   http.get("/api/todos", async ({ request, response }) => {
-    await delay(500);
+    await delay(1500);
     const url = new URL(request.url);
     const owners = url.searchParams.getAll("owner");
     const filtered =

@@ -1,4 +1,4 @@
-import { StrictMode, useState } from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -9,14 +9,12 @@ import {
 } from "@tanstack/react-router";
 import { useFamilyTodoFacade } from "./features/family-todo/FamilyTodo.facade";
 import { FamilyTodoPage } from "./features/family-todo/FamilyTodoPage";
-import type { FamilyMember } from "./features/family-todo/FamilyTodo.api";
 import "./app.css";
 
 const queryClient = new QueryClient();
 
 function FamilyTodoContainer() {
-  const [currentUser, setCurrentUser] = useState<FamilyMember>("Papa");
-  const facade = useFamilyTodoFacade(currentUser, setCurrentUser);
+  const facade = useFamilyTodoFacade();
   return <FamilyTodoPage {...facade} />;
 }
 

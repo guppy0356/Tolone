@@ -23,7 +23,7 @@ export const familyTodoApi = {
       })
       .json<FamilyTodo[]>(),
   create: (input: CreateFamilyTodoInput) =>
-    api.post("todos", { json: input }).json<FamilyTodo>(),
+    api.post("todos", { json: input, credentials: "include" }).json<FamilyTodo>(),
   update: (id: string, input: UpdateFamilyTodoInput) =>
     api.patch(`todos/${id}`, { json: input }).json<FamilyTodo>(),
   delete: (id: string) => api.delete(`todos/${id}`),

@@ -50,7 +50,6 @@ export interface components {
         };
         CreateFamilyTodoInput: {
             title: string;
-            owner: components["schemas"]["FamilyMember"];
         };
         UpdateFamilyTodoInput: {
             title?: string;

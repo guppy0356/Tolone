@@ -44,11 +44,14 @@ export const handlers = [
 
   http.post("/api/todos", async ({ request, response }) => {
     const body = await request.json();
+    const cookieHeader = request.headers.get("cookie") ?? "";
+    const ownerMatch = cookieHeader.match(/currentUser=(\w+)/);
+    const owner = (ownerMatch?.[1] ?? "Papa") as FamilyTodo["owner"];
     const todo: FamilyTodo = {
       id: String(nextId++),
       title: body.title,
       completed: false,
-      owner: body.owner,
+      owner,
     };
     todos.push(todo);
     return response(201).json(todo);

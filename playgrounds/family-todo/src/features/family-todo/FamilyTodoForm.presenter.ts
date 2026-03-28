@@ -1,10 +1,8 @@
 import { useState, useCallback } from "react";
-import type { FamilyMember } from "./FamilyTodo.api";
 import type { CreateFamilyTodoInput } from "./FamilyTodo.api";
 
 export interface FamilyTodoFormProps {
   addTodo: (input: CreateFamilyTodoInput) => Promise<void>;
-  currentUser: FamilyMember;
 }
 
 export interface FamilyTodoFormPresenter {
@@ -15,16 +13,15 @@ export interface FamilyTodoFormPresenter {
 
 export function useFamilyTodoFormPresenter({
   addTodo,
-  currentUser,
 }: FamilyTodoFormProps): FamilyTodoFormPresenter {
   const [newTitle, setNewTitle] = useState("");
 
   const handleSubmit = useCallback(async () => {
     const trimmed = newTitle.trim();
     if (!trimmed) return;
-    await addTodo({ title: trimmed, owner: currentUser });
+    await addTodo({ title: trimmed });
     setNewTitle("");
-  }, [newTitle, addTodo, currentUser]);
+  }, [newTitle, addTodo]);
 
   return {
     newTitle,

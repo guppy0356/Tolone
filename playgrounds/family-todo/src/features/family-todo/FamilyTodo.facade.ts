@@ -11,6 +11,10 @@ import {
   type FamilyMember,
   type CreateFamilyTodoInput,
 } from "./FamilyTodo.api";
+import {
+  getCurrentUserFromCookie,
+  setCurrentUserCookie,
+} from "../../lib/cookie";
 
 export interface FamilyTodoFacade {
   todos: FamilyTodo[];
@@ -32,12 +36,22 @@ const todoKeys = {
     [...todoKeys.all, { owners }] as const,
 };
 
-export function useFamilyTodoFacade(
-  currentUser: FamilyMember,
-  setCurrentUser: (member: FamilyMember) => void,
-): FamilyTodoFacade {
+function getInitialUser(): FamilyMember {
+  const fromCookie = getCurrentUserFromCookie();
+  if (fromCookie) return fromCookie;
+  setCurrentUserCookie("Papa");
+  return "Papa";
+}
+
+export function useFamilyTodoFacade(): FamilyTodoFacade {
   const queryClient = useQueryClient();
+  const [currentUser, setCurrentUserState] = useState<FamilyMember>(getInitialUser);
   const [selectedMembers, setSelectedMembers] = useState<FamilyMember[]>([]);
+
+  const setCurrentUser = useCallback((member: FamilyMember) => {
+    setCurrentUserCookie(member);
+    setCurrentUserState(member);
+  }, []);
 
   const queryKey = selectedMembers.length > 0
     ? todoKeys.filtered(selectedMembers)
@@ -62,7 +76,7 @@ export function useFamilyTodoFacade(
           id: crypto.randomUUID(),
           title: input.title,
           completed: false,
-          owner: input.owner,
+          owner: currentUser,
         },
       ]);
       return { previous };

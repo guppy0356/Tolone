@@ -99,12 +99,10 @@ components:
 
     CreateFamilyTodoInput:
       type: object
-      required: [title, owner]
+      required: [title]
       properties:
         title:
           type: string
-        owner:
-          $ref: "#/components/schemas/FamilyMember"
 
     UpdateFamilyTodoInput:
       type: object

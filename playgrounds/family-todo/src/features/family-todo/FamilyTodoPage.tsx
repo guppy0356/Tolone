@@ -43,7 +43,7 @@ export function FamilyTodoPage(facade: FamilyTodoFacade) {
         </div>
       </header>
 
-      <FamilyTodoForm addTodo={addTodo} currentUser={currentUser} />
+      <FamilyTodoForm addTodo={addTodo} />
 
       <FamilyTodoFilter
         selectedMembers={selectedMembers}

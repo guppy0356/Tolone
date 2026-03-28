@@ -67,10 +67,16 @@ export interface TodoPresenter {
 }
 export function useTodoPresenter(props: { addTodo: TodoFacade["addTodo"] }): TodoPresenter { ... }
 
-// Component — uses both Facade props and Presenter return values to render
-export const TodoComponent = memo(function TodoComponent(props: TodoFacade) {
-  const presenter = useTodoPresenter(props);
-  // render using props.todos, props.isPending, presenter.newTitle, presenter.handleSubmit, etc.
+// Component — destructure props, pass only needed values to Presenter
+export const TodoComponent = memo(function TodoComponent({
+  todos,
+  isPending,
+  addTodo,
+  toggleTodo,
+  deleteTodo,
+}: TodoFacade) {
+  const { newTitle, setNewTitle, handleSubmit } = useTodoPresenter({ addTodo });
+  // render using destructured Facade props + Presenter return values
   return ...;
 });
 ```
@@ -186,7 +192,7 @@ export function useTodoFacade(): TodoFacade {
     async (input: CreateTodoInput) => {
       await addMutation.mutateAsync(input);
     },
-    [addMutation],
+    [addMutation.mutateAsync],
   );
 
   // ...
@@ -265,9 +271,15 @@ import { memo } from "react";
 import { useTodoPresenter } from "./Todo.presenter";
 import type { TodoFacade } from "./Todo.facade";
 
-export const TodoComponent = memo(function TodoComponent(props: TodoFacade) {
-  const { todos, isPending, isFetching, toggleTodo, deleteTodo } = props;
-  const { newTitle, setNewTitle, handleSubmit } = useTodoPresenter(props);
+export const TodoComponent = memo(function TodoComponent({
+  todos,
+  isPending,
+  isFetching,
+  addTodo,
+  toggleTodo,
+  deleteTodo,
+}: TodoFacade) {
+  const { newTitle, setNewTitle, handleSubmit } = useTodoPresenter({ addTodo });
 
   return (
     <div className="mx-auto max-w-lg p-4">

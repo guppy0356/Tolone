@@ -358,8 +358,25 @@ import { TodoComponent } from "./features/todo/Todo.component";
 const queryClient = new QueryClient();
 
 function TodoContainer() {
-  const facade = useTodoFacade();
-  return <TodoComponent {...facade} />;
+  const {
+    todos,
+    isPending,
+    isFetching,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+  } = useTodoFacade();
+
+  return (
+    <TodoComponent
+      todos={todos}
+      isPending={isPending}
+      isFetching={isFetching}
+      addTodo={addTodo}
+      toggleTodo={toggleTodo}
+      deleteTodo={deleteTodo}
+    />
+  );
 }
 
 const rootRoute = createRootRoute();

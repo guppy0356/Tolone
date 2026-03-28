@@ -13,7 +13,7 @@ API → Facade → Presenter → Component
 | Layer | File | Responsibility | Form |
 |---|---|---|---|
 | API | `{Feature}.api.ts` | HTTP communication + types (from OpenAPI) | Plain function object |
-| Facade | `{Feature}.facade.ts` | Server state (TanStack Query: useSuspenseQuery + useMutation) | React hook |
+| Facade | `{Feature}.facade.ts` | Server state (TanStack Query: useQuery + useMutation) | React hook |
 | Presenter | `{Feature}.presenter.ts` | Local UI state (forms, validation) | React hook |
 | Component | `{Feature}.component.tsx` | Rendering only, memoized | React component |
 
@@ -27,7 +27,7 @@ Container (main.tsx)
 Component (memo)
   → receives Facade data as props
   → calls Presenter hook internally, forwarding those props
-  → renders using only Presenter return values
+  → renders using Facade props + Presenter return values
 ```
 
 The Component never receives Presenter output from outside. The Presenter is always called **inside** the Component.
@@ -51,23 +51,26 @@ Use **explicit interfaces** for hook props and return types instead of `ReturnTy
 
 ```ts
 // Facade — export the return type as a named interface
-// Loading/error states are handled by Suspense/ErrorBoundary, not the Facade interface
 export interface TodoFacade {
   todos: Todo[];
+  isPending: boolean;
+  isFetching: boolean;
   addTodo: (input: CreateTodoInput) => Promise<void>;
 }
-export function useTodoFacade(): TodoFacade { ... }  // internally uses useSuspenseQuery + useMutation
+export function useTodoFacade(): TodoFacade { ... }  // internally uses useQuery + useMutation
 
-// Presenter — receive the Facade interface as props, export its own return interface
+// Presenter — receive props it needs, return ONLY what it creates (no pass-through)
 export interface TodoPresenter {
-  todos: TodoFacade["todos"];
+  newTitle: string;
+  setNewTitle: (value: string) => void;
   handleSubmit: () => Promise<void>;
 }
-export function useTodoPresenter(props: TodoFacade): TodoPresenter { ... }
+export function useTodoPresenter(props: { addTodo: TodoFacade["addTodo"] }): TodoPresenter { ... }
 
-// Component — props type is the Facade interface (Presenter is called internally)
+// Component — uses both Facade props and Presenter return values to render
 export const TodoComponent = memo(function TodoComponent(props: TodoFacade) {
-  const { ... } = useTodoPresenter(props);
+  const presenter = useTodoPresenter(props);
+  // render using props.todos, props.isPending, presenter.newTitle, presenter.handleSubmit, etc.
   return ...;
 });
 ```
@@ -111,13 +114,13 @@ export const todoApi = {
 **Responsibility**: Server state management (fetching and mutating data)
 
 **Rules**:
-- Use `useSuspenseQuery` + `useMutation` + `useQueryClient` from TanStack Query
+- Use `useQuery` + `keepPreviousData` + `useMutation` + `useQueryClient` from TanStack Query
 - Call the API layer via query/mutation functions
-- Loading state is handled by `Suspense` boundaries, errors by `ErrorBoundary` — the Facade interface does not include `loading` or `error`
-- `useSuspenseQuery` guarantees `data` is always defined (never `undefined`)
+- Export `isPending` (initial load, `data` is `undefined`) and `isFetching` (background refetch, stale data still available) — the Component uses these for loading UI
+- `data` may be `undefined` before the first successful fetch — use `data ?? []` or similar defaults
 - No UI logic (forms, validation, etc.)
 - Export an explicit interface for the return type
-- Return action functions + data
+- Return action functions + data + loading states
 - Define query keys as a constant object for reuse
 - Use optimistic updates (`onMutate` / `onError` / `onSettled`) for instant UI feedback
 
@@ -125,14 +128,17 @@ export const todoApi = {
 // Todo.facade.ts
 import { useCallback } from "react";
 import {
-  useSuspenseQuery,
+  useQuery,
   useMutation,
   useQueryClient,
+  keepPreviousData,
 } from "@tanstack/react-query";
 import { todoApi, type Todo, type CreateTodoInput } from "./Todo.api";
 
 export interface TodoFacade {
   todos: Todo[];
+  isPending: boolean;
+  isFetching: boolean;
   addTodo: (input: CreateTodoInput) => Promise<void>;
   toggleTodo: (id: string, completed: boolean) => Promise<void>;
   deleteTodo: (id: string) => Promise<void>;
@@ -145,9 +151,10 @@ const todoKeys = {
 export function useTodoFacade(): TodoFacade {
   const queryClient = useQueryClient();
 
-  const { data } = useSuspenseQuery({
+  const { data, isPending, isFetching } = useQuery({
     queryKey: todoKeys.all,
     queryFn: todoApi.getAll,
+    placeholderData: keepPreviousData,
   });
 
   // Optimistic update pattern:
@@ -185,7 +192,9 @@ export function useTodoFacade(): TodoFacade {
   // ...
 
   return {
-    todos: data,
+    todos: data ?? [],
+    isPending,
+    isFetching,
     addTodo,
     toggleTodo,
     deleteTodo,
@@ -198,32 +207,30 @@ export function useTodoFacade(): TodoFacade {
 **Responsibility**: Local UI state management (form input, validation, UI toggles)
 
 **Rules**:
-- Receive the full Facade return value as props
+- Receive Facade data/actions it needs as props (define own Props interface)
 - Manage form input values, validation, UI toggles, etc.
 - No direct server communication (delegate to Facade action callbacks)
-- Return **everything** the Component needs to render (including forwarded Facade data)
+- **No pass-through**: return only what the Presenter creates (local state, derived values, handlers). Facade data the Component needs is accessed directly from Facade props, not re-exported through the Presenter
 - Export an explicit interface for the return type
 
 ```ts
 // Todo.presenter.ts
 import { useState, useCallback } from "react";
-import type { TodoFacade } from "./Todo.facade";
+import type { CreateTodoInput } from "./Todo.api";
+
+export interface TodoPresenterProps {
+  addTodo: (input: CreateTodoInput) => Promise<void>;
+}
 
 export interface TodoPresenter {
-  todos: TodoFacade["todos"];
-  toggleTodo: TodoFacade["toggleTodo"];
-  deleteTodo: TodoFacade["deleteTodo"];
   newTitle: string;
   setNewTitle: (value: string) => void;
   handleSubmit: () => Promise<void>;
 }
 
 export function useTodoPresenter({
-  todos,
   addTodo,
-  toggleTodo,
-  deleteTodo,
-}: TodoFacade): TodoPresenter {
+}: TodoPresenterProps): TodoPresenter {
   const [newTitle, setNewTitle] = useState("");
 
   const handleSubmit = useCallback(async () => {
@@ -234,9 +241,6 @@ export function useTodoPresenter({
   }, [newTitle, addTodo]);
 
   return {
-    todos,
-    toggleTodo,
-    deleteTodo,
     newTitle,
     setNewTitle,
     handleSubmit,
@@ -250,9 +254,9 @@ export function useTodoPresenter({
 
 **Rules**:
 - Wrap with `memo`
-- Props type is the Facade interface
-- Call the Presenter hook **internally**, forwarding props
-- Render using only Presenter return values
+- Props type is the Facade interface (or a subset for sub-components)
+- Call the Presenter hook **internally**, forwarding needed props
+- Render using **both** Facade props (data, loading states, actions) and Presenter return values (local UI state)
 - No business logic — only JSX and CSS classes
 
 ```tsx
@@ -262,14 +266,8 @@ import { useTodoPresenter } from "./Todo.presenter";
 import type { TodoFacade } from "./Todo.facade";
 
 export const TodoComponent = memo(function TodoComponent(props: TodoFacade) {
-  const {
-    todos,
-    toggleTodo,
-    deleteTodo,
-    newTitle,
-    setNewTitle,
-    handleSubmit,
-  } = useTodoPresenter(props);
+  const { todos, isPending, isFetching, toggleTodo, deleteTodo } = props;
+  const { newTitle, setNewTitle, handleSubmit } = useTodoPresenter(props);
 
   return (
     <div className="mx-auto max-w-lg p-4">
@@ -297,27 +295,31 @@ export const TodoComponent = memo(function TodoComponent(props: TodoFacade) {
         </button>
       </form>
 
-      <ul className="space-y-2">
-        {todos.map((todo) => (
-          <li key={todo.id} className="flex items-center gap-2 rounded border p-2">
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => toggleTodo(todo.id, !todo.completed)}
-              className="size-4"
-            />
-            <span className={todo.completed ? "flex-1 text-gray-400 line-through" : "flex-1"}>
-              {todo.title}
-            </span>
-            <button
-              onClick={() => deleteTodo(todo.id)}
-              className="text-red-500 hover:text-red-700"
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
+      {isPending ? (
+        <TodoSkeleton />
+      ) : (
+        <ul className={`space-y-2 transition-opacity ${isFetching ? "opacity-50" : ""}`}>
+          {todos.map((todo) => (
+            <li key={todo.id} className="flex items-center gap-2 rounded border p-2">
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => toggleTodo(todo.id, !todo.completed)}
+                className="size-4"
+              />
+              <span className={todo.completed ? "flex-1 text-gray-400 line-through" : "flex-1"}>
+                {todo.title}
+              </span>
+              <button
+                onClick={() => deleteTodo(todo.id)}
+                className="text-red-500 hover:text-red-700"
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 });
@@ -331,7 +333,6 @@ The Container (e.g. `main.tsx`) only calls the Facade and passes its return valu
 
 ```tsx
 // main.tsx
-import { Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   createRouter,
@@ -340,11 +341,11 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { useTodoFacade } from "./features/todo/Todo.facade";
-import { TodoComponent, TodoSkeleton } from "./features/todo/Todo.component";
+import { TodoComponent } from "./features/todo/Todo.component";
 
 const queryClient = new QueryClient();
 
-function TodoPage() {
+function TodoContainer() {
   const facade = useTodoFacade();
   return <TodoComponent {...facade} />;
 }
@@ -354,11 +355,7 @@ const rootRoute = createRootRoute();
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => (
-    <Suspense fallback={<TodoSkeleton />}>
-      <TodoPage />
-    </Suspense>
-  ),
+  component: TodoContainer,
 });
 
 const routeTree = rootRoute.addChildren([indexRoute]);
@@ -441,6 +438,8 @@ const baseFacade: TodoFacade = {
     { id: "1", title: "Test todo", completed: false },
     { id: "2", title: "Done todo", completed: true },
   ],
+  isPending: false,
+  isFetching: false,
   addTodo: vi.fn(),
   toggleTodo: vi.fn(),
   deleteTodo: vi.fn(),
@@ -513,9 +512,9 @@ Commit after each step. Do not batch multiple steps into one commit.
 2. Run `pnpm generate:api` to generate types → **commit**
 3. Create `src/features/{feature-name}/` directory
 4. `{Feature}.api.ts` — import generated types + API function object → **commit**
-5. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (useSuspenseQuery + useMutation) → **commit**
+5. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (useQuery + keepPreviousData + useMutation) → **commit**
 6. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook + `{Feature}Presenter` interface → **commit**
 7. `{Feature}.component.tsx` — `{Feature}Component` (memo, calls Presenter internally)
 8. `{Feature}.component.test.tsx` — component tests with Facade-shaped props; run `pnpm test` to verify → **commit** (Component + tests together)
 9. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
-10. Wire the feature in `main.tsx` (add route with `Suspense` fallback; Container calls Facade, passes to Component) → **commit**
+10. Wire the feature in `main.tsx` (add route; Container calls Facade, passes to Component) → **commit**

@@ -11,7 +11,8 @@ A pnpm monorepo for experimenting with the Facade + Presenter pattern in React.
 ├── packages/
 │   └── tailwind/             # Shared TailwindCSS package
 ├── playgrounds/
-│   └── todo/                 # Todo app (reference implementation)
+│   ├── todo/                 # Todo app (reference implementation)
+│   └── family-todo/          # Family todo app (multi-user, cookie auth)
 └── scripts/
     └── new-playground.mjs    # Playground scaffold script
 ```

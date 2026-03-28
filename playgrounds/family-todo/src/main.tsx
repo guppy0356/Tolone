@@ -14,8 +14,31 @@ import "./app.css";
 const queryClient = new QueryClient();
 
 function FamilyTodoContainer() {
-  const facade = useFamilyTodoFacade();
-  return <FamilyTodoPage {...facade} />;
+  const {
+    todos,
+    isPending,
+    isFetching,
+    currentUser,
+    selectedMembers,
+    filterTodos,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+  } = useFamilyTodoFacade();
+
+  return (
+    <FamilyTodoPage
+      todos={todos}
+      isPending={isPending}
+      isFetching={isFetching}
+      currentUser={currentUser}
+      selectedMembers={selectedMembers}
+      filterTodos={filterTodos}
+      addTodo={addTodo}
+      toggleTodo={toggleTodo}
+      deleteTodo={deleteTodo}
+    />
+  );
 }
 
 const rootRoute = createRootRoute();

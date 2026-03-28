@@ -77,6 +77,10 @@ Typical commit sequence:
 7. Component + tests (run tests before committing) → commit
 8. Wire in main.tsx → commit
 
+## Future Work
+
+Once a feature is working end-to-end, if a single Component/Presenter contains multiple distinct UI concerns (e.g. form, filter, list), **propose** splitting into sub-components each with its own Presenter. Do not split without user approval.
+
 ## Tech Stack
 
 React 19, TanStack Query 5, TanStack Router 1, Vite 6, Vitest 3, TailwindCSS 4, MSW 2, openapi-msw 2, openapi-typescript 7, ky 1, TypeScript 5.7, vite-plugin-checker

@@ -4,11 +4,11 @@ import {
   type FamilyTodoFormProps,
 } from "./FamilyTodoForm.presenter";
 
-export const FamilyTodoForm = memo(function FamilyTodoForm(
-  props: FamilyTodoFormProps,
-) {
+export const FamilyTodoForm = memo(function FamilyTodoForm({
+  addTodo,
+}: FamilyTodoFormProps) {
   const { newTitle, setNewTitle, handleSubmit } =
-    useFamilyTodoFormPresenter(props);
+    useFamilyTodoFormPresenter({ addTodo });
 
   return (
     <form

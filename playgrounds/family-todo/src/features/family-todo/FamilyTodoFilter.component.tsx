@@ -5,9 +5,10 @@ import {
 } from "./FamilyTodoFilter.presenter";
 import { MEMBER_AVATARS } from "./member-avatars";
 
-export const FamilyTodoFilter = memo(function FamilyTodoFilter(
-  props: FamilyTodoFilterProps,
-) {
+export const FamilyTodoFilter = memo(function FamilyTodoFilter({
+  selectedMembers,
+  filterTodos,
+}: FamilyTodoFilterProps) {
   const {
     filterSearch,
     setFilterSearch,
@@ -18,9 +19,7 @@ export const FamilyTodoFilter = memo(function FamilyTodoFilter(
     inputRef,
     selectMember,
     removeMember,
-  } = useFamilyTodoFilterPresenter(props);
-
-  const { selectedMembers } = props;
+  } = useFamilyTodoFilterPresenter({ selectedMembers, filterTodos });
 
   return (
     <div ref={filterRef} className="relative mb-4">

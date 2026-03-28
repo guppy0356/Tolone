@@ -15,7 +15,7 @@ export interface FamilyTodoListPresenter {
 
 export function useFamilyTodoListPresenter({
   currentUser,
-}: FamilyTodoListProps): FamilyTodoListPresenter {
+}: Pick<FamilyTodoListProps, "currentUser">): FamilyTodoListPresenter {
   const isOwnTodo = useCallback(
     (todo: FamilyTodo) => todo.owner === currentUser,
     [currentUser],

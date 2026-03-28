@@ -5,11 +5,14 @@ import {
 } from "./FamilyTodoList.presenter";
 import { MEMBER_AVATARS } from "./member-avatars";
 
-export const FamilyTodoList = memo(function FamilyTodoList(
-  props: FamilyTodoListProps,
-) {
-  const { todos, isFetching, toggleTodo, deleteTodo } = props;
-  const { isOwnTodo } = useFamilyTodoListPresenter(props);
+export const FamilyTodoList = memo(function FamilyTodoList({
+  todos,
+  currentUser,
+  isFetching,
+  toggleTodo,
+  deleteTodo,
+}: FamilyTodoListProps) {
+  const { isOwnTodo } = useFamilyTodoListPresenter({ currentUser });
 
   return (
     <ul

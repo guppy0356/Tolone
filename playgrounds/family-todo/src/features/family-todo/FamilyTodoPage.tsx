@@ -12,8 +12,7 @@ export function FamilyTodoPage(facade: FamilyTodoFacade) {
     isFetching,
     currentUser,
     selectedMembers,
-    toggleMemberSelection,
-    removeMember,
+    selectMember,
     addTodo,
     toggleTodo,
     deleteTodo,
@@ -32,8 +31,7 @@ export function FamilyTodoPage(facade: FamilyTodoFacade) {
 
       <FamilyTodoFilter
         selectedMembers={selectedMembers}
-        toggleMemberSelection={toggleMemberSelection}
-        removeMember={removeMember}
+        selectMember={selectMember}
       />
 
       {isPending ? (

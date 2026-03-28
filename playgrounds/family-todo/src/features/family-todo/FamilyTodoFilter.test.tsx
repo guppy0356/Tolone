@@ -6,23 +6,19 @@ import type { FamilyTodoFilterProps } from "./FamilyTodoFilter.presenter";
 
 const baseProps: FamilyTodoFilterProps = {
   selectedMembers: [],
-  toggleMemberSelection: vi.fn(),
-  removeMember: vi.fn(),
+  selectMember: vi.fn(),
 };
 
 describe("FamilyTodoFilter", () => {
-  it("calls toggleMemberSelection when selecting a member", async () => {
-    const toggleMemberSelection = vi.fn();
+  it("calls selectMember when selecting a member", async () => {
+    const selectMember = vi.fn();
     const user = userEvent.setup();
     render(
-      <FamilyTodoFilter
-        {...baseProps}
-        toggleMemberSelection={toggleMemberSelection}
-      />,
+      <FamilyTodoFilter {...baseProps} selectMember={selectMember} />,
     );
     await user.click(screen.getByRole("combobox", { name: "Filter by member" }));
     await user.click(screen.getByRole("button", { name: /Mama/ }));
-    expect(toggleMemberSelection).toHaveBeenCalledWith("Mama");
+    expect(selectMember).toHaveBeenCalledWith("Mama");
   });
 
   it("shows chips for selected members", () => {
@@ -33,18 +29,18 @@ describe("FamilyTodoFilter", () => {
     expect(screen.getByRole("button", { name: "Remove Taro" })).toBeInTheDocument();
   });
 
-  it("calls removeMember when clicking chip remove button", async () => {
-    const removeMember = vi.fn();
+  it("calls selectMember when clicking chip remove button", async () => {
+    const selectMember = vi.fn();
     const user = userEvent.setup();
     render(
       <FamilyTodoFilter
         {...baseProps}
         selectedMembers={["Mama"]}
-        removeMember={removeMember}
+        selectMember={selectMember}
       />,
     );
     await user.click(screen.getByRole("button", { name: "Remove Mama" }));
-    expect(removeMember).toHaveBeenCalledWith("Mama");
+    expect(selectMember).toHaveBeenCalledWith("Mama");
   });
 
   it("shows 'All members' when nothing is selected", () => {

@@ -4,8 +4,7 @@ import { FAMILY_MEMBERS } from "./FamilyTodo.api";
 
 export interface FamilyTodoFilterProps {
   selectedMembers: FamilyMember[];
-  toggleMemberSelection: (member: FamilyMember) => void;
-  removeMember: (member: FamilyMember) => void;
+  selectMember: (member: FamilyMember) => void;
 }
 
 export interface FamilyTodoFilterPresenter {

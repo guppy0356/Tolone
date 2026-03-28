@@ -19,8 +19,7 @@ export interface FamilyTodoFacade {
   isFetching: boolean;
   currentUser: FamilyMember;
   selectedMembers: FamilyMember[];
-  toggleMemberSelection: (member: FamilyMember) => void;
-  removeMember: (member: FamilyMember) => void;
+  selectMember: (member: FamilyMember) => void;
   addTodo: (input: CreateFamilyTodoInput) => Promise<void>;
   toggleTodo: (id: string, completed: boolean) => Promise<void>;
   deleteTodo: (id: string) => Promise<void>;
@@ -139,16 +138,12 @@ export function useFamilyTodoFacade(): FamilyTodoFacade {
     [deleteMutation.mutateAsync],
   );
 
-  const toggleMemberSelection = useCallback((member: FamilyMember) => {
+  const selectMember = useCallback((member: FamilyMember) => {
     setSelectedMembers((prev) =>
       prev.includes(member)
         ? prev.filter((m) => m !== member)
         : [...prev, member],
     );
-  }, []);
-
-  const removeMember = useCallback((member: FamilyMember) => {
-    setSelectedMembers((prev) => prev.filter((m) => m !== member));
   }, []);
 
   return {
@@ -157,8 +152,7 @@ export function useFamilyTodoFacade(): FamilyTodoFacade {
     isFetching,
     currentUser,
     selectedMembers,
-    toggleMemberSelection,
-    removeMember,
+    selectMember,
     addTodo,
     toggleTodo,
     deleteTodo,

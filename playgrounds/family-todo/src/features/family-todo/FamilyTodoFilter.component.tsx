@@ -7,8 +7,7 @@ import { MEMBER_AVATARS } from "./member-avatars";
 
 export const FamilyTodoFilter = memo(function FamilyTodoFilter({
   selectedMembers,
-  toggleMemberSelection,
-  removeMember,
+  selectMember,
 }: FamilyTodoFilterProps) {
   const {
     filterSearch,
@@ -55,13 +54,13 @@ export const FamilyTodoFilter = memo(function FamilyTodoFilter({
                   aria-label={`Remove ${m}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    removeMember(m);
+                    selectMember(m);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.stopPropagation();
                       e.preventDefault();
-                      removeMember(m);
+                      selectMember(m);
                     }
                   }}
                   className="ml-0.5 cursor-pointer rounded-sm p-0 transition-colors hover:bg-gray-200"
@@ -125,7 +124,7 @@ export const FamilyTodoFilter = memo(function FamilyTodoFilter({
                   <button
                     key={m}
                     type="button"
-                    onClick={() => toggleMemberSelection(m)}
+                    onClick={() => selectMember(m)}
                     className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors hover:bg-blue-50 ${
                       selected ? "bg-blue-50/50" : ""
                     }`}

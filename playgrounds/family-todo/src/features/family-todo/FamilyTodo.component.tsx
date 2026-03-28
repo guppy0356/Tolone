@@ -15,18 +15,23 @@ export const FamilyTodoComponent = memo(function FamilyTodoComponent(
   props: FamilyTodoFacade,
 ) {
   const {
-    currentUser,
-    setCurrentUser,
     todos,
     isPending,
     isFetching,
+    currentUser,
+    setCurrentUser,
     selectedMembers,
+    toggleMemberSelection,
+    removeMember,
+    toggleTodo,
+    deleteTodo,
+  } = props;
+
+  const {
     filterSearch,
     setFilterSearch,
     filterOpen,
     toggleFilter,
-    toggleMemberSelection,
-    removeMember,
     filteredMemberOptions,
     filterRef,
     inputRef,
@@ -34,8 +39,6 @@ export const FamilyTodoComponent = memo(function FamilyTodoComponent(
     setNewTitle,
     handleSubmit,
     isOwnTodo,
-    toggleTodo,
-    deleteTodo,
   } = useFamilyTodoPresenter(props);
 
   return (

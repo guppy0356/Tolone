@@ -4,14 +4,6 @@ import { FAMILY_MEMBERS } from "./FamilyTodo.api";
 import type { FamilyTodoFacade } from "./FamilyTodo.facade";
 
 export interface FamilyTodoPresenter {
-  currentUser: FamilyMember;
-  setCurrentUser: (member: FamilyMember) => void;
-  todos: FamilyTodo[];
-  isPending: boolean;
-  isFetching: boolean;
-  selectedMembers: FamilyTodoFacade["selectedMembers"];
-  toggleMemberSelection: FamilyTodoFacade["toggleMemberSelection"];
-  removeMember: FamilyTodoFacade["removeMember"];
   filterSearch: string;
   setFilterSearch: (value: string) => void;
   filterOpen: boolean;
@@ -23,22 +15,11 @@ export interface FamilyTodoPresenter {
   setNewTitle: (value: string) => void;
   handleSubmit: () => Promise<void>;
   isOwnTodo: (todo: FamilyTodo) => boolean;
-  toggleTodo: FamilyTodoFacade["toggleTodo"];
-  deleteTodo: FamilyTodoFacade["deleteTodo"];
 }
 
 export function useFamilyTodoPresenter({
-  todos,
-  isPending,
-  isFetching,
   currentUser,
-  setCurrentUser,
-  selectedMembers,
-  toggleMemberSelection,
-  removeMember,
   addTodo,
-  toggleTodo,
-  deleteTodo,
 }: FamilyTodoFacade): FamilyTodoPresenter {
   const [newTitle, setNewTitle] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -89,14 +70,6 @@ export function useFamilyTodoPresenter({
   );
 
   return {
-    currentUser,
-    setCurrentUser,
-    todos,
-    isPending,
-    isFetching,
-    selectedMembers,
-    toggleMemberSelection,
-    removeMember,
     filterSearch,
     setFilterSearch,
     filterOpen,
@@ -108,7 +81,5 @@ export function useFamilyTodoPresenter({
     setNewTitle,
     handleSubmit,
     isOwnTodo,
-    toggleTodo,
-    deleteTodo,
   };
 }

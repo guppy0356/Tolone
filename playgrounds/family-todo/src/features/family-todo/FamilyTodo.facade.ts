@@ -11,17 +11,13 @@ import {
   type FamilyMember,
   type CreateFamilyTodoInput,
 } from "./FamilyTodo.api";
-import {
-  getCurrentUserFromCookie,
-  setCurrentUserCookie,
-} from "../../lib/cookie";
+import { getCurrentUserFromCookie, setCurrentUserCookie } from "../../lib/cookie";
 
 export interface FamilyTodoFacade {
   todos: FamilyTodo[];
   isPending: boolean;
   isFetching: boolean;
   currentUser: FamilyMember;
-  setCurrentUser: (member: FamilyMember) => void;
   selectedMembers: FamilyMember[];
   toggleMemberSelection: (member: FamilyMember) => void;
   removeMember: (member: FamilyMember) => void;
@@ -45,13 +41,9 @@ function getInitialUser(): FamilyMember {
 
 export function useFamilyTodoFacade(): FamilyTodoFacade {
   const queryClient = useQueryClient();
-  const [currentUser, setCurrentUserState] = useState<FamilyMember>(getInitialUser);
+  const [currentUser] = useState<FamilyMember>(getInitialUser);
   const [selectedMembers, setSelectedMembers] = useState<FamilyMember[]>([]);
 
-  const setCurrentUser = useCallback((member: FamilyMember) => {
-    setCurrentUserCookie(member);
-    setCurrentUserState(member);
-  }, []);
 
   const queryKey = selectedMembers.length > 0
     ? todoKeys.filtered(selectedMembers)
@@ -164,7 +156,6 @@ export function useFamilyTodoFacade(): FamilyTodoFacade {
     isPending,
     isFetching,
     currentUser,
-    setCurrentUser,
     selectedMembers,
     toggleMemberSelection,
     removeMember,

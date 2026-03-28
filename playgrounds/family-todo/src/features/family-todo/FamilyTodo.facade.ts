@@ -122,21 +122,21 @@ export function useFamilyTodoFacade(): FamilyTodoFacade {
     async (input: CreateFamilyTodoInput) => {
       await addMutation.mutateAsync(input);
     },
-    [addMutation],
+    [addMutation.mutateAsync],
   );
 
   const toggleTodo = useCallback(
     async (id: string, completed: boolean) => {
       await toggleMutation.mutateAsync({ id, completed });
     },
-    [toggleMutation],
+    [toggleMutation.mutateAsync],
   );
 
   const deleteTodo = useCallback(
     async (id: string) => {
       await deleteMutation.mutateAsync(id);
     },
-    [deleteMutation],
+    [deleteMutation.mutateAsync],
   );
 
   const toggleMemberSelection = useCallback((member: FamilyMember) => {

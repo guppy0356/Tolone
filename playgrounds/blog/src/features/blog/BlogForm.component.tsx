@@ -1,12 +1,10 @@
 import { memo } from "react";
-import {
-  useBlogFormPresenter,
-  type BlogFormPresenterProps,
-} from "./BlogForm.presenter";
+import { useBlogFormPresenter } from "./BlogForm.presenter";
+import type { BlogFacade } from "./Blog.facade";
 
 export const BlogForm = memo(function BlogForm({
   addBlog,
-}: BlogFormPresenterProps) {
+}: Pick<BlogFacade, "addBlog">) {
   const { titleField, contentField, handleSubmit, isValid } =
     useBlogFormPresenter({ addBlog });
 

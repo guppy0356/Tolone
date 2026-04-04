@@ -76,7 +76,7 @@ pnpm test
 
 ## Architecture
 
-Uses the 4-layer Lahan pattern. See [docs/architecture.md](./docs/architecture.md) for full details.
+Uses a 4-layer architecture. See [docs/architecture.md](./docs/architecture.md) for full details.
 
 ```
 API → Facade → Presenter → Component

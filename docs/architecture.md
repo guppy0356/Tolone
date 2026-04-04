@@ -4,7 +4,7 @@ Reference document for Claude when implementing features.
 
 ---
 
-## 4-Layer Architecture (Lahan Pattern)
+## 4-Layer Architecture
 
 ```
 API → Facade → Presenter → Component

@@ -12,7 +12,8 @@ A pnpm monorepo for experimenting with the Facade + Presenter pattern in React.
 │   └── tailwind/             # Shared TailwindCSS package
 ├── playgrounds/
 │   ├── todo/                 # Todo app (reference implementation)
-│   └── family-todo/          # Family todo app (multi-user, cookie auth)
+│   ├── family-todo/          # Family todo app (multi-user, cookie auth)
+│   └── blog/                 # Blog app (react-hook-form + zod)
 └── scripts/
     └── new-playground.mjs    # Playground scaffold script
 ```
@@ -113,4 +114,5 @@ and implement following docs/architecture.md.
 - openapi-typescript (schema → type generation)
 - vite-plugin-checker (dev server type checking)
 - ky (HTTP client)
+- react-hook-form + zod (form validation, blog playground)
 - Vitest + Testing Library

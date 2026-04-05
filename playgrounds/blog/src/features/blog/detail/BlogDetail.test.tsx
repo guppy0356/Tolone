@@ -6,8 +6,8 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { BlogDetail } from "./BlogDetail.component";
-import type { BlogDetailFacade } from "./Blog.facade";
-import type { BlogPost } from "./Blog.api";
+import type { BlogDetailFacade } from "../Blog.facade";
+import type { BlogPost } from "../Blog.api";
 
 const sampleBlog: BlogPost = {
   id: "1",

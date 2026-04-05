@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { useBlogFormPresenter } from "./BlogForm.presenter";
-import type { BlogFacade } from "./Blog.facade";
+import type { BlogFacade } from "../Blog.facade";
 
 export const BlogForm = memo(function BlogForm({
   addBlog,

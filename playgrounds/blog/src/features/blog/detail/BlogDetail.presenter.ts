@@ -1,4 +1,4 @@
-import type { BlogPost } from "./Blog.api";
+import type { BlogPost } from "../Blog.api";
 
 export interface BlogDetailPresenterProps {
   blog: BlogPost | undefined;

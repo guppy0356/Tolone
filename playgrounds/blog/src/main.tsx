@@ -7,38 +7,11 @@ import {
   createRoute,
   RouterProvider,
 } from "@tanstack/react-router";
-import { useBlogFacade, useBlogDetailFacade } from "./features/blog/Blog.facade";
-import { BlogPage } from "./features/blog/BlogPage";
-import { BlogDetail } from "./features/blog/BlogDetail.component";
+import { BlogListContainer } from "./features/blog/list/BlogListContainer";
+import { BlogDetailContainer } from "./features/blog/detail/BlogDetailContainer";
 import "./app.css";
 
 const queryClient = new QueryClient();
-
-function BlogListContainer() {
-  const { blogs, isPending, isFetching, addBlog } = useBlogFacade();
-
-  return (
-    <BlogPage
-      blogs={blogs}
-      isPending={isPending}
-      isFetching={isFetching}
-      addBlog={addBlog}
-    />
-  );
-}
-
-function BlogDetailContainer() {
-  const { id } = blogDetailRoute.useParams();
-  const { blog, isPending, isFetching } = useBlogDetailFacade(id);
-
-  return (
-    <BlogDetail
-      blog={blog}
-      isPending={isPending}
-      isFetching={isFetching}
-    />
-  );
-}
 
 const rootRoute = createRootRoute();
 

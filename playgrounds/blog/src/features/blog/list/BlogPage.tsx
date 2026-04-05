@@ -1,4 +1,4 @@
-import type { BlogFacade } from "./Blog.facade";
+import type { BlogFacade } from "../Blog.facade";
 import { BlogForm } from "./BlogForm.component";
 import { BlogList } from "./BlogList.component";
 import { BlogSkeleton } from "./BlogSkeleton";

@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 import { useForm, useController } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createBlogSchema, type CreateBlogFormValues } from "./Blog.schema";
-import type { CreateBlogInput } from "./Blog.api";
+import { createBlogSchema, type CreateBlogFormValues } from "../Blog.schema";
+import type { CreateBlogInput } from "../Blog.api";
 
 export interface BlogFormPresenterProps {
   addBlog: (input: CreateBlogInput) => Promise<void>;

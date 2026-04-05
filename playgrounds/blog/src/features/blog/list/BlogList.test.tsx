@@ -7,7 +7,7 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { BlogList, type BlogListProps } from "./BlogList.component";
-import type { BlogPost } from "./Blog.api";
+import type { BlogPost } from "../Blog.api";
 
 const sampleBlogs: BlogPost[] = [
   {

@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Link } from "@tanstack/react-router";
-import type { BlogPost } from "./Blog.api";
+import type { BlogPost } from "../Blog.api";
 
 export interface BlogListProps {
   blogs: BlogPost[];

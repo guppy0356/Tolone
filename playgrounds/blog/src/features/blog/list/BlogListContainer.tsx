@@ -1,8 +1,8 @@
-import { useBlogFacade } from "../Blog.facade";
+import { useBlogListFacade } from "./BlogList.facade";
 import { BlogPage } from "./BlogPage";
 
 export function BlogListContainer() {
-  const { blogs, isPending, isFetching, addBlog } = useBlogFacade();
+  const { blogs, isPending, isFetching, addBlog } = useBlogListFacade();
 
   return (
     <BlogPage

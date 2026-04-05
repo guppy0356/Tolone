@@ -1,5 +1,5 @@
 import { getRouteApi } from "@tanstack/react-router";
-import { useBlogDetailFacade } from "../Blog.facade";
+import { useBlogDetailFacade } from "./BlogDetail.facade";
 import { BlogDetail } from "./BlogDetail.component";
 
 const route = getRouteApi("/blogs/$id");

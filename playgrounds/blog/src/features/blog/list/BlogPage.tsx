@@ -1,4 +1,4 @@
-import type { BlogFacade } from "../Blog.facade";
+import type { BlogListFacade } from "./BlogList.facade";
 import { BlogForm } from "./BlogForm.component";
 import { BlogList } from "./BlogList.component";
 import { BlogSkeleton } from "./BlogSkeleton";
@@ -8,7 +8,7 @@ export function BlogPage({
   isPending,
   isFetching,
   addBlog,
-}: BlogFacade) {
+}: BlogListFacade) {
   return (
     <div className="mx-auto max-w-lg p-4">
       <h1 className="mb-4 text-2xl font-bold">Blog</h1>

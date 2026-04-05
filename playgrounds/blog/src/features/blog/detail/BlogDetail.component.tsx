@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Link } from "@tanstack/react-router";
 import { useBlogDetailPresenter } from "./BlogDetail.presenter";
-import type { BlogDetailFacade } from "../Blog.facade";
+import type { BlogDetailFacade } from "./BlogDetail.facade";
 import { BlogSkeleton } from "../list/BlogSkeleton";
 
 export const BlogDetail = memo(function BlogDetail({

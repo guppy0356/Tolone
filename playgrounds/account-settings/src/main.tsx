@@ -7,20 +7,48 @@ import {
   createRoute,
   RouterProvider,
 } from "@tanstack/react-router";
+import { useSettingsTabsPresenter } from "./features/settings-tabs/SettingsTabs.presenter";
+import { SettingsTabsNav } from "./features/settings-tabs/SettingsTabs.component";
+import { useProfileSettingsFacade } from "./features/profile-settings/ProfileSettings.facade";
+import { ProfileSettingsComponent } from "./features/profile-settings/ProfileSettings.component";
+import { useNotificationSettingsFacade } from "./features/notification-settings/NotificationSettings.facade";
+import { NotificationSettingsComponent } from "./features/notification-settings/NotificationSettings.component";
 import "./app.css";
 
 const queryClient = new QueryClient();
+
+function ProfileSettingsContainer() {
+  const facade = useProfileSettingsFacade();
+  return <ProfileSettingsComponent {...facade} />;
+}
+
+function NotificationSettingsContainer() {
+  const facade = useNotificationSettingsFacade();
+  return <NotificationSettingsComponent {...facade} />;
+}
+
+function SettingsPage() {
+  const { activeTab, setActiveTab } = useSettingsTabsPresenter();
+
+  return (
+    <div className="mx-auto max-w-2xl p-6">
+      <h1 className="mb-4 text-2xl font-bold">Settings</h1>
+      <SettingsTabsNav activeTab={activeTab} onTabChange={setActiveTab} />
+      {activeTab === "profile" ? (
+        <ProfileSettingsContainer />
+      ) : (
+        <NotificationSettingsContainer />
+      )}
+    </div>
+  );
+}
 
 const rootRoute = createRootRoute();
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => (
-    <div>
-      <h1>Account-settings Playground</h1>
-    </div>
-  ),
+  component: SettingsPage,
 });
 
 const routeTree = rootRoute.addChildren([indexRoute]);

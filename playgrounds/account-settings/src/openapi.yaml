@@ -1,0 +1,97 @@
+openapi: 3.1.0
+info:
+  title: Account Settings API
+  version: 0.1.0
+
+paths:
+  /api/settings/profile:
+    get:
+      operationId: getProfile
+      responses:
+        "200":
+          description: Current profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+    patch:
+      operationId: updateProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileInput"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  /api/settings/notifications:
+    get:
+      operationId: getNotifications
+      responses:
+        "200":
+          description: Current notification preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPreferences"
+    patch:
+      operationId: updateNotifications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNotificationsInput"
+      responses:
+        "200":
+          description: Updated notification preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPreferences"
+
+components:
+  schemas:
+    Profile:
+      type: object
+      required: [name, bio]
+      properties:
+        name:
+          type: string
+        bio:
+          type: string
+
+    UpdateProfileInput:
+      type: object
+      properties:
+        name:
+          type: string
+        bio:
+          type: string
+
+    NotificationPreferences:
+      type: object
+      required: [reviewRequested, mentioned, issueAssigned]
+      properties:
+        reviewRequested:
+          type: boolean
+        mentioned:
+          type: boolean
+        issueAssigned:
+          type: boolean
+
+    UpdateNotificationsInput:
+      type: object
+      properties:
+        reviewRequested:
+          type: boolean
+        mentioned:
+          type: boolean
+        issueAssigned:
+          type: boolean

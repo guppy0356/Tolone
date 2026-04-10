@@ -17,28 +17,21 @@ import "./app.css";
 
 const queryClient = new QueryClient();
 
-function ProfileSettingsContainer() {
-  const facade = useProfileSettingsFacade();
-  return <ProfileSettingsComponent {...facade} />;
-}
-
-function NotificationSettingsContainer() {
-  const facade = useNotificationSettingsFacade();
-  return <NotificationSettingsComponent {...facade} />;
-}
-
 function SettingsPage() {
   const { activeTab, setActiveTab } = useSettingsTabsPresenter();
+  const profileFacade = useProfileSettingsFacade();
+  const notificationFacade = useNotificationSettingsFacade();
 
   return (
     <div className="mx-auto max-w-2xl p-6">
       <h1 className="mb-4 text-2xl font-bold">Settings</h1>
       <SettingsTabsNav activeTab={activeTab} onTabChange={setActiveTab} />
-      {activeTab === "profile" ? (
-        <ProfileSettingsContainer />
-      ) : (
-        <NotificationSettingsContainer />
-      )}
+      <div hidden={activeTab !== "profile"}>
+        <ProfileSettingsComponent {...profileFacade} />
+      </div>
+      <div hidden={activeTab !== "notifications"}>
+        <NotificationSettingsComponent {...notificationFacade} />
+      </div>
     </div>
   );
 }

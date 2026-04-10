@@ -1,13 +1,17 @@
 import { memo } from "react";
 import { useProfileSettingsPresenter } from "./ProfileSettings.presenter";
 import type { ProfileSettingsFacade } from "./ProfileSettings.facade";
+import type { Profile } from "./ProfileSettings.api";
 
-export const ProfileSettingsComponent = memo(function ProfileSettingsComponent({
+interface ProfileSettingsViewProps {
+  profile: Profile;
+  updateProfile: ProfileSettingsFacade["updateProfile"];
+}
+
+const ProfileSettingsView = memo(function ProfileSettingsView({
   profile,
-  isPending,
-  isFetching,
   updateProfile,
-}: ProfileSettingsFacade) {
+}: ProfileSettingsViewProps) {
   const {
     nameField,
     bioField,
@@ -17,17 +21,13 @@ export const ProfileSettingsComponent = memo(function ProfileSettingsComponent({
     isSubmitting,
   } = useProfileSettingsPresenter({ profile, updateProfile });
 
-  if (isPending || !profile) {
-    return <ProfileSettingsSkeleton />;
-  }
-
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
         handleSubmit();
       }}
-      className={`space-y-4 transition-opacity ${isFetching ? "opacity-70" : ""}`}
+      className="space-y-4"
     >
       <div>
         <label
@@ -79,6 +79,23 @@ export const ProfileSettingsComponent = memo(function ProfileSettingsComponent({
     </form>
   );
 });
+
+export function ProfileSettingsComponent({
+  profile,
+  isPending,
+  isFetching,
+  updateProfile,
+}: ProfileSettingsFacade) {
+  if (isPending || !profile) {
+    return <ProfileSettingsSkeleton />;
+  }
+
+  return (
+    <div className={`transition-opacity ${isFetching ? "opacity-70" : ""}`}>
+      <ProfileSettingsView profile={profile} updateProfile={updateProfile} />
+    </div>
+  );
+}
 
 function ProfileSettingsSkeleton() {
   return (

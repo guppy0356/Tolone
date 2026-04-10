@@ -3,9 +3,10 @@ import type {
   NotificationSettingsFacade,
   NotificationKey,
 } from "./NotificationSettings.facade";
+import type { NotificationPreferences } from "./NotificationSettings.api";
 
 export interface NotificationSettingsPresenterProps {
-  preferences: NotificationSettingsFacade["preferences"];
+  preferences: NotificationPreferences;
   updatePreference: NotificationSettingsFacade["updatePreference"];
 }
 
@@ -57,7 +58,7 @@ export function useNotificationSettingsPresenter({
   );
 
   const toggles: NotificationToggle[] = TOGGLE_META.map((meta) => {
-    const checked = preferences?.[meta.key] ?? false;
+    const checked = preferences[meta.key];
     return {
       key: meta.key,
       label: meta.label,

@@ -6,7 +6,7 @@ import type { Profile } from "./ProfileSettings.api";
 import type { ProfileSettingsFacade } from "./ProfileSettings.facade";
 
 export interface ProfileSettingsPresenterProps {
-  profile: Profile | undefined;
+  profile: Profile;
   updateProfile: ProfileSettingsFacade["updateProfile"];
 }
 
@@ -38,13 +38,11 @@ export function useProfileSettingsPresenter({
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     mode: "onChange",
-    defaultValues: { name: "", bio: "" },
+    defaultValues: { name: profile.name, bio: profile.bio },
   });
 
   useEffect(() => {
-    if (profile) {
-      reset({ name: profile.name, bio: profile.bio });
-    }
+    reset({ name: profile.name, bio: profile.bio });
   }, [profile, reset]);
 
   const nameCtrl = useController({ name: "name", control });

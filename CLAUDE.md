@@ -37,15 +37,17 @@ This is a pnpm monorepo for experimenting with a **4-layer architecture** (API �
 | API | `{Feature}.api.ts` | Plain object of functions | HTTP calls via `ky` + type definitions |
 | Facade | `{Feature}.facade.ts` | React hook | Server state via TanStack Query (`useQuery` + `keepPreviousData` + `useMutation`) |
 | Presenter | `{Feature}.presenter.ts` | React hook | Local UI state (forms, validation, toggles) |
-| Component | `{Feature}.component.tsx` | `memo` component | Rendering only |
+| Component | `{Feature}.component.tsx` | Plain component | Loading UI (`isPending` / `isFetching`) + delegation to View |
+| View | `{Feature}.component.tsx` (same file) | `memo` component | Rendering only (content props, no loading flags) |
 
 ### Wiring rules
 
 - **Container** (e.g. `main.tsx`) calls Facade hook, spreads return as props to Component
-- **Component** receives Facade props, calls Presenter hook internally, renders from **both** Facade props and Presenter return
-- Component **never** imports Presenter from outside — Presenter is always called inside Component
-- **Presenter returns only what it creates** — no pass-through of Facade data. Component accesses Facade data directly from its own props
-- Facade exposes `isPending` / `isFetching` for loading UI — no `Suspense` boundary needed
+- **Component** (outer, no `memo`) receives Facade props, handles `isPending` (skeleton) and `isFetching` (opacity), passes only **content props** (data + actions) to View
+- **View** (inner, `memo`) receives content props (no `isPending` / `isFetching`), calls Presenter hook internally, renders from **both** content props and Presenter return
+- View **never** imports Presenter from outside — Presenter is always called inside View
+- **Presenter returns only what it creates** — no pass-through of Facade data. View accesses content data directly from its own props
+- Presenter props are **guaranteed non-undefined** — Component handles `undefined` / loading before rendering View
 - All hook return types use **explicit named interfaces** (no `ReturnType<typeof ...>`)
 
 ### Feature file structure

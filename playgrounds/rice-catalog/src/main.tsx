@@ -7,20 +7,23 @@ import {
   createRoute,
   RouterProvider,
 } from "@tanstack/react-router";
+import { useRiceCatalogFacade } from "./features/rice-catalog/RiceCatalog.facade";
+import { RiceCatalogComponent } from "./features/rice-catalog/RiceCatalog.component";
 import "./app.css";
 
 const queryClient = new QueryClient();
+
+function RiceCatalogPage() {
+  const facade = useRiceCatalogFacade();
+  return <RiceCatalogComponent {...facade} />;
+}
 
 const rootRoute = createRootRoute();
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => (
-    <div>
-      <h1>Rice-catalog Playground</h1>
-    </div>
-  ),
+  component: RiceCatalogPage,
 });
 
 const routeTree = rootRoute.addChildren([indexRoute]);

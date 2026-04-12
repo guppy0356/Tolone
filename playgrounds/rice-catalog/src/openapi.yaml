@@ -1,0 +1,33 @@
+openapi: 3.1.0
+info:
+  title: Rice Catalog API
+  version: 0.1.0
+
+paths:
+  /api/rices:
+    get:
+      operationId: getRices
+      responses:
+        "200":
+          description: List of rice varieties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Rice"
+
+components:
+  schemas:
+    Rice:
+      type: object
+      required: [id, brand, producer, region]
+      properties:
+        id:
+          type: string
+        brand:
+          type: string
+        producer:
+          type: string
+        region:
+          type: string

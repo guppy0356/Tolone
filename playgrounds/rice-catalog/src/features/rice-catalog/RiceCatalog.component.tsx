@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useRiceCatalogPresenter } from "./RiceCatalog.presenter";
 import type { RiceCatalogFacade } from "./RiceCatalog.facade";
 import type { Rice, RiceFilters } from "./RiceCatalog.api";
 
@@ -29,6 +30,9 @@ const RiceCatalogView = memo(function RiceCatalogView({
   regionFilter,
   setRegionFilter,
 }: RiceCatalogViewProps) {
+  const { brandOptions, producerOptions, regionOptions } =
+    useRiceCatalogPresenter({ filters, brandFilter, producerFilter, regionFilter });
+
   return (
     <div className="mx-auto max-w-4xl p-4">
       <h1 className="mb-4 text-2xl font-bold">Rice Catalog</h1>
@@ -49,12 +53,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
           className="rounded border px-3 py-2"
         >
           <option value="">All brands</option>
-          {brandFilter && !filters.brands.includes(brandFilter) && (
-            <option key={brandFilter} value={brandFilter}>
-              {brandFilter}
-            </option>
-          )}
-          {filters.brands.map((b) => (
+          {brandOptions.map((b) => (
             <option key={b} value={b}>
               {b}
             </option>
@@ -68,12 +67,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
           className="rounded border px-3 py-2"
         >
           <option value="">All producers</option>
-          {producerFilter && !filters.producers.includes(producerFilter) && (
-            <option key={producerFilter} value={producerFilter}>
-              {producerFilter}
-            </option>
-          )}
-          {filters.producers.map((p) => (
+          {producerOptions.map((p) => (
             <option key={p} value={p}>
               {p}
             </option>
@@ -87,12 +81,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
           className="rounded border px-3 py-2"
         >
           <option value="">All regions</option>
-          {regionFilter && !filters.regions.includes(regionFilter) && (
-            <option key={regionFilter} value={regionFilter}>
-              {regionFilter}
-            </option>
-          )}
-          {filters.regions.map((r) => (
+          {regionOptions.map((r) => (
             <option key={r} value={r}>
               {r}
             </option>

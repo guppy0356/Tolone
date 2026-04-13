@@ -120,4 +120,25 @@ describe("RiceCatalogComponent", () => {
     expect(screen.getByLabelText("Brand filter")).toHaveValue("コシヒカリ");
     expect(screen.getByLabelText("Region filter")).toHaveValue("新潟県");
   });
+
+  it("keeps selected filter value visible in select-box when not in options", () => {
+    render(
+      <RiceCatalogComponent
+        {...baseFacade}
+        brandFilter="つや姫"
+        filters={{
+          brands: ["ななつぼし", "ゆめぴりか"],
+          producers: ["JA北海道"],
+          regions: ["北海道"],
+        }}
+      />,
+    );
+
+    const brandSelect = screen.getByLabelText("Brand filter");
+    expect(brandSelect).toHaveValue("つや姫");
+    const brandOptions = within(brandSelect)
+      .getAllByRole("option")
+      .map((o) => o.textContent);
+    expect(brandOptions).toContain("つや姫");
+  });
 });

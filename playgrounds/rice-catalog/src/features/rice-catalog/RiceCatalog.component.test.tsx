@@ -18,14 +18,7 @@ const baseFacade: RiceCatalogFacade = {
   },
   isPending: false,
   isFetching: false,
-  searchText: "",
-  setSearchText: vi.fn(),
-  brandFilter: "",
-  setBrandFilter: vi.fn(),
-  producerFilter: "",
-  setProducerFilter: vi.fn(),
-  regionFilter: "",
-  setRegionFilter: vi.fn(),
+  setSearchQuery: vi.fn(),
 };
 
 describe("RiceCatalogComponent", () => {
@@ -80,65 +73,93 @@ describe("RiceCatalogComponent", () => {
     ]);
   });
 
-  it("calls setSearchText on input change", async () => {
-    const setSearchText = vi.fn();
+  it("calls setSearchQuery on search input change", async () => {
+    const setSearchQuery = vi.fn();
     const user = userEvent.setup();
     render(
-      <RiceCatalogComponent {...baseFacade} setSearchText={setSearchText} />,
+      <RiceCatalogComponent {...baseFacade} setSearchQuery={setSearchQuery} />,
     );
 
     const input = screen.getByPlaceholderText(
       "Search by brand, producer, or region...",
     );
     await user.type(input, "山");
-    expect(setSearchText).toHaveBeenCalledWith("山");
+    expect(setSearchQuery).toHaveBeenCalledWith({
+      search: "山",
+      brand: "",
+      producer: "",
+      region: "",
+    });
   });
 
-  it("calls setBrandFilter on select change", async () => {
-    const setBrandFilter = vi.fn();
+  it("calls setSearchQuery on brand select change", async () => {
+    const setSearchQuery = vi.fn();
     const user = userEvent.setup();
     render(
-      <RiceCatalogComponent {...baseFacade} setBrandFilter={setBrandFilter} />,
+      <RiceCatalogComponent {...baseFacade} setSearchQuery={setSearchQuery} />,
     );
 
     const brandSelect = screen.getByLabelText("Brand filter");
     await user.selectOptions(brandSelect, "コシヒカリ");
-    expect(setBrandFilter).toHaveBeenCalledWith("コシヒカリ");
+    expect(setSearchQuery).toHaveBeenCalledWith({
+      search: "",
+      brand: "コシヒカリ",
+      producer: "",
+      region: "",
+    });
   });
 
-  it("displays current filter values", () => {
-    render(
-      <RiceCatalogComponent
-        {...baseFacade}
-        searchText="テスト"
-        brandFilter="コシヒカリ"
-        regionFilter="新潟県"
-      />,
+  it("keeps selected filter value visible in select-box when not in options", async () => {
+    const setSearchQuery = vi.fn();
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <RiceCatalogComponent {...baseFacade} setSearchQuery={setSearchQuery} />,
     );
 
-    expect(screen.getByPlaceholderText("Search by brand, producer, or region...")).toHaveValue("テスト");
-    expect(screen.getByLabelText("Brand filter")).toHaveValue("コシヒカリ");
-    expect(screen.getByLabelText("Region filter")).toHaveValue("新潟県");
-  });
+    // Select a brand
+    await user.selectOptions(screen.getByLabelText("Brand filter"), "コシヒカリ");
 
-  it("keeps selected filter value visible in select-box when not in options", () => {
-    render(
+    // Re-render with filters that don't include the selected brand
+    rerender(
       <RiceCatalogComponent
         {...baseFacade}
-        brandFilter="つや姫"
         filters={{
           brands: ["ななつぼし", "ゆめぴりか"],
           producers: ["JA北海道"],
           regions: ["北海道"],
         }}
+        setSearchQuery={setSearchQuery}
       />,
     );
 
+    // The selected brand should still be visible in the select-box
     const brandSelect = screen.getByLabelText("Brand filter");
-    expect(brandSelect).toHaveValue("つや姫");
+    expect(brandSelect).toHaveValue("コシヒカリ");
     const brandOptions = within(brandSelect)
       .getAllByRole("option")
       .map((o) => o.textContent);
-    expect(brandOptions).toContain("つや姫");
+    expect(brandOptions).toContain("コシヒカリ");
+    expect(brandOptions).toContain("ななつぼし");
+    expect(brandOptions).toContain("ゆめぴりか");
+  });
+
+  it("calls setSearchQuery with all current filter values on change", async () => {
+    const setSearchQuery = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <RiceCatalogComponent {...baseFacade} setSearchQuery={setSearchQuery} />,
+    );
+
+    // Select a brand first
+    await user.selectOptions(screen.getByLabelText("Brand filter"), "コシヒカリ");
+
+    // Then select a region — should include the brand in params
+    await user.selectOptions(screen.getByLabelText("Region filter"), "新潟県");
+    expect(setSearchQuery).toHaveBeenLastCalledWith({
+      search: "",
+      brand: "コシヒカリ",
+      producer: "",
+      region: "新潟県",
+    });
   });
 });

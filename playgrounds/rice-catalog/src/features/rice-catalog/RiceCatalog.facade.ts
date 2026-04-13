@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import {
   riceCatalogApi,
@@ -12,14 +12,7 @@ export interface RiceCatalogFacade {
   filters: RiceFilters;
   isPending: boolean;
   isFetching: boolean;
-  searchText: string;
-  setSearchText: (value: string) => void;
-  brandFilter: string;
-  setBrandFilter: (value: string) => void;
-  producerFilter: string;
-  setProducerFilter: (value: string) => void;
-  regionFilter: string;
-  setRegionFilter: (value: string) => void;
+  setSearchQuery: (params: RiceSearchParams) => void;
 }
 
 const riceKeys = {
@@ -30,17 +23,12 @@ const riceKeys = {
 const emptyFilters: RiceFilters = { brands: [], producers: [], regions: [] };
 
 export function useRiceCatalogFacade(): RiceCatalogFacade {
-  const [searchText, setSearchText] = useState("");
-  const [brandFilter, setBrandFilter] = useState("");
-  const [producerFilter, setProducerFilter] = useState("");
-  const [regionFilter, setRegionFilter] = useState("");
+  const [params, setParams] = useState<RiceSearchParams>({});
 
-  const params: RiceSearchParams = {
-    search: searchText,
-    brand: brandFilter,
-    producer: producerFilter,
-    region: regionFilter,
-  };
+  const setSearchQuery = useCallback(
+    (newParams: RiceSearchParams) => setParams(newParams),
+    [],
+  );
 
   const {
     data: rices,
@@ -67,13 +55,6 @@ export function useRiceCatalogFacade(): RiceCatalogFacade {
     filters: filtersData ?? emptyFilters,
     isPending: ricesPending || filtersPending,
     isFetching: ricesFetching || filtersFetching,
-    searchText,
-    setSearchText,
-    brandFilter,
-    setBrandFilter,
-    producerFilter,
-    setProducerFilter,
-    regionFilter,
-    setRegionFilter,
+    setSearchQuery,
   };
 }

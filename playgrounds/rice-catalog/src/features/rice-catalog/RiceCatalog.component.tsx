@@ -8,30 +8,27 @@ import type { Rice, RiceFilters } from "./RiceCatalog.api";
 interface RiceCatalogViewProps {
   rices: Rice[];
   filters: RiceFilters;
-  searchText: string;
-  setSearchText: (value: string) => void;
-  brandFilter: string;
-  setBrandFilter: (value: string) => void;
-  producerFilter: string;
-  setProducerFilter: (value: string) => void;
-  regionFilter: string;
-  setRegionFilter: (value: string) => void;
+  setSearchQuery: RiceCatalogFacade["setSearchQuery"];
 }
 
 const RiceCatalogView = memo(function RiceCatalogView({
   rices,
   filters,
-  searchText,
-  setSearchText,
-  brandFilter,
-  setBrandFilter,
-  producerFilter,
-  setProducerFilter,
-  regionFilter,
-  setRegionFilter,
+  setSearchQuery,
 }: RiceCatalogViewProps) {
-  const { brandOptions, producerOptions, regionOptions } =
-    useRiceCatalogPresenter({ filters, brandFilter, producerFilter, regionFilter });
+  const {
+    searchText,
+    brandFilter,
+    producerFilter,
+    regionFilter,
+    brandOptions,
+    producerOptions,
+    regionOptions,
+    handleSearchChange,
+    handleBrandChange,
+    handleProducerChange,
+    handleRegionChange,
+  } = useRiceCatalogPresenter({ filters, setSearchQuery });
 
   return (
     <div className="mx-auto max-w-4xl p-4">
@@ -40,7 +37,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
       <input
         type="text"
         value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
+        onChange={(e) => handleSearchChange(e.target.value)}
         placeholder="Search by brand, producer, or region..."
         className="mb-4 w-full rounded border px-3 py-2"
       />
@@ -49,7 +46,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
         <select
           aria-label="Brand filter"
           value={brandFilter}
-          onChange={(e) => setBrandFilter(e.target.value)}
+          onChange={(e) => handleBrandChange(e.target.value)}
           className="rounded border px-3 py-2"
         >
           <option value="">All brands</option>
@@ -63,7 +60,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
         <select
           aria-label="Producer filter"
           value={producerFilter}
-          onChange={(e) => setProducerFilter(e.target.value)}
+          onChange={(e) => handleProducerChange(e.target.value)}
           className="rounded border px-3 py-2"
         >
           <option value="">All producers</option>
@@ -77,7 +74,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
         <select
           aria-label="Region filter"
           value={regionFilter}
-          onChange={(e) => setRegionFilter(e.target.value)}
+          onChange={(e) => handleRegionChange(e.target.value)}
           className="rounded border px-3 py-2"
         >
           <option value="">All regions</option>
@@ -143,14 +140,7 @@ export function RiceCatalogComponent({
   filters,
   isPending,
   isFetching,
-  searchText,
-  setSearchText,
-  brandFilter,
-  setBrandFilter,
-  producerFilter,
-  setProducerFilter,
-  regionFilter,
-  setRegionFilter,
+  setSearchQuery,
 }: RiceCatalogFacade) {
   if (isPending) {
     return <RiceCatalogSkeleton />;
@@ -161,14 +151,7 @@ export function RiceCatalogComponent({
       <RiceCatalogView
         rices={rices}
         filters={filters}
-        searchText={searchText}
-        setSearchText={setSearchText}
-        brandFilter={brandFilter}
-        setBrandFilter={setBrandFilter}
-        producerFilter={producerFilter}
-        setProducerFilter={setProducerFilter}
-        regionFilter={regionFilter}
-        setRegionFilter={setRegionFilter}
+        setSearchQuery={setSearchQuery}
       />
     </div>
   );

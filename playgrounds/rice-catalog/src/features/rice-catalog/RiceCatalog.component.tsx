@@ -49,6 +49,11 @@ const RiceCatalogView = memo(function RiceCatalogView({
           className="rounded border px-3 py-2"
         >
           <option value="">All brands</option>
+          {brandFilter && !filters.brands.includes(brandFilter) && (
+            <option key={brandFilter} value={brandFilter}>
+              {brandFilter}
+            </option>
+          )}
           {filters.brands.map((b) => (
             <option key={b} value={b}>
               {b}
@@ -63,6 +68,11 @@ const RiceCatalogView = memo(function RiceCatalogView({
           className="rounded border px-3 py-2"
         >
           <option value="">All producers</option>
+          {producerFilter && !filters.producers.includes(producerFilter) && (
+            <option key={producerFilter} value={producerFilter}>
+              {producerFilter}
+            </option>
+          )}
           {filters.producers.map((p) => (
             <option key={p} value={p}>
               {p}
@@ -77,6 +87,11 @@ const RiceCatalogView = memo(function RiceCatalogView({
           className="rounded border px-3 py-2"
         >
           <option value="">All regions</option>
+          {regionFilter && !filters.regions.includes(regionFilter) && (
+            <option key={regionFilter} value={regionFilter}>
+              {regionFilter}
+            </option>
+          )}
           {filters.regions.map((r) => (
             <option key={r} value={r}>
               {r}

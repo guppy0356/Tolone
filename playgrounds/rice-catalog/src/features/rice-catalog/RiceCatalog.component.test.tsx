@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { RiceCatalogComponent } from "./RiceCatalog.component";
 import type { RiceCatalogFacade } from "./RiceCatalog.facade";
 
@@ -11,8 +11,21 @@ const baseFacade: RiceCatalogFacade = {
     { id: "3", brand: "あきたこまち", producer: "大潟村農協", region: "秋田県" },
     { id: "4", brand: "ひとめぼれ", producer: "JA仙台", region: "宮城県" },
   ],
+  filters: {
+    brands: ["あきたこまち", "コシヒカリ", "ひとめぼれ"],
+    producers: ["JA仙台", "大潟村農協", "丹後農協", "魚沼農協"],
+    regions: ["京都府", "宮城県", "新潟県", "秋田県"],
+  },
   isPending: false,
   isFetching: false,
+  searchText: "",
+  setSearchText: vi.fn(),
+  brandFilter: "",
+  setBrandFilter: vi.fn(),
+  producerFilter: "",
+  setProducerFilter: vi.fn(),
+  regionFilter: "",
+  setRegionFilter: vi.fn(),
 };
 
 describe("RiceCatalogComponent", () => {
@@ -40,78 +53,71 @@ describe("RiceCatalogComponent", () => {
     expect(container.firstElementChild).toHaveClass("opacity-50");
   });
 
-  it("filters rows by free-text search", async () => {
-    const user = userEvent.setup();
+  it("renders filter options from filters prop", () => {
     render(<RiceCatalogComponent {...baseFacade} />);
+
+    const brandSelect = screen.getByLabelText("Brand filter");
+    const brandOptions = within(brandSelect)
+      .getAllByRole("option")
+      .map((o) => o.textContent);
+    expect(brandOptions).toEqual([
+      "All brands",
+      "あきたこまち",
+      "コシヒカリ",
+      "ひとめぼれ",
+    ]);
+
+    const regionSelect = screen.getByLabelText("Region filter");
+    const regionOptions = within(regionSelect)
+      .getAllByRole("option")
+      .map((o) => o.textContent);
+    expect(regionOptions).toEqual([
+      "All regions",
+      "京都府",
+      "宮城県",
+      "新潟県",
+      "秋田県",
+    ]);
+  });
+
+  it("calls setSearchText on input change", async () => {
+    const setSearchText = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <RiceCatalogComponent {...baseFacade} setSearchText={setSearchText} />,
+    );
 
     const input = screen.getByPlaceholderText(
       "Search by brand, producer, or region...",
     );
-    await user.type(input, "コシヒカリ");
-
-    const tbody = screen.getAllByRole("rowgroup")[1];
-    const rows = within(tbody).getAllByRole("row");
-    expect(rows).toHaveLength(2);
-    expect(within(tbody).getByText("魚沼農協")).toBeInTheDocument();
-    expect(within(tbody).getByText("丹後農協")).toBeInTheDocument();
-    expect(within(tbody).queryByText("あきたこまち")).not.toBeInTheDocument();
+    await user.type(input, "山");
+    expect(setSearchText).toHaveBeenCalledWith("山");
   });
 
-  it("filters rows by select-box", async () => {
+  it("calls setBrandFilter on select change", async () => {
+    const setBrandFilter = vi.fn();
     const user = userEvent.setup();
-    render(<RiceCatalogComponent {...baseFacade} />);
-
-    const regionSelect = screen.getByLabelText("Region filter");
-    await user.selectOptions(regionSelect, "新潟県");
-
-    const tbody = screen.getAllByRole("rowgroup")[1];
-    const rows = within(tbody).getAllByRole("row");
-    expect(rows).toHaveLength(1);
-    expect(within(tbody).getByText("魚沼農協")).toBeInTheDocument();
-    expect(within(tbody).queryByText("丹後農協")).not.toBeInTheDocument();
-  });
-
-  it("derives select-box options from text-filtered results", async () => {
-    const user = userEvent.setup();
-    render(<RiceCatalogComponent {...baseFacade} />);
-
-    const input = screen.getByPlaceholderText(
-      "Search by brand, producer, or region...",
+    render(
+      <RiceCatalogComponent {...baseFacade} setBrandFilter={setBrandFilter} />,
     );
-    await user.type(input, "コシヒカリ");
 
-    const regionSelect = screen.getByLabelText("Region filter");
-    const options = within(regionSelect).getAllByRole("option");
-    const optionValues = options.map((o) => o.textContent);
-
-    expect(optionValues).toContain("新潟県");
-    expect(optionValues).toContain("京都府");
-    expect(optionValues).not.toContain("秋田県");
-    expect(optionValues).not.toContain("宮城県");
+    const brandSelect = screen.getByLabelText("Brand filter");
+    await user.selectOptions(brandSelect, "コシヒカリ");
+    expect(setBrandFilter).toHaveBeenCalledWith("コシヒカリ");
   });
 
-  it("resets select-box when option disappears from search", async () => {
-    const user = userEvent.setup();
-    render(<RiceCatalogComponent {...baseFacade} />);
-
-    // Select 京都府 region
-    const regionSelect = screen.getByLabelText("Region filter");
-    await user.selectOptions(regionSelect, "京都府");
-
-    const tbody = screen.getAllByRole("rowgroup")[1];
-    let rows = within(tbody).getAllByRole("row");
-    expect(rows).toHaveLength(1);
-    expect(within(tbody).getByText("丹後農協")).toBeInTheDocument();
-
-    // Now search for "魚沼" — only matches 新潟県, so 京都府 disappears from options
-    const input = screen.getByPlaceholderText(
-      "Search by brand, producer, or region...",
+  it("displays current filter values", () => {
+    render(
+      <RiceCatalogComponent
+        {...baseFacade}
+        searchText="テスト"
+        brandFilter="コシヒカリ"
+        regionFilter="新潟県"
+      />,
     );
-    await user.type(input, "魚沼");
 
-    // Region filter should have been auto-reset, showing the 魚沼 entry
-    rows = within(tbody).getAllByRole("row");
-    expect(rows).toHaveLength(1);
-    expect(within(tbody).getByText("魚沼農協")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Search by brand, producer, or region...")).toHaveValue("テスト");
+    expect(screen.getByLabelText("Brand filter")).toHaveValue("コシヒカリ");
+    expect(screen.getByLabelText("Region filter")).toHaveValue("新潟県");
   });
 });

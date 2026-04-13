@@ -1,32 +1,34 @@
 import { memo } from "react";
-import { useRiceCatalogPresenter } from "./RiceCatalog.presenter";
 import type { RiceCatalogFacade } from "./RiceCatalog.facade";
-import type { Rice } from "./RiceCatalog.api";
+import type { Rice, RiceFilters } from "./RiceCatalog.api";
 
 // --- View (memo) ---
 
 interface RiceCatalogViewProps {
   rices: Rice[];
+  filters: RiceFilters;
+  searchText: string;
+  setSearchText: (value: string) => void;
+  brandFilter: string;
+  setBrandFilter: (value: string) => void;
+  producerFilter: string;
+  setProducerFilter: (value: string) => void;
+  regionFilter: string;
+  setRegionFilter: (value: string) => void;
 }
 
 const RiceCatalogView = memo(function RiceCatalogView({
   rices,
+  filters,
+  searchText,
+  setSearchText,
+  brandFilter,
+  setBrandFilter,
+  producerFilter,
+  setProducerFilter,
+  regionFilter,
+  setRegionFilter,
 }: RiceCatalogViewProps) {
-  const {
-    searchText,
-    setSearchText,
-    brandFilter,
-    setBrandFilter,
-    producerFilter,
-    setProducerFilter,
-    regionFilter,
-    setRegionFilter,
-    filteredRices,
-    brandOptions,
-    producerOptions,
-    regionOptions,
-  } = useRiceCatalogPresenter({ rices });
-
   return (
     <div className="mx-auto max-w-4xl p-4">
       <h1 className="mb-4 text-2xl font-bold">Rice Catalog</h1>
@@ -47,7 +49,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
           className="rounded border px-3 py-2"
         >
           <option value="">All brands</option>
-          {brandOptions.map((b) => (
+          {filters.brands.map((b) => (
             <option key={b} value={b}>
               {b}
             </option>
@@ -61,7 +63,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
           className="rounded border px-3 py-2"
         >
           <option value="">All producers</option>
-          {producerOptions.map((p) => (
+          {filters.producers.map((p) => (
             <option key={p} value={p}>
               {p}
             </option>
@@ -75,7 +77,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
           className="rounded border px-3 py-2"
         >
           <option value="">All regions</option>
-          {regionOptions.map((r) => (
+          {filters.regions.map((r) => (
             <option key={r} value={r}>
               {r}
             </option>
@@ -92,7 +94,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
           </tr>
         </thead>
         <tbody>
-          {filteredRices.map((rice) => (
+          {rices.map((rice) => (
             <tr key={rice.id} className="border-b">
               <td className="px-4 py-2">{rice.brand}</td>
               <td className="px-4 py-2">{rice.producer}</td>
@@ -134,8 +136,17 @@ function RiceCatalogSkeleton() {
 
 export function RiceCatalogComponent({
   rices,
+  filters,
   isPending,
   isFetching,
+  searchText,
+  setSearchText,
+  brandFilter,
+  setBrandFilter,
+  producerFilter,
+  setProducerFilter,
+  regionFilter,
+  setRegionFilter,
 }: RiceCatalogFacade) {
   if (isPending) {
     return <RiceCatalogSkeleton />;
@@ -143,7 +154,18 @@ export function RiceCatalogComponent({
 
   return (
     <div className={`transition-opacity ${isFetching ? "opacity-50" : ""}`}>
-      <RiceCatalogView rices={rices} />
+      <RiceCatalogView
+        rices={rices}
+        filters={filters}
+        searchText={searchText}
+        setSearchText={setSearchText}
+        brandFilter={brandFilter}
+        setBrandFilter={setBrandFilter}
+        producerFilter={producerFilter}
+        setProducerFilter={setProducerFilter}
+        regionFilter={regionFilter}
+        setRegionFilter={setRegionFilter}
+      />
     </div>
   );
 }

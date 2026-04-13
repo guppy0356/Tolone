@@ -1,21 +1,66 @@
 openapi: 3.1.0
 info:
   title: Rice Catalog API
-  version: 0.1.0
+  version: 0.2.0
 
 paths:
   /api/rices:
     get:
       operationId: getRices
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: brand
+          in: query
+          schema:
+            type: string
+        - name: producer
+          in: query
+          schema:
+            type: string
+        - name: region
+          in: query
+          schema:
+            type: string
       responses:
         "200":
-          description: List of rice varieties
+          description: Filtered list of rice varieties
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/Rice"
+
+  /api/rices/filters:
+    get:
+      operationId: getRiceFilters
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: brand
+          in: query
+          schema:
+            type: string
+        - name: producer
+          in: query
+          schema:
+            type: string
+        - name: region
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Available filter options derived from current filter state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiceFilters"
 
 components:
   schemas:
@@ -31,3 +76,20 @@ components:
           type: string
         region:
           type: string
+
+    RiceFilters:
+      type: object
+      required: [brands, producers, regions]
+      properties:
+        brands:
+          type: array
+          items:
+            type: string
+        producers:
+          type: array
+          items:
+            type: string
+        regions:
+          type: array
+          items:
+            type: string

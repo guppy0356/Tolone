@@ -20,6 +20,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rices/filters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getRiceFilters"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -29,6 +45,11 @@ export interface components {
             brand: string;
             producer: string;
             region: string;
+        };
+        RiceFilters: {
+            brands: string[];
+            producers: string[];
+            regions: string[];
         };
     };
     responses: never;
@@ -41,20 +62,50 @@ export type $defs = Record<string, never>;
 export interface operations {
     getRices: {
         parameters: {
-            query?: never;
+            query?: {
+                search?: string;
+                brand?: string;
+                producer?: string;
+                region?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description List of rice varieties */
+            /** @description Filtered list of rice varieties */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["Rice"][];
+                };
+            };
+        };
+    };
+    getRiceFilters: {
+        parameters: {
+            query?: {
+                search?: string;
+                brand?: string;
+                producer?: string;
+                region?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Available filter options derived from current filter state */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RiceFilters"];
                 };
             };
         };

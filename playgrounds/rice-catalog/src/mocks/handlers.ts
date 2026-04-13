@@ -27,9 +27,63 @@ const rices: Rice[] = [
   { id: "18", brand: "きぬむすめ", producer: "JA鳥取", region: "鳥取県" },
 ];
 
+function matchesSearch(rice: Rice, search: string): boolean {
+  const q = search.toLowerCase();
+  return (
+    rice.brand.toLowerCase().includes(q) ||
+    rice.producer.toLowerCase().includes(q) ||
+    rice.region.toLowerCase().includes(q)
+  );
+}
+
+function applyFilters(
+  data: Rice[],
+  params: { search?: string; brand?: string; producer?: string; region?: string },
+): Rice[] {
+  let result = data;
+  if (params.search) result = result.filter((r) => matchesSearch(r, params.search!));
+  if (params.brand) result = result.filter((r) => r.brand === params.brand);
+  if (params.producer) result = result.filter((r) => r.producer === params.producer);
+  if (params.region) result = result.filter((r) => r.region === params.region);
+  return result;
+}
+
+function unique(values: string[]): string[] {
+  return [...new Set(values)].sort();
+}
+
 export const handlers = [
-  http.get("/api/rices", async ({ response }) => {
+  http.get("/api/rices", async ({ request, response }) => {
+    const url = new URL(request.url);
+    const params = {
+      search: url.searchParams.get("search") ?? undefined,
+      brand: url.searchParams.get("brand") ?? undefined,
+      producer: url.searchParams.get("producer") ?? undefined,
+      region: url.searchParams.get("region") ?? undefined,
+    };
     await delay(1000);
-    return response(200).json(rices);
+    return response(200).json(applyFilters(rices, params));
+  }),
+
+  http.get("/api/rices/filters", async ({ request, response }) => {
+    const url = new URL(request.url);
+    const search = url.searchParams.get("search") ?? undefined;
+    const brand = url.searchParams.get("brand") ?? undefined;
+    const producer = url.searchParams.get("producer") ?? undefined;
+    const region = url.searchParams.get("region") ?? undefined;
+
+    // Faceted: each dimension's options exclude its own filter
+    const brands = unique(
+      applyFilters(rices, { search, producer, region }).map((r) => r.brand),
+    );
+    const producers = unique(
+      applyFilters(rices, { search, brand, region }).map((r) => r.producer),
+    );
+    const regions = unique(
+      applyFilters(rices, { search, brand, producer }).map((r) => r.region),
+    );
+
+    await delay(500);
+    return response(200).json({ brands, producers, regions });
   }),
 ];

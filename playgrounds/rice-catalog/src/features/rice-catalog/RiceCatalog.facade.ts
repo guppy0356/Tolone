@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import {
   riceCatalogApi,
@@ -62,46 +62,18 @@ export function useRiceCatalogFacade(): RiceCatalogFacade {
     placeholderData: keepPreviousData,
   });
 
-  const resolvedFilters = filtersData ?? emptyFilters;
-
-  // Derive effective filter values — if the selected value is not in the
-  // options returned by the server, treat it as unselected (empty string).
-  // No useEffect needed; the derived value drives both the query params
-  // on the next render and the UI display.
-  const effectiveBrand = resolvedFilters.brands.includes(brandFilter)
-    ? brandFilter
-    : "";
-  const effectiveProducer = resolvedFilters.producers.includes(producerFilter)
-    ? producerFilter
-    : "";
-  const effectiveRegion = resolvedFilters.regions.includes(regionFilter)
-    ? regionFilter
-    : "";
-
-  const handleSetBrandFilter = useCallback((value: string) => {
-    setBrandFilter(value);
-  }, []);
-
-  const handleSetProducerFilter = useCallback((value: string) => {
-    setProducerFilter(value);
-  }, []);
-
-  const handleSetRegionFilter = useCallback((value: string) => {
-    setRegionFilter(value);
-  }, []);
-
   return {
     rices: rices ?? [],
-    filters: resolvedFilters,
+    filters: filtersData ?? emptyFilters,
     isPending: ricesPending || filtersPending,
     isFetching: ricesFetching || filtersFetching,
     searchText,
     setSearchText,
-    brandFilter: effectiveBrand,
-    setBrandFilter: handleSetBrandFilter,
-    producerFilter: effectiveProducer,
-    setProducerFilter: handleSetProducerFilter,
-    regionFilter: effectiveRegion,
-    setRegionFilter: handleSetRegionFilter,
+    brandFilter,
+    setBrandFilter,
+    producerFilter,
+    setProducerFilter,
+    regionFilter,
+    setRegionFilter,
   };
 }

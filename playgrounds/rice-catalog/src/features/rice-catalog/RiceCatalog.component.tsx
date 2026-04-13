@@ -8,12 +8,14 @@ import type { Rice, RiceFilters } from "./RiceCatalog.api";
 interface RiceCatalogViewProps {
   rices: Rice[];
   filters: RiceFilters;
+  params: RiceCatalogFacade["params"];
   setSearchQuery: RiceCatalogFacade["setSearchQuery"];
 }
 
 const RiceCatalogView = memo(function RiceCatalogView({
   rices,
   filters,
+  params,
   setSearchQuery,
 }: RiceCatalogViewProps) {
   const {
@@ -28,7 +30,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
     handleBrandChange,
     handleProducerChange,
     handleRegionChange,
-  } = useRiceCatalogPresenter({ filters, setSearchQuery });
+  } = useRiceCatalogPresenter({ filters, params, setSearchQuery });
 
   return (
     <div className="mx-auto max-w-4xl p-4">
@@ -140,6 +142,7 @@ export function RiceCatalogComponent({
   filters,
   isPending,
   isFetching,
+  params,
   setSearchQuery,
 }: RiceCatalogFacade) {
   if (isPending) {
@@ -151,6 +154,7 @@ export function RiceCatalogComponent({
       <RiceCatalogView
         rices={rices}
         filters={filters}
+        params={params}
         setSearchQuery={setSearchQuery}
       />
     </div>

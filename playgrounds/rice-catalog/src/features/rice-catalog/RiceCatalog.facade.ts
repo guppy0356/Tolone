@@ -12,6 +12,7 @@ export interface RiceCatalogFacade {
   filters: RiceFilters;
   isPending: boolean;
   isFetching: boolean;
+  params: RiceSearchParams;
   setSearchQuery: (params: RiceSearchParams) => void;
 }
 
@@ -55,6 +56,7 @@ export function useRiceCatalogFacade(): RiceCatalogFacade {
     filters: filtersData ?? emptyFilters,
     isPending: ricesPending || filtersPending,
     isFetching: ricesFetching || filtersFetching,
+    params,
     setSearchQuery,
   };
 }

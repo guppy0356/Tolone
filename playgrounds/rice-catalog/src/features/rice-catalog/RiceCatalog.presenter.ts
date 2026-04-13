@@ -1,8 +1,9 @@
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import type { RiceFilters, RiceSearchParams } from "./RiceCatalog.api";
 
 export interface RiceCatalogPresenterProps {
   filters: RiceFilters;
+  params: RiceSearchParams;
   setSearchQuery: (params: RiceSearchParams) => void;
 }
 
@@ -27,54 +28,32 @@ function mergeOptions(options: string[], selected: string): string[] {
 
 export function useRiceCatalogPresenter({
   filters,
+  params,
   setSearchQuery,
 }: RiceCatalogPresenterProps): RiceCatalogPresenter {
-  const [searchText, setSearchText] = useState("");
-  const [brandFilter, setBrandFilter] = useState("");
-  const [producerFilter, setProducerFilter] = useState("");
-  const [regionFilter, setRegionFilter] = useState("");
-
-  const buildParams = useCallback(
-    (overrides: Partial<RiceSearchParams>): RiceSearchParams => ({
-      search: searchText,
-      brand: brandFilter,
-      producer: producerFilter,
-      region: regionFilter,
-      ...overrides,
-    }),
-    [searchText, brandFilter, producerFilter, regionFilter],
-  );
+  const searchText = params.search ?? "";
+  const brandFilter = params.brand ?? "";
+  const producerFilter = params.producer ?? "";
+  const regionFilter = params.region ?? "";
 
   const handleSearchChange = useCallback(
-    (value: string) => {
-      setSearchText(value);
-      setSearchQuery(buildParams({ search: value }));
-    },
-    [setSearchQuery, buildParams],
+    (value: string) => setSearchQuery({ ...params, search: value }),
+    [setSearchQuery, params],
   );
 
   const handleBrandChange = useCallback(
-    (value: string) => {
-      setBrandFilter(value);
-      setSearchQuery(buildParams({ brand: value }));
-    },
-    [setSearchQuery, buildParams],
+    (value: string) => setSearchQuery({ ...params, brand: value }),
+    [setSearchQuery, params],
   );
 
   const handleProducerChange = useCallback(
-    (value: string) => {
-      setProducerFilter(value);
-      setSearchQuery(buildParams({ producer: value }));
-    },
-    [setSearchQuery, buildParams],
+    (value: string) => setSearchQuery({ ...params, producer: value }),
+    [setSearchQuery, params],
   );
 
   const handleRegionChange = useCallback(
-    (value: string) => {
-      setRegionFilter(value);
-      setSearchQuery(buildParams({ region: value }));
-    },
-    [setSearchQuery, buildParams],
+    (value: string) => setSearchQuery({ ...params, region: value }),
+    [setSearchQuery, params],
   );
 
   return {

@@ -83,7 +83,18 @@ export const handlers = [
       applyFilters(rices, { search, brand, producer }).map((r) => r.region),
     );
 
+    const totalBrands = unique(rices.map((r) => r.brand)).length;
+    const totalProducers = unique(rices.map((r) => r.producer)).length;
+    const totalRegions = unique(rices.map((r) => r.region)).length;
+
     await delay(500);
-    return response(200).json({ brands, producers, regions });
+    return response(200).json({
+      brands,
+      producers,
+      regions,
+      totalBrands,
+      totalProducers,
+      totalRegions,
+    });
   }),
 ];

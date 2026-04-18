@@ -14,7 +14,7 @@ API → Facade → Presenter → Component
 |---|---|---|---|
 | API | `{Feature}.api.ts` | HTTP communication + types (from OpenAPI) | Plain function object |
 | Facade | `{Feature}.facade.ts` | Server state (TanStack Query: useQuery + useMutation) | React hook |
-| Presenter | `{Feature}.presenter.ts` | Local UI state (forms, validation) | React hook |
+| Presenter | `{Feature}.presenter.ts` | Local UI state + derived display values | React hook |
 | Component | `{Feature}.component.tsx` | Loading UI + delegation to View | React component |
 | View | `{Feature}.component.tsx` (same file) | Rendering only, `memo` wrapped | React component |
 
@@ -220,13 +220,15 @@ export function useTodoFacade(): TodoFacade {
 
 ### 3. Presenter Layer (`{Feature}.presenter.ts`)
 
-**Responsibility**: Local UI state management (form input, validation, UI toggles)
+**Responsibility**: Local UI state management + derived display values
 
 **Rules**:
 - Receive content data/actions it needs as props (define own Props interface)
 - Props are **guaranteed non-undefined** — the Component handles the `undefined` / loading case before rendering the View, which calls the Presenter
 - Manage form input values, validation, UI toggles, etc.
-- No direct server communication (delegate to Facade action callbacks)
+- Derive display values from Facade data (e.g. merging server-returned options with current selections)
+- May have no `useState` when its job is purely derivation + handler wrapping
+- No direct API calls — delegate to Facade actions passed as props
 - **No pass-through**: return only what the Presenter creates (local state, derived values, handlers). Facade data the View needs is accessed directly from its own props, not re-exported through the Presenter
 - Export an explicit interface for the return type
 

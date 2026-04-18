@@ -36,7 +36,7 @@ This is a pnpm monorepo for experimenting with a **4-layer architecture** (API â
 |---|---|---|---|
 | API | `{Feature}.api.ts` | Plain object of functions | HTTP calls via `ky` + type definitions |
 | Facade | `{Feature}.facade.ts` | React hook | Server state via TanStack Query (`useQuery` + `keepPreviousData` + `useMutation`) |
-| Presenter | `{Feature}.presenter.ts` | React hook | Local UI state (forms, validation, toggles) |
+| Presenter | `{Feature}.presenter.ts` | React hook | Local UI state + derived display values, delegates to Facade actions |
 | Component | `{Feature}.component.tsx` | Plain component | Loading UI (`isPending` / `isFetching`) + delegation to View |
 | View | `{Feature}.component.tsx` (same file) | `memo` component | Rendering only (content props, no loading flags) |
 

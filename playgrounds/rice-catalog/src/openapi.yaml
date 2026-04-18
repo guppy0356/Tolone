@@ -79,7 +79,7 @@ components:
 
     RiceFilters:
       type: object
-      required: [brands, producers, regions]
+      required: [brands, producers, regions, totalBrands, totalProducers, totalRegions]
       properties:
         brands:
           type: array
@@ -93,3 +93,9 @@ components:
           type: array
           items:
             type: string
+        totalBrands:
+          type: integer
+        totalProducers:
+          type: integer
+        totalRegions:
+          type: integer

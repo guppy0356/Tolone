@@ -50,6 +50,9 @@ export interface components {
             brands: string[];
             producers: string[];
             regions: string[];
+            totalBrands: number;
+            totalProducers: number;
+            totalRegions: number;
         };
     };
     responses: never;

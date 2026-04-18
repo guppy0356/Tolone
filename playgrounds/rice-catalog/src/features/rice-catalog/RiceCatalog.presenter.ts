@@ -15,6 +15,9 @@ export interface RiceCatalogPresenter {
   brandOptions: string[];
   producerOptions: string[];
   regionOptions: string[];
+  brandLabel: string;
+  producerLabel: string;
+  regionLabel: string;
   handleSearchChange: (value: string) => void;
   handleBrandChange: (value: string) => void;
   handleProducerChange: (value: string) => void;
@@ -24,6 +27,10 @@ export interface RiceCatalogPresenter {
 function mergeOptions(options: string[], selected: string): string[] {
   if (!selected || options.includes(selected)) return options;
   return [selected, ...options];
+}
+
+function filterLabel(name: string, count: number, total: number): string {
+  return count < total ? `${name} (${count})` : name;
 }
 
 export function useRiceCatalogPresenter({
@@ -64,6 +71,9 @@ export function useRiceCatalogPresenter({
     brandOptions: mergeOptions(filters.brands, brandFilter),
     producerOptions: mergeOptions(filters.producers, producerFilter),
     regionOptions: mergeOptions(filters.regions, regionFilter),
+    brandLabel: filterLabel("Brand", filters.brands.length, filters.totalBrands),
+    producerLabel: filterLabel("Producer", filters.producers.length, filters.totalProducers),
+    regionLabel: filterLabel("Region", filters.regions.length, filters.totalRegions),
     handleSearchChange,
     handleBrandChange,
     handleProducerChange,

@@ -26,6 +26,9 @@ const RiceCatalogView = memo(function RiceCatalogView({
     brandOptions,
     producerOptions,
     regionOptions,
+    brandLabel,
+    producerLabel,
+    regionLabel,
     handleSearchChange,
     handleBrandChange,
     handleProducerChange,
@@ -51,7 +54,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
           onChange={(e) => handleBrandChange(e.target.value)}
           className="rounded border px-3 py-2"
         >
-          <option value="">All brands</option>
+          <option value="">{brandLabel}</option>
           {brandOptions.map((b) => (
             <option key={b} value={b}>
               {b}
@@ -65,7 +68,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
           onChange={(e) => handleProducerChange(e.target.value)}
           className="rounded border px-3 py-2"
         >
-          <option value="">All producers</option>
+          <option value="">{producerLabel}</option>
           {producerOptions.map((p) => (
             <option key={p} value={p}>
               {p}
@@ -79,7 +82,7 @@ const RiceCatalogView = memo(function RiceCatalogView({
           onChange={(e) => handleRegionChange(e.target.value)}
           className="rounded border px-3 py-2"
         >
-          <option value="">All regions</option>
+          <option value="">{regionLabel}</option>
           {regionOptions.map((r) => (
             <option key={r} value={r}>
               {r}

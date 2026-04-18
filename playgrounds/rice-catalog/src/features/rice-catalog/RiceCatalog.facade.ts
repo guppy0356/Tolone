@@ -21,7 +21,14 @@ const riceKeys = {
   filters: (params: RiceSearchParams) => ["rices", "filters", params] as const,
 };
 
-const emptyFilters: RiceFilters = { brands: [], producers: [], regions: [] };
+const emptyFilters: RiceFilters = {
+  brands: [],
+  producers: [],
+  regions: [],
+  totalBrands: 0,
+  totalProducers: 0,
+  totalRegions: 0,
+};
 
 export function useRiceCatalogFacade(): RiceCatalogFacade {
   const [params, setParams] = useState<RiceSearchParams>({});

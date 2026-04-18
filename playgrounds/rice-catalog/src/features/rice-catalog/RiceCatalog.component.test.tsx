@@ -15,6 +15,9 @@ const baseFacade: RiceCatalogFacade = {
     brands: ["あきたこまち", "コシヒカリ", "ひとめぼれ"],
     producers: ["JA仙台", "大潟村農協", "丹後農協", "魚沼農協"],
     regions: ["京都府", "宮城県", "新潟県", "秋田県"],
+    totalBrands: 3,
+    totalProducers: 4,
+    totalRegions: 4,
   },
   isPending: false,
   isFetching: false,
@@ -55,7 +58,7 @@ describe("RiceCatalogComponent", () => {
       .getAllByRole("option")
       .map((o) => o.textContent);
     expect(brandOptions).toEqual([
-      "All brands",
+      "Brand",
       "あきたこまち",
       "コシヒカリ",
       "ひとめぼれ",
@@ -66,7 +69,7 @@ describe("RiceCatalogComponent", () => {
       .getAllByRole("option")
       .map((o) => o.textContent);
     expect(regionOptions).toEqual([
-      "All regions",
+      "Region",
       "京都府",
       "宮城県",
       "新潟県",
@@ -109,6 +112,9 @@ describe("RiceCatalogComponent", () => {
           brands: ["ななつぼし", "ゆめぴりか"],
           producers: ["JA北海道"],
           regions: ["北海道"],
+          totalBrands: 3,
+          totalProducers: 4,
+          totalRegions: 4,
         }}
       />,
     );
@@ -121,6 +127,43 @@ describe("RiceCatalogComponent", () => {
     expect(brandOptions).toContain("コシヒカリ");
     expect(brandOptions).toContain("ななつぼし");
     expect(brandOptions).toContain("ゆめぴりか");
+  });
+
+  it("shows count in filter label when options are filtered", () => {
+    render(
+      <RiceCatalogComponent
+        {...baseFacade}
+        filters={{
+          brands: ["ななつぼし", "ゆめぴりか"],
+          producers: ["JA北海道"],
+          regions: ["北海道"],
+          totalBrands: 3,
+          totalProducers: 4,
+          totalRegions: 4,
+        }}
+      />,
+    );
+
+    const brandDefault = within(screen.getByLabelText("Brand filter"))
+      .getAllByRole("option")[0];
+    expect(brandDefault).toHaveTextContent("Brand (2)");
+
+    const producerDefault = within(screen.getByLabelText("Producer filter"))
+      .getAllByRole("option")[0];
+    expect(producerDefault).toHaveTextContent("Producer (1)");
+
+    const regionDefault = within(screen.getByLabelText("Region filter"))
+      .getAllByRole("option")[0];
+    expect(regionDefault).toHaveTextContent("Region (1)");
+  });
+
+  it("shows plain label when all options are available", () => {
+    render(<RiceCatalogComponent {...baseFacade} />);
+
+    const brandDefault = within(screen.getByLabelText("Brand filter"))
+      .getAllByRole("option")[0];
+    expect(brandDefault).toHaveTextContent("Brand");
+    expect(brandDefault).not.toHaveTextContent("Brand (");
   });
 
   it("calls setSearchQuery with all current params on change", async () => {

@@ -42,6 +42,8 @@ export function useRiceCatalogPresenter({
 }: RiceCatalogPresenterProps): RiceCatalogPresenter {
   const [inputText, setInputText] = useState(params.search ?? "");
   const searchTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
 
   const searchText = inputText;
   const brandFilter = params.brand ?? "";
@@ -53,10 +55,10 @@ export function useRiceCatalogPresenter({
       setInputText(value);
       clearTimeout(searchTimerRef.current);
       searchTimerRef.current = setTimeout(() => {
-        setSearchQuery({ ...params, search: value });
+        setSearchQuery({ ...paramsRef.current, search: value });
       }, SEARCH_DEBOUNCE_MS);
     },
-    [setSearchQuery, params],
+    [setSearchQuery],
   );
 
   const handleBrandChange = useCallback(

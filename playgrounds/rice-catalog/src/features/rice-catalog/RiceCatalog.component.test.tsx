@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { RiceCatalogComponent } from "./RiceCatalog.component";
@@ -77,7 +77,8 @@ describe("RiceCatalogComponent", () => {
     ]);
   });
 
-  it("calls setSearchQuery on search input change", async () => {
+  it("calls setSearchQuery on search input change after debounce", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     const setSearchQuery = vi.fn();
     const user = userEvent.setup();
     render(
@@ -88,7 +89,10 @@ describe("RiceCatalogComponent", () => {
       "Search by brand, producer, or region...",
     );
     await user.type(input, "山");
+    expect(setSearchQuery).not.toHaveBeenCalled();
+    act(() => vi.advanceTimersByTime(300));
     expect(setSearchQuery).toHaveBeenCalledWith({ search: "山" });
+    vi.useRealTimers();
   });
 
   it("calls setSearchQuery on brand select change", async () => {

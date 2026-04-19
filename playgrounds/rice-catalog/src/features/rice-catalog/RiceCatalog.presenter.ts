@@ -1,5 +1,7 @@
-import { useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { RiceFilters, RiceSearchParams } from "./RiceCatalog.api";
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 export interface RiceCatalogPresenterProps {
   filters: RiceFilters;
@@ -38,13 +40,22 @@ export function useRiceCatalogPresenter({
   params,
   setSearchQuery,
 }: RiceCatalogPresenterProps): RiceCatalogPresenter {
-  const searchText = params.search ?? "";
+  const [inputText, setInputText] = useState(params.search ?? "");
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const searchText = inputText;
   const brandFilter = params.brand ?? "";
   const producerFilter = params.producer ?? "";
   const regionFilter = params.region ?? "";
 
   const handleSearchChange = useCallback(
-    (value: string) => setSearchQuery({ ...params, search: value }),
+    (value: string) => {
+      setInputText(value);
+      clearTimeout(searchTimerRef.current);
+      searchTimerRef.current = setTimeout(() => {
+        setSearchQuery({ ...params, search: value });
+      }, SEARCH_DEBOUNCE_MS);
+    },
     [setSearchQuery, params],
   );
 

@@ -7,20 +7,23 @@ import {
   createRoute,
   RouterProvider,
 } from "@tanstack/react-router";
+import { usePatFacade } from "./features/pat/Pat.facade";
+import { PatComponent } from "./features/pat/Pat.component";
 import "./app.css";
 
 const queryClient = new QueryClient();
+
+function PatPage() {
+  const facade = usePatFacade();
+  return <PatComponent {...facade} />;
+}
 
 const rootRoute = createRootRoute();
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => (
-    <div>
-      <h1>Pat Playground</h1>
-    </div>
-  ),
+  component: PatPage,
 });
 
 const routeTree = rootRoute.addChildren([indexRoute]);

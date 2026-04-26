@@ -1,0 +1,133 @@
+openapi: 3.1.0
+info:
+  title: Novel API
+  version: 0.1.0
+
+paths:
+  /api/login:
+    post:
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+
+  /api/books:
+    get:
+      operationId: getBooks
+      responses:
+        "200":
+          description: List of books for the sidebar
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BookSummary"
+
+  /api/books/{id}:
+    get:
+      operationId: getBook
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Book metadata for the preview screen
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "404":
+          description: Not found
+
+  /api/books/{id}/pages/{pageNumber}:
+    get:
+      operationId: getPage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pageNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Page content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Page"
+        "404":
+          description: Not found
+
+components:
+  schemas:
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+
+    BookSummary:
+      type: object
+      required: [id, title, author]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        author:
+          type: string
+
+    Book:
+      type: object
+      required: [id, title, author, summary, totalPages]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        author:
+          type: string
+        summary:
+          type: string
+        totalPages:
+          type: integer
+
+    Page:
+      type: object
+      required: [number, totalPages, content]
+      properties:
+        number:
+          type: integer
+        totalPages:
+          type: integer
+        content:
+          type: string

@@ -44,23 +44,39 @@ const SidebarView = memo(function SidebarView({
         Books
       </h2>
       <ul className="mb-6 space-y-1">
-        {bookItems.map((item) => (
-          <li key={item.id}>
-            <Link
-              to="/books/$id"
-              params={{ id: item.id }}
-              search={{ flash: undefined }}
-              className={`block rounded px-3 py-2 text-sm hover:bg-gray-100 ${
-                item.isCurrent ? "bg-blue-100 font-medium text-blue-900" : ""
-              }`}
-            >
-              <div className="truncate">{item.title}</div>
-              <div className="truncate text-xs text-gray-500">
-                {item.author}
-              </div>
-            </Link>
-          </li>
-        ))}
+        {bookItems.map((item) => {
+          const className = `block rounded px-3 py-2 text-sm hover:bg-gray-100 ${
+            item.isCurrent ? "bg-blue-100 font-medium text-blue-900" : ""
+          }`;
+          return (
+            <li key={item.id}>
+              {isLoggedIn ? (
+                <Link
+                  to="/books/$id/read/$page"
+                  params={{ id: item.id, page: 1 }}
+                  className={className}
+                >
+                  <div className="truncate">{item.title}</div>
+                  <div className="truncate text-xs text-gray-500">
+                    {item.author}
+                  </div>
+                </Link>
+              ) : (
+                <Link
+                  to="/books/$id"
+                  params={{ id: item.id }}
+                  search={{ page: 1, flash: undefined }}
+                  className={className}
+                >
+                  <div className="truncate">{item.title}</div>
+                  <div className="truncate text-xs text-gray-500">
+                    {item.author}
+                  </div>
+                </Link>
+              )}
+            </li>
+          );
+        })}
       </ul>
       <div className="border-t pt-4">
         {isLoggedIn ? (

@@ -22,20 +22,17 @@ interface BookReaderViewProps {
   page: Page;
   bookId: string;
   pageNumber: number;
-  isLoggedIn: boolean;
 }
 
 const BookReaderView = memo(function BookReaderView({
   page,
   bookId,
   pageNumber,
-  isLoggedIn,
 }: BookReaderViewProps) {
-  const { showGate, prevToParams, nextToParams } = useBookReaderPresenter({
+  const { prevToParams, nextToParams } = useBookReaderPresenter({
     bookId,
     pageNumber,
     totalPages: page.totalPages,
-    isLoggedIn,
   });
 
   return (
@@ -44,21 +41,9 @@ const BookReaderView = memo(function BookReaderView({
         Page {pageNumber} of {page.totalPages}
       </p>
 
-      {showGate ? (
-        <div className="rounded border border-amber-300 bg-amber-50 p-6 text-center">
-          <p className="mb-4 text-amber-800">Login to continue reading.</p>
-          <Link
-            to="/login"
-            className="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-          >
-            Log in
-          </Link>
-        </div>
-      ) : (
-        <p className="whitespace-pre-line leading-relaxed text-gray-800">
-          {page.content}
-        </p>
-      )}
+      <p className="whitespace-pre-line leading-relaxed text-gray-800">
+        {page.content}
+      </p>
 
       <nav className="mt-8 flex justify-between">
         {prevToParams ? (
@@ -73,7 +58,7 @@ const BookReaderView = memo(function BookReaderView({
           <Link
             to="/books/$id"
             params={{ id: bookId }}
-            search={{ flash: undefined }}
+            search={{ page: 1, flash: undefined }}
             className="rounded border px-4 py-2 hover:bg-gray-50"
           >
             ← Back to preview
@@ -97,7 +82,6 @@ export function BookReaderComponent({
   page,
   isPending,
   isFetching,
-  isLoggedIn,
   bookId,
   pageNumber,
 }: BookReaderFacade) {
@@ -107,12 +91,7 @@ export function BookReaderComponent({
 
   return (
     <div className={`transition-opacity ${isFetching ? "opacity-50" : ""}`}>
-      <BookReaderView
-        page={page}
-        bookId={bookId}
-        pageNumber={pageNumber}
-        isLoggedIn={isLoggedIn}
-      />
+      <BookReaderView page={page} bookId={bookId} pageNumber={pageNumber} />
     </div>
   );
 }

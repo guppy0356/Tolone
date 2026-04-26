@@ -26,12 +26,21 @@ async function renderWithRouter(props: SidebarComponentProps) {
   const previewRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/books/$id",
+    validateSearch: () => ({ page: 1, flash: undefined }),
+  });
+  const readerRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/books/$id/read/$page",
   });
   const loginRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/login",
   });
-  const routeTree = rootRoute.addChildren([previewRoute, loginRoute]);
+  const routeTree = rootRoute.addChildren([
+    previewRoute,
+    readerRoute,
+    loginRoute,
+  ]);
   const router = createRouter({ routeTree });
   await router.load();
   return render(<RouterProvider router={router} />);
@@ -54,12 +63,24 @@ describe("SidebarComponent", () => {
     expect(screen.getByText("Quiet Cities")).toBeInTheDocument();
   });
 
-  it("links each book to its preview", async () => {
+  it("links each book to its preview when not logged in", async () => {
     await renderWithRouter(baseProps);
-    const links = screen.getAllByRole("link");
-    expect(links[0]).toHaveAttribute("href", "/books/1");
-    expect(links[1]).toHaveAttribute("href", "/books/2");
-    expect(links[2]).toHaveAttribute("href", "/books/3");
+    const bookLinks = screen
+      .getAllByRole("link")
+      .filter((l) => l.getAttribute("href")?.startsWith("/books/"));
+    expect(bookLinks[0]).toHaveAttribute("href", "/books/1?page=1");
+    expect(bookLinks[1]).toHaveAttribute("href", "/books/2?page=1");
+    expect(bookLinks[2]).toHaveAttribute("href", "/books/3?page=1");
+  });
+
+  it("links each book to the reader (page 1) when logged in", async () => {
+    await renderWithRouter({ ...baseProps, isLoggedIn: true });
+    const bookLinks = screen
+      .getAllByRole("link")
+      .filter((l) => l.getAttribute("href")?.startsWith("/books/"));
+    expect(bookLinks[0]).toHaveAttribute("href", "/books/1/read/1");
+    expect(bookLinks[1]).toHaveAttribute("href", "/books/2/read/1");
+    expect(bookLinks[2]).toHaveAttribute("href", "/books/3/read/1");
   });
 
   it("highlights current book when currentBookId matches", async () => {

@@ -22,20 +22,13 @@ async function renderWithRouter(props: BookReaderFacade) {
   const previewRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/books/$id",
+    validateSearch: () => ({ page: 1, flash: undefined }),
   });
   const readerRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/books/$id/read/$page",
   });
-  const loginRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/login",
-  });
-  const routeTree = rootRoute.addChildren([
-    previewRoute,
-    readerRoute,
-    loginRoute,
-  ]);
+  const routeTree = rootRoute.addChildren([previewRoute, readerRoute]);
   const router = createRouter({ routeTree });
   await router.load();
   return render(<RouterProvider router={router} />);
@@ -45,60 +38,17 @@ const baseProps: BookReaderFacade = {
   page: samplePage,
   isPending: false,
   isFetching: false,
-  isLoggedIn: false,
   bookId: "1",
   pageNumber: 1,
 };
 
 describe("BookReaderComponent", () => {
-  it("renders page content for guest on page 1", async () => {
+  it("renders page content and pagination label", async () => {
     await renderWithRouter(baseProps);
     expect(
       screen.getByText("It was a quiet morning in the lighthouse."),
     ).toBeInTheDocument();
     expect(screen.getByText("Page 1 of 6")).toBeInTheDocument();
-  });
-
-  it("renders page content for guest on page 2", async () => {
-    await renderWithRouter({
-      ...baseProps,
-      pageNumber: 2,
-      page: { ...samplePage, number: 2 },
-    });
-    expect(
-      screen.getByText("It was a quiet morning in the lighthouse."),
-    ).toBeInTheDocument();
-  });
-
-  it("renders gate (no content) for guest on page 3", async () => {
-    await renderWithRouter({
-      ...baseProps,
-      pageNumber: 3,
-      page: { ...samplePage, number: 3 },
-    });
-    expect(screen.getByText("Login to continue reading.")).toBeInTheDocument();
-    expect(
-      screen.queryByText("It was a quiet morning in the lighthouse."),
-    ).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Log in" })).toHaveAttribute(
-      "href",
-      "/login",
-    );
-  });
-
-  it("renders content (no gate) for logged-in user on page 3", async () => {
-    await renderWithRouter({
-      ...baseProps,
-      pageNumber: 3,
-      isLoggedIn: true,
-      page: { ...samplePage, number: 3 },
-    });
-    expect(
-      screen.getByText("It was a quiet morning in the lighthouse."),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByText("Login to continue reading."),
-    ).not.toBeInTheDocument();
   });
 
   it("renders Next link to page 2 from page 1", async () => {
@@ -113,7 +63,7 @@ describe("BookReaderComponent", () => {
     await renderWithRouter(baseProps);
     expect(
       screen.getByRole("link", { name: "← Back to preview" }),
-    ).toHaveAttribute("href", "/books/1");
+    ).toHaveAttribute("href", "/books/1?page=1");
   });
 
   it("renders Previous link from page 2", async () => {
@@ -132,7 +82,6 @@ describe("BookReaderComponent", () => {
     await renderWithRouter({
       ...baseProps,
       pageNumber: 6,
-      isLoggedIn: true,
       page: { ...samplePage, number: 6 },
     });
     expect(

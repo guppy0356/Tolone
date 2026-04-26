@@ -25,7 +25,7 @@ const indexRoute = createRoute({
     throw redirect({
       to: "/books/$id",
       params: { id: "1" },
-      search: { flash: undefined },
+      search: { page: 1, flash: undefined },
     });
   },
 });
@@ -40,12 +40,18 @@ const bookPreviewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/books/$id",
   component: BookPreviewContainer,
-  validateSearch: (search: Record<string, unknown>) => ({
-    flash:
-      search.flash === "login-required"
-        ? ("login-required" as const)
-        : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>) => {
+    const rawPage = Number(search.page);
+    const page =
+      Number.isFinite(rawPage) && rawPage >= 1 && rawPage <= 4 ? rawPage : 1;
+    return {
+      page,
+      flash:
+        search.flash === "login-required"
+          ? ("login-required" as const)
+          : undefined,
+    };
+  },
 });
 
 const bookReaderRoute = createRoute({
@@ -55,14 +61,12 @@ const bookReaderRoute = createRoute({
   parseParams: ({ id, page }) => ({ id, page: Number(page) }),
   stringifyParams: ({ id, page }) => ({ id, page: String(page) }),
   beforeLoad: ({ params }) => {
-    if (!Number.isFinite(params.page) || params.page > 3) {
-      if (!isAuthenticated()) {
-        throw redirect({
-          to: "/books/$id",
-          params: { id: params.id },
-          search: { flash: "login-required" },
-        });
-      }
+    if (!isAuthenticated()) {
+      throw redirect({
+        to: "/books/$id",
+        params: { id: params.id },
+        search: { page: 1, flash: "login-required" },
+      });
     }
   },
 });

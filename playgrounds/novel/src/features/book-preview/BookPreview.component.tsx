@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Link } from "@tanstack/react-router";
 import { useBookPreviewPresenter } from "./BookPreview.presenter";
 import type { BookPreviewFacade } from "./BookPreview.facade";
-import type { Book } from "./BookPreview.api";
+import type { Book, Page } from "./BookPreview.api";
 
 export function BookPreviewSkeleton() {
   return (
@@ -20,14 +20,23 @@ export function BookPreviewSkeleton() {
 
 interface BookPreviewViewProps {
   book: Book;
+  page: Page | undefined;
+  bookId: string;
+  currentPage: number;
+  isLoggedIn: boolean;
   flash: "login-required" | undefined;
 }
 
 const BookPreviewView = memo(function BookPreviewView({
   book,
+  page,
+  bookId,
+  currentPage,
+  isLoggedIn,
   flash,
 }: BookPreviewViewProps) {
-  const { readToParams } = useBookPreviewPresenter({ bookId: book.id });
+  const { showCta, prevSearch, nextSearch, readToParams } =
+    useBookPreviewPresenter({ bookId, currentPage });
 
   return (
     <article className="mx-auto max-w-2xl p-6">
@@ -39,30 +48,102 @@ const BookPreviewView = memo(function BookPreviewView({
           You need to log in to keep reading.
         </div>
       )}
-      <h1 className="mb-1 text-3xl font-bold">{book.title}</h1>
-      <p className="mb-4 text-sm text-gray-600">by {book.author}</p>
-      <p className="mb-6 text-gray-800">{book.summary}</p>
-      <p className="mb-6 text-sm text-gray-500">{book.totalPages} pages</p>
-      <Link
-        to="/books/$id/read/$page"
-        params={readToParams}
-        className="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-      >
-        Read
-      </Link>
+
+      <header className="mb-6">
+        <h1 className="mb-1 text-3xl font-bold">{book.title}</h1>
+        <p className="text-sm text-gray-600">by {book.author}</p>
+        {currentPage === 1 && (
+          <p className="mt-3 text-gray-700">{book.summary}</p>
+        )}
+      </header>
+
+      {showCta || !page ? (
+        <div className="rounded border border-amber-300 bg-amber-50 p-6 text-center">
+          <p className="mb-4 text-amber-800">
+            You've reached the end of the preview.
+          </p>
+          {isLoggedIn ? (
+            <Link
+              to="/books/$id/read/$page"
+              params={readToParams}
+              className="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+            >
+              Read the full book
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+            >
+              Log in to keep reading
+            </Link>
+          )}
+        </div>
+      ) : (
+        <>
+          <p className="mb-4 text-sm text-gray-500">
+            Preview · Page {currentPage} of {book.totalPages}
+          </p>
+          <p className="whitespace-pre-line leading-relaxed text-gray-800">
+            {page.content}
+          </p>
+        </>
+      )}
+
+      <nav className="mt-8 flex justify-between">
+        {prevSearch ? (
+          <Link
+            to="/books/$id"
+            params={{ id: bookId }}
+            search={prevSearch}
+            className="rounded border px-4 py-2 hover:bg-gray-50"
+          >
+            ← Previous
+          </Link>
+        ) : (
+          <span />
+        )}
+        {nextSearch && (
+          <Link
+            to="/books/$id"
+            params={{ id: bookId }}
+            search={nextSearch}
+            className="rounded border px-4 py-2 hover:bg-gray-50"
+          >
+            Next →
+          </Link>
+        )}
+      </nav>
+
+      {isLoggedIn && !showCta && (
+        <div className="mt-8 border-t pt-4 text-center">
+          <Link
+            to="/books/$id/read/$page"
+            params={readToParams}
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Skip preview · Read the full book →
+          </Link>
+        </div>
+      )}
     </article>
   );
 });
 
 export interface BookPreviewComponentProps extends BookPreviewFacade {
   flash: "login-required" | undefined;
+  isLoggedIn: boolean;
 }
 
 export function BookPreviewComponent({
   book,
+  page,
   isPending,
   isFetching,
+  bookId,
+  currentPage,
   flash,
+  isLoggedIn,
 }: BookPreviewComponentProps) {
   if (isPending || !book) {
     return <BookPreviewSkeleton />;
@@ -70,7 +151,14 @@ export function BookPreviewComponent({
 
   return (
     <div className={`transition-opacity ${isFetching ? "opacity-50" : ""}`}>
-      <BookPreviewView book={book} flash={flash} />
+      <BookPreviewView
+        book={book}
+        page={page}
+        bookId={bookId}
+        currentPage={currentPage}
+        isLoggedIn={isLoggedIn}
+        flash={flash}
+      />
     </div>
   );
 }

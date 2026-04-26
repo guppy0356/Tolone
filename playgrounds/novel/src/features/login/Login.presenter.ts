@@ -22,7 +22,11 @@ export function useLoginPresenter({
   const [password, setPassword] = useState("");
 
   const handleSubmit = useCallback(async () => {
-    await submit({ email, password });
+    try {
+      await submit({ email, password });
+    } catch {
+      return;
+    }
     onLoggedIn();
   }, [email, password, submit, onLoggedIn]);
 

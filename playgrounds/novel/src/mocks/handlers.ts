@@ -30,4 +30,21 @@ export const handlers = [
       totalPages: book.pages.length,
     });
   }),
+
+  http.get(
+    "/api/books/{id}/pages/{pageNumber}",
+    async ({ params, response }) => {
+      await delay(300);
+      const book = books.find((b) => b.id === params.id);
+      if (!book) return response(404).empty();
+      const pageNumber = Number(params.pageNumber);
+      const content = book.pages[pageNumber - 1];
+      if (!content) return response(404).empty();
+      return response(200).json({
+        number: pageNumber,
+        totalPages: book.pages.length,
+        content,
+      });
+    },
+  ),
 ];

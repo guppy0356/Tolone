@@ -3,13 +3,13 @@ export interface BookPreviewPresenterProps {
 }
 
 export interface BookPreviewPresenter {
-  readToParams: { id: string; page: string };
+  readToParams: { id: string; page: number };
 }
 
 export function useBookPreviewPresenter({
   bookId,
 }: BookPreviewPresenterProps): BookPreviewPresenter {
   return {
-    readToParams: { id: bookId, page: "1" },
+    readToParams: { id: bookId, page: 1 },
   };
 }

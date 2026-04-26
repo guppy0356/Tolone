@@ -7,8 +7,8 @@ export interface BookReaderPresenterProps {
 
 export interface BookReaderPresenter {
   showGate: boolean;
-  prevToParams: { id: string; page: string } | null;
-  nextToParams: { id: string; page: string } | null;
+  prevToParams: { id: string; page: number } | null;
+  nextToParams: { id: string; page: number } | null;
 }
 
 export function useBookReaderPresenter({
@@ -20,14 +20,10 @@ export function useBookReaderPresenter({
   const showGate = !isLoggedIn && pageNumber === 3;
 
   const prevToParams =
-    pageNumber > 1
-      ? { id: bookId, page: String(pageNumber - 1) }
-      : null;
+    pageNumber > 1 ? { id: bookId, page: pageNumber - 1 } : null;
 
   const nextToParams =
-    pageNumber < totalPages
-      ? { id: bookId, page: String(pageNumber + 1) }
-      : null;
+    pageNumber < totalPages ? { id: bookId, page: pageNumber + 1 } : null;
 
   return {
     showGate,

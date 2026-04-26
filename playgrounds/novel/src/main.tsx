@@ -5,8 +5,13 @@ import {
   createRouter,
   createRootRoute,
   createRoute,
+  redirect,
   RouterProvider,
 } from "@tanstack/react-router";
+import { LoginContainer } from "./features/login/LoginContainer";
+import { BookPreviewContainer } from "./features/book-preview/BookPreviewContainer";
+import { BookReaderContainer } from "./features/book-reader/BookReaderContainer";
+import { isAuthenticated } from "./lib/auth-cookie";
 import "./app.css";
 
 const queryClient = new QueryClient();
@@ -16,15 +21,66 @@ const rootRoute = createRootRoute();
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => (
-    <div>
-      <h1>Novel Playground</h1>
-    </div>
-  ),
+  beforeLoad: () => {
+    throw redirect({
+      to: "/books/$id",
+      params: { id: "1" },
+      search: { flash: undefined },
+    });
+  },
 });
 
-const routeTree = rootRoute.addChildren([indexRoute]);
+const loginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/login",
+  component: LoginContainer,
+});
+
+const bookPreviewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/books/$id",
+  component: BookPreviewContainer,
+  validateSearch: (search: Record<string, unknown>) => ({
+    flash:
+      search.flash === "login-required"
+        ? ("login-required" as const)
+        : undefined,
+  }),
+});
+
+const bookReaderRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/books/$id/read/$page",
+  component: BookReaderContainer,
+  parseParams: ({ id, page }) => ({ id, page: Number(page) }),
+  stringifyParams: ({ id, page }) => ({ id, page: String(page) }),
+  beforeLoad: ({ params }) => {
+    if (!Number.isFinite(params.page) || params.page > 3) {
+      if (!isAuthenticated()) {
+        throw redirect({
+          to: "/books/$id",
+          params: { id: params.id },
+          search: { flash: "login-required" },
+        });
+      }
+    }
+  },
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  loginRoute,
+  bookPreviewRoute,
+  bookReaderRoute,
+]);
+
 const router = createRouter({ routeTree });
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
 
 async function enableMocking() {
   const { worker } = await import("./mocks/browser");

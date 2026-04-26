@@ -1,0 +1,28 @@
+import { getRouteApi } from "@tanstack/react-router";
+import { useBookReaderFacade } from "./BookReader.facade";
+import { BookReaderComponent } from "./BookReader.component";
+import { useSidebarFacade } from "../sidebar/Sidebar.facade";
+import { SidebarComponent } from "../sidebar/Sidebar.component";
+import { useAuth } from "../../lib/use-auth";
+
+const route = getRouteApi("/books/$id/read/$page");
+
+export function BookReaderContainer() {
+  const { id, page } = route.useParams();
+  const facade = useBookReaderFacade(id, page);
+  const sidebarFacade = useSidebarFacade();
+  const { isLoggedIn } = useAuth();
+
+  return (
+    <div className="flex min-h-screen">
+      <SidebarComponent
+        {...sidebarFacade}
+        currentBookId={id}
+        isLoggedIn={isLoggedIn}
+      />
+      <main className="flex-1">
+        <BookReaderComponent {...facade} />
+      </main>
+    </div>
+  );
+}

@@ -49,6 +49,7 @@ const SidebarView = memo(function SidebarView({
             <Link
               to="/books/$id"
               params={{ id: item.id }}
+              search={{ flash: undefined }}
               className={`block rounded px-3 py-2 text-sm hover:bg-gray-100 ${
                 item.isCurrent ? "bg-blue-100 font-medium text-blue-900" : ""
               }`}

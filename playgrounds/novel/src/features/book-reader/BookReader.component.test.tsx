@@ -21,7 +21,7 @@ async function renderWithRouter(props: BookReaderFacade) {
   });
   const previewRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: "/books/$id",
+    path: "/preview-books/$id",
     validateSearch: () => ({ page: 1, flash: undefined }),
   });
   const readerRoute = createRoute({
@@ -63,7 +63,7 @@ describe("BookReaderComponent", () => {
     await renderWithRouter(baseProps);
     expect(
       screen.getByRole("link", { name: "← Back to preview" }),
-    ).toHaveAttribute("href", "/books/1?page=1");
+    ).toHaveAttribute("href", "/preview-books/1?page=1");
   });
 
   it("renders Previous link from page 2", async () => {

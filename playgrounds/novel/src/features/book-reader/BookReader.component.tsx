@@ -56,7 +56,7 @@ const BookReaderView = memo(function BookReaderView({
           </Link>
         ) : (
           <Link
-            to="/books/$id"
+            to="/preview-books/$id"
             params={{ id: bookId }}
             search={{ page: 1, flash: undefined }}
             className="rounded border px-4 py-2 hover:bg-gray-50"

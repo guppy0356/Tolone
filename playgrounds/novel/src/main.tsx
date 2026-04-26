@@ -23,7 +23,7 @@ const indexRoute = createRoute({
   path: "/",
   beforeLoad: () => {
     throw redirect({
-      to: "/books/$id",
+      to: "/preview-books/$id",
       params: { id: "1" },
       search: { page: 1, flash: undefined },
     });
@@ -38,7 +38,7 @@ const loginRoute = createRoute({
 
 const bookPreviewRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/books/$id",
+  path: "/preview-books/$id",
   component: BookPreviewContainer,
   validateSearch: (search: Record<string, unknown>) => {
     const rawPage = Number(search.page);
@@ -63,7 +63,7 @@ const bookReaderRoute = createRoute({
   beforeLoad: ({ params }) => {
     if (!isAuthenticated()) {
       throw redirect({
-        to: "/books/$id",
+        to: "/preview-books/$id",
         params: { id: params.id },
         search: { page: 1, flash: "login-required" },
       });

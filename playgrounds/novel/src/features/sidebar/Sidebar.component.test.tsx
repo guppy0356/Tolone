@@ -25,7 +25,7 @@ async function renderWithRouter(props: SidebarComponentProps) {
   });
   const previewRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: "/books/$id",
+    path: "/preview-books/$id",
     validateSearch: () => ({ page: 1, flash: undefined }),
   });
   const readerRoute = createRoute({
@@ -67,10 +67,12 @@ describe("SidebarComponent", () => {
     await renderWithRouter(baseProps);
     const bookLinks = screen
       .getAllByRole("link")
-      .filter((l) => l.getAttribute("href")?.startsWith("/books/"));
-    expect(bookLinks[0]).toHaveAttribute("href", "/books/1?page=1");
-    expect(bookLinks[1]).toHaveAttribute("href", "/books/2?page=1");
-    expect(bookLinks[2]).toHaveAttribute("href", "/books/3?page=1");
+      .filter((l) =>
+        l.getAttribute("href")?.startsWith("/preview-books/"),
+      );
+    expect(bookLinks[0]).toHaveAttribute("href", "/preview-books/1?page=1");
+    expect(bookLinks[1]).toHaveAttribute("href", "/preview-books/2?page=1");
+    expect(bookLinks[2]).toHaveAttribute("href", "/preview-books/3?page=1");
   });
 
   it("links each book to the reader (page 1) when logged in", async () => {

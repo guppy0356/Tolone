@@ -32,7 +32,7 @@ async function renderWithRouter(props: BookPreviewComponentProps) {
   });
   const previewRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: "/books/$id",
+    path: "/preview-books/$id",
     validateSearch: () => ({ page: 1, flash: undefined }),
   });
   const readerRoute = createRoute({
@@ -97,7 +97,7 @@ describe("BookPreviewComponent", () => {
     await renderWithRouter(baseProps);
     expect(screen.getByRole("link", { name: "Next →" })).toHaveAttribute(
       "href",
-      "/books/1?page=2",
+      "/preview-books/1?page=2",
     );
     expect(
       screen.queryByRole("link", { name: "← Previous" }),
@@ -112,11 +112,11 @@ describe("BookPreviewComponent", () => {
     });
     expect(screen.getByRole("link", { name: "← Previous" })).toHaveAttribute(
       "href",
-      "/books/1?page=1",
+      "/preview-books/1?page=1",
     );
     expect(screen.getByRole("link", { name: "Next →" })).toHaveAttribute(
       "href",
-      "/books/1?page=3",
+      "/preview-books/1?page=3",
     );
   });
 
@@ -128,7 +128,7 @@ describe("BookPreviewComponent", () => {
     });
     expect(screen.getByRole("link", { name: "Next →" })).toHaveAttribute(
       "href",
-      "/books/1?page=4",
+      "/preview-books/1?page=4",
     );
   });
 

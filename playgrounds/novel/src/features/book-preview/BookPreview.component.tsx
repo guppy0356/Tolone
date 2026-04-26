@@ -93,7 +93,7 @@ const BookPreviewView = memo(function BookPreviewView({
       <nav className="mt-8 flex justify-between">
         {prevSearch ? (
           <Link
-            to="/books/$id"
+            to="/preview-books/$id"
             params={{ id: bookId }}
             search={prevSearch}
             className="rounded border px-4 py-2 hover:bg-gray-50"
@@ -105,7 +105,7 @@ const BookPreviewView = memo(function BookPreviewView({
         )}
         {nextSearch && (
           <Link
-            to="/books/$id"
+            to="/preview-books/$id"
             params={{ id: bookId }}
             search={nextSearch}
             className="rounded border px-4 py-2 hover:bg-gray-50"

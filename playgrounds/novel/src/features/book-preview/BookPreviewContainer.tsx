@@ -5,7 +5,7 @@ import { useSidebarFacade } from "../sidebar/Sidebar.facade";
 import { SidebarComponent } from "../sidebar/Sidebar.component";
 import { useAuth } from "../../lib/use-auth";
 
-const route = getRouteApi("/books/$id");
+const route = getRouteApi("/preview-books/$id");
 
 export function BookPreviewContainer() {
   const { id } = route.useParams();

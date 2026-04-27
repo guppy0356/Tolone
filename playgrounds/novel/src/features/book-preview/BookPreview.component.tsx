@@ -35,7 +35,7 @@ const BookPreviewView = memo(function BookPreviewView({
   isLoggedIn,
   flash,
 }: BookPreviewViewProps) {
-  const { showCta, prevSearch, nextSearch, readToParams } =
+  const { showCta, prevSearch, nextSearch, readParams, readSearch } =
     useBookPreviewPresenter({ bookId, currentPage });
 
   return (
@@ -64,8 +64,9 @@ const BookPreviewView = memo(function BookPreviewView({
           </p>
           {isLoggedIn ? (
             <Link
-              to="/books/$id/read/$page"
-              params={readToParams}
+              to="/books/$id"
+              params={readParams}
+              search={readSearch}
               className="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
             >
               Read the full book
@@ -118,8 +119,9 @@ const BookPreviewView = memo(function BookPreviewView({
       {isLoggedIn && !showCta && (
         <div className="mt-8 border-t pt-4 text-center">
           <Link
-            to="/books/$id/read/$page"
-            params={readToParams}
+            to="/books/$id"
+            params={readParams}
+            search={readSearch}
             className="text-sm text-blue-600 hover:underline"
           >
             Skip preview · Read the full book →

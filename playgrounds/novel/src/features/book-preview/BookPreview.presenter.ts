@@ -9,7 +9,8 @@ export interface BookPreviewPresenter {
   showCta: boolean;
   prevSearch: { page: number; flash: undefined } | null;
   nextSearch: { page: number; flash: undefined } | null;
-  readToParams: { id: string; page: number };
+  readParams: { id: string };
+  readSearch: { page: number };
 }
 
 export function useBookPreviewPresenter({
@@ -32,6 +33,7 @@ export function useBookPreviewPresenter({
     showCta,
     prevSearch,
     nextSearch,
-    readToParams: { id: bookId, page: 1 },
+    readParams: { id: bookId },
+    readSearch: { page: 1 },
   };
 }

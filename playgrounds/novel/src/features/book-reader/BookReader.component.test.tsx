@@ -26,7 +26,8 @@ async function renderWithRouter(props: BookReaderFacade) {
   });
   const readerRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: "/books/$id/read/$page",
+    path: "/books/$id",
+    validateSearch: () => ({ page: 1 }),
   });
   const routeTree = rootRoute.addChildren([previewRoute, readerRoute]);
   const router = createRouter({ routeTree });
@@ -55,7 +56,7 @@ describe("BookReaderComponent", () => {
     await renderWithRouter(baseProps);
     expect(screen.getByRole("link", { name: "Next →" })).toHaveAttribute(
       "href",
-      "/books/1/read/2",
+      "/books/1?page=2",
     );
   });
 
@@ -74,7 +75,7 @@ describe("BookReaderComponent", () => {
     });
     expect(screen.getByRole("link", { name: "← Previous" })).toHaveAttribute(
       "href",
-      "/books/1/read/1",
+      "/books/1?page=1",
     );
   });
 

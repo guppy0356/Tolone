@@ -56,10 +56,13 @@ const bookPreviewRoute = createRoute({
 
 const bookReaderRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/books/$id/read/$page",
+  path: "/books/$id",
   component: BookReaderContainer,
-  parseParams: ({ id, page }) => ({ id, page: Number(page) }),
-  stringifyParams: ({ id, page }) => ({ id, page: String(page) }),
+  validateSearch: (search: Record<string, unknown>) => {
+    const rawPage = Number(search.page);
+    const page = Number.isFinite(rawPage) && rawPage >= 1 ? rawPage : 1;
+    return { page };
+  },
   beforeLoad: ({ params }) => {
     if (!isAuthenticated()) {
       throw redirect({

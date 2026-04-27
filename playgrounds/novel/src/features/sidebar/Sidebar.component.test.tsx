@@ -30,7 +30,8 @@ async function renderWithRouter(props: SidebarComponentProps) {
   });
   const readerRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: "/books/$id/read/$page",
+    path: "/books/$id",
+    validateSearch: () => ({ page: 1 }),
   });
   const loginRoute = createRoute({
     getParentRoute: () => rootRoute,
@@ -80,9 +81,9 @@ describe("SidebarComponent", () => {
     const bookLinks = screen
       .getAllByRole("link")
       .filter((l) => l.getAttribute("href")?.startsWith("/books/"));
-    expect(bookLinks[0]).toHaveAttribute("href", "/books/1/read/1");
-    expect(bookLinks[1]).toHaveAttribute("href", "/books/2/read/1");
-    expect(bookLinks[2]).toHaveAttribute("href", "/books/3/read/1");
+    expect(bookLinks[0]).toHaveAttribute("href", "/books/1?page=1");
+    expect(bookLinks[1]).toHaveAttribute("href", "/books/2?page=1");
+    expect(bookLinks[2]).toHaveAttribute("href", "/books/3?page=1");
   });
 
   it("highlights current book when currentBookId matches", async () => {

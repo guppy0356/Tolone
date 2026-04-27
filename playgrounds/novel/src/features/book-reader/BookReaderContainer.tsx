@@ -5,10 +5,11 @@ import { useSidebarFacade } from "../sidebar/Sidebar.facade";
 import { SidebarComponent } from "../sidebar/Sidebar.component";
 import { useAuth } from "../../lib/use-auth";
 
-const route = getRouteApi("/books/$id/read/$page");
+const route = getRouteApi("/books/$id");
 
 export function BookReaderContainer() {
-  const { id, page } = route.useParams();
+  const { id } = route.useParams();
+  const { page } = route.useSearch();
   const facade = useBookReaderFacade(id, page);
   const sidebarFacade = useSidebarFacade();
   const { isLoggedIn } = useAuth();

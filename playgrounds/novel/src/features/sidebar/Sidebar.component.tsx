@@ -53,8 +53,9 @@ const SidebarView = memo(function SidebarView({
             <li key={item.id}>
               {isLoggedIn ? (
                 <Link
-                  to="/books/$id/read/$page"
-                  params={{ id: item.id, page: 1 }}
+                  to="/books/$id"
+                  params={{ id: item.id }}
+                  search={{ page: 1 }}
                   className={className}
                 >
                   <div className="truncate">{item.title}</div>

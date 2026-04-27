@@ -29,8 +29,7 @@ const BookReaderView = memo(function BookReaderView({
   bookId,
   pageNumber,
 }: BookReaderViewProps) {
-  const { prevToParams, nextToParams } = useBookReaderPresenter({
-    bookId,
+  const { prevSearch, nextSearch } = useBookReaderPresenter({
     pageNumber,
     totalPages: page.totalPages,
   });
@@ -46,10 +45,11 @@ const BookReaderView = memo(function BookReaderView({
       </p>
 
       <nav className="mt-8 flex justify-between">
-        {prevToParams ? (
+        {prevSearch ? (
           <Link
-            to="/books/$id/read/$page"
-            params={prevToParams}
+            to="/books/$id"
+            params={{ id: bookId }}
+            search={prevSearch}
             className="rounded border px-4 py-2 hover:bg-gray-50"
           >
             ← Previous
@@ -64,10 +64,11 @@ const BookReaderView = memo(function BookReaderView({
             ← Back to preview
           </Link>
         )}
-        {nextToParams && (
+        {nextSearch && (
           <Link
-            to="/books/$id/read/$page"
-            params={nextToParams}
+            to="/books/$id"
+            params={{ id: bookId }}
+            search={nextSearch}
             className="rounded border px-4 py-2 hover:bg-gray-50"
           >
             Next →

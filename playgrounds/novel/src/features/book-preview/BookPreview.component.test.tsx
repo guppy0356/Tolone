@@ -37,7 +37,8 @@ async function renderWithRouter(props: BookPreviewComponentProps) {
   });
   const readerRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: "/books/$id/read/$page",
+    path: "/books/$id",
+    validateSearch: () => ({ page: 1 }),
   });
   const loginRoute = createRoute({
     getParentRoute: () => rootRoute,
@@ -158,7 +159,7 @@ describe("BookPreviewComponent", () => {
     });
     expect(
       screen.getByRole("link", { name: "Read the full book" }),
-    ).toHaveAttribute("href", "/books/1/read/1");
+    ).toHaveAttribute("href", "/books/1?page=1");
   });
 
   it("hides Next link at page 4 (CTA state)", async () => {
@@ -176,7 +177,7 @@ describe("BookPreviewComponent", () => {
     await renderWithRouter({ ...baseProps, isLoggedIn: true });
     expect(
       screen.getByRole("link", { name: "Skip preview · Read the full book →" }),
-    ).toHaveAttribute("href", "/books/1/read/1");
+    ).toHaveAttribute("href", "/books/1?page=1");
   });
 
   it("guests do not see a Skip-preview link", async () => {

@@ -1,11 +1,9 @@
+import { useCallback, useState } from "react";
 import {
   useQuery,
   keepPreviousData,
 } from "@tanstack/react-query";
-import { getRouteApi } from "@tanstack/react-router";
 import { bookReaderApi, type Page } from "./BookReader.api";
-
-const route = getRouteApi("/books/$id");
 
 export interface BookReaderFacade {
   page: Page | undefined;
@@ -13,6 +11,7 @@ export interface BookReaderFacade {
   isFetching: boolean;
   bookId: string;
   pageNumber: number;
+  setPageNumber: (n: number) => void;
 }
 
 const bookReaderKeys = {
@@ -21,7 +20,11 @@ const bookReaderKeys = {
 };
 
 export function useBookReaderFacade(bookId: string): BookReaderFacade {
-  const { page: pageNumber } = route.useSearch();
+  const [pageNumber, setPageNumberState] = useState(1);
+
+  const setPageNumber = useCallback((n: number) => {
+    setPageNumberState(Math.max(1, n));
+  }, []);
 
   const { data, isPending, isFetching } = useQuery({
     queryKey: bookReaderKeys.page(bookId, pageNumber),
@@ -35,5 +38,6 @@ export function useBookReaderFacade(bookId: string): BookReaderFacade {
     isFetching,
     bookId,
     pageNumber,
+    setPageNumber,
   };
 }

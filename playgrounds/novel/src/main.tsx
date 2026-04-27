@@ -25,7 +25,6 @@ const indexRoute = createRoute({
     throw redirect({
       to: "/preview-books/$id",
       params: { id: "1" },
-      search: { page: 1, flash: undefined },
     });
   },
 });
@@ -40,35 +39,17 @@ const bookPreviewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/preview-books/$id",
   component: BookPreviewContainer,
-  validateSearch: (search: Record<string, unknown>) => {
-    const rawPage = Number(search.page);
-    const page =
-      Number.isFinite(rawPage) && rawPage >= 1 && rawPage <= 4 ? rawPage : 1;
-    return {
-      page,
-      flash:
-        search.flash === "login-required"
-          ? ("login-required" as const)
-          : undefined,
-    };
-  },
 });
 
 const bookReaderRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/books/$id",
   component: BookReaderContainer,
-  validateSearch: (search: Record<string, unknown>) => {
-    const rawPage = Number(search.page);
-    const page = Number.isFinite(rawPage) && rawPage >= 1 ? rawPage : 1;
-    return { page };
-  },
   beforeLoad: ({ params }) => {
     if (!isAuthenticated()) {
       throw redirect({
         to: "/preview-books/$id",
         params: { id: params.id },
-        search: { page: 1, flash: "login-required" },
       });
     }
   },

@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { describe, it, expect, vi } from "vitest";
 import {
   createRouter,
   createRootRoute,
@@ -33,12 +34,10 @@ async function renderWithRouter(props: BookPreviewComponentProps) {
   const previewRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/preview-books/$id",
-    validateSearch: () => ({ page: 1, flash: undefined }),
   });
   const readerRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/books/$id",
-    validateSearch: () => ({ page: 1 }),
   });
   const loginRoute = createRoute({
     getParentRoute: () => rootRoute,
@@ -61,7 +60,7 @@ const baseProps: BookPreviewComponentProps = {
   isFetching: false,
   bookId: "1",
   currentPage: 1,
-  flash: undefined,
+  setCurrentPage: vi.fn(),
   isLoggedIn: false,
 };
 
@@ -94,43 +93,43 @@ describe("BookPreviewComponent", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders Next link to ?page=2 from page 1, no Previous", async () => {
-    await renderWithRouter(baseProps);
-    expect(screen.getByRole("link", { name: "Next →" })).toHaveAttribute(
-      "href",
-      "/preview-books/1?page=2",
-    );
+  it("calls setCurrentPage(2) when Next clicked from page 1; no Previous", async () => {
+    const setCurrentPage = vi.fn();
+    const user = userEvent.setup();
+    await renderWithRouter({ ...baseProps, setCurrentPage });
+    await user.click(screen.getByRole("button", { name: "Next →" }));
+    expect(setCurrentPage).toHaveBeenCalledWith(2);
     expect(
-      screen.queryByRole("link", { name: "← Previous" }),
+      screen.queryByRole("button", { name: "← Previous" }),
     ).not.toBeInTheDocument();
   });
 
-  it("renders Previous and Next on page 2", async () => {
+  it("Previous and Next on page 2 call setCurrentPage with adjacent values", async () => {
+    const setCurrentPage = vi.fn();
+    const user = userEvent.setup();
     await renderWithRouter({
       ...baseProps,
       currentPage: 2,
       page: { ...samplePage, number: 2 },
+      setCurrentPage,
     });
-    expect(screen.getByRole("link", { name: "← Previous" })).toHaveAttribute(
-      "href",
-      "/preview-books/1?page=1",
-    );
-    expect(screen.getByRole("link", { name: "Next →" })).toHaveAttribute(
-      "href",
-      "/preview-books/1?page=3",
-    );
+    await user.click(screen.getByRole("button", { name: "← Previous" }));
+    expect(setCurrentPage).toHaveBeenCalledWith(1);
+    await user.click(screen.getByRole("button", { name: "Next →" }));
+    expect(setCurrentPage).toHaveBeenCalledWith(3);
   });
 
-  it("renders Next on page 3 (so guest can hit the CTA at page 4)", async () => {
+  it("Next button still present on page 3 (so user can hit the CTA at page 4)", async () => {
+    const setCurrentPage = vi.fn();
+    const user = userEvent.setup();
     await renderWithRouter({
       ...baseProps,
       currentPage: 3,
       page: { ...samplePage, number: 3 },
+      setCurrentPage,
     });
-    expect(screen.getByRole("link", { name: "Next →" })).toHaveAttribute(
-      "href",
-      "/preview-books/1?page=4",
-    );
+    await user.click(screen.getByRole("button", { name: "Next →" }));
+    expect(setCurrentPage).toHaveBeenCalledWith(4);
   });
 
   it("shows guest CTA (login link) on page 4 instead of content", async () => {
@@ -159,17 +158,17 @@ describe("BookPreviewComponent", () => {
     });
     expect(
       screen.getByRole("link", { name: "Read the full book" }),
-    ).toHaveAttribute("href", "/books/1?page=1");
+    ).toHaveAttribute("href", "/books/1");
   });
 
-  it("hides Next link at page 4 (CTA state)", async () => {
+  it("hides Next button at page 4 (CTA state)", async () => {
     await renderWithRouter({
       ...baseProps,
       currentPage: 4,
       page: undefined,
     });
     expect(
-      screen.queryByRole("link", { name: "Next →" }),
+      screen.queryByRole("button", { name: "Next →" }),
     ).not.toBeInTheDocument();
   });
 
@@ -177,7 +176,7 @@ describe("BookPreviewComponent", () => {
     await renderWithRouter({ ...baseProps, isLoggedIn: true });
     expect(
       screen.getByRole("link", { name: "Skip preview · Read the full book →" }),
-    ).toHaveAttribute("href", "/books/1?page=1");
+    ).toHaveAttribute("href", "/books/1");
   });
 
   it("guests do not see a Skip-preview link", async () => {
@@ -185,13 +184,6 @@ describe("BookPreviewComponent", () => {
     expect(
       screen.queryByRole("link", { name: /Skip preview/ }),
     ).not.toBeInTheDocument();
-  });
-
-  it("shows flash banner when flash is login-required", async () => {
-    await renderWithRouter({ ...baseProps, flash: "login-required" });
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "You need to log in to keep reading.",
-    );
   });
 
   it("renders skeleton when isPending and book undefined", async () => {

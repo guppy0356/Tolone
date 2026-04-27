@@ -22,17 +22,21 @@ interface BookReaderViewProps {
   page: Page;
   bookId: string;
   pageNumber: number;
+  setPageNumber: (n: number) => void;
 }
 
 const BookReaderView = memo(function BookReaderView({
   page,
   bookId,
   pageNumber,
+  setPageNumber,
 }: BookReaderViewProps) {
-  const { prevSearch, nextSearch } = useBookReaderPresenter({
-    pageNumber,
-    totalPages: page.totalPages,
-  });
+  const { canGoPrev, canGoNext, handlePrev, handleNext } =
+    useBookReaderPresenter({
+      pageNumber,
+      totalPages: page.totalPages,
+      setPageNumber,
+    });
 
   return (
     <article className="mx-auto max-w-2xl p-6">
@@ -45,34 +49,31 @@ const BookReaderView = memo(function BookReaderView({
       </p>
 
       <nav className="mt-8 flex justify-between">
-        {prevSearch ? (
-          <Link
-            to="/books/$id"
-            params={{ id: bookId }}
-            search={prevSearch}
+        {canGoPrev ? (
+          <button
+            type="button"
+            onClick={handlePrev}
             className="rounded border px-4 py-2 hover:bg-gray-50"
           >
             ← Previous
-          </Link>
+          </button>
         ) : (
           <Link
             to="/preview-books/$id"
             params={{ id: bookId }}
-            search={{ page: 1, flash: undefined }}
             className="rounded border px-4 py-2 hover:bg-gray-50"
           >
             ← Back to preview
           </Link>
         )}
-        {nextSearch && (
-          <Link
-            to="/books/$id"
-            params={{ id: bookId }}
-            search={nextSearch}
+        {canGoNext && (
+          <button
+            type="button"
+            onClick={handleNext}
             className="rounded border px-4 py-2 hover:bg-gray-50"
           >
             Next →
-          </Link>
+          </button>
         )}
       </nav>
     </article>
@@ -85,6 +86,7 @@ export function BookReaderComponent({
   isFetching,
   bookId,
   pageNumber,
+  setPageNumber,
 }: BookReaderFacade) {
   if (isPending || !page) {
     return <BookReaderSkeleton />;
@@ -92,7 +94,12 @@ export function BookReaderComponent({
 
   return (
     <div className={`transition-opacity ${isFetching ? "opacity-50" : ""}`}>
-      <BookReaderView page={page} bookId={bookId} pageNumber={pageNumber} />
+      <BookReaderView
+        page={page}
+        bookId={bookId}
+        pageNumber={pageNumber}
+        setPageNumber={setPageNumber}
+      />
     </div>
   );
 }

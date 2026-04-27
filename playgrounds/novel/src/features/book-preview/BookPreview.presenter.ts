@@ -1,39 +1,40 @@
+import { useCallback } from "react";
 import { PREVIEW_PAGE_LIMIT } from "./BookPreview.facade";
 
 export interface BookPreviewPresenterProps {
-  bookId: string;
   currentPage: number;
+  setCurrentPage: (n: number) => void;
 }
 
 export interface BookPreviewPresenter {
   showCta: boolean;
-  prevSearch: { page: number; flash: undefined } | null;
-  nextSearch: { page: number; flash: undefined } | null;
-  readParams: { id: string };
-  readSearch: { page: number };
+  canGoPrev: boolean;
+  canGoNext: boolean;
+  handlePrev: () => void;
+  handleNext: () => void;
 }
 
 export function useBookPreviewPresenter({
-  bookId,
   currentPage,
+  setCurrentPage,
 }: BookPreviewPresenterProps): BookPreviewPresenter {
   const showCta = currentPage > PREVIEW_PAGE_LIMIT;
+  const canGoPrev = currentPage > 1;
+  const canGoNext = currentPage <= PREVIEW_PAGE_LIMIT;
 
-  const prevSearch =
-    currentPage > 1
-      ? { page: currentPage - 1, flash: undefined as undefined }
-      : null;
+  const handlePrev = useCallback(() => {
+    setCurrentPage(currentPage - 1);
+  }, [currentPage, setCurrentPage]);
 
-  const nextSearch =
-    currentPage <= PREVIEW_PAGE_LIMIT
-      ? { page: currentPage + 1, flash: undefined as undefined }
-      : null;
+  const handleNext = useCallback(() => {
+    setCurrentPage(currentPage + 1);
+  }, [currentPage, setCurrentPage]);
 
   return {
     showCta,
-    prevSearch,
-    nextSearch,
-    readParams: { id: bookId },
-    readSearch: { page: 1 },
+    canGoPrev,
+    canGoNext,
+    handlePrev,
+    handleNext,
   };
 }

@@ -1,22 +1,38 @@
+import { useCallback } from "react";
+
 export interface BookReaderPresenterProps {
   pageNumber: number;
   totalPages: number;
+  setPageNumber: (n: number) => void;
 }
 
 export interface BookReaderPresenter {
-  prevSearch: { page: number } | null;
-  nextSearch: { page: number } | null;
+  canGoPrev: boolean;
+  canGoNext: boolean;
+  handlePrev: () => void;
+  handleNext: () => void;
 }
 
 export function useBookReaderPresenter({
   pageNumber,
   totalPages,
+  setPageNumber,
 }: BookReaderPresenterProps): BookReaderPresenter {
-  const prevSearch = pageNumber > 1 ? { page: pageNumber - 1 } : null;
-  const nextSearch = pageNumber < totalPages ? { page: pageNumber + 1 } : null;
+  const canGoPrev = pageNumber > 1;
+  const canGoNext = pageNumber < totalPages;
+
+  const handlePrev = useCallback(() => {
+    setPageNumber(pageNumber - 1);
+  }, [pageNumber, setPageNumber]);
+
+  const handleNext = useCallback(() => {
+    setPageNumber(pageNumber + 1);
+  }, [pageNumber, setPageNumber]);
 
   return {
-    prevSearch,
-    nextSearch,
+    canGoPrev,
+    canGoNext,
+    handlePrev,
+    handleNext,
   };
 }

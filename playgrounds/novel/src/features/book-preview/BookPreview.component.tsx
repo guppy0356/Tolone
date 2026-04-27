@@ -23,8 +23,8 @@ interface BookPreviewViewProps {
   page: Page | undefined;
   bookId: string;
   currentPage: number;
+  setCurrentPage: (n: number) => void;
   isLoggedIn: boolean;
-  flash: "login-required" | undefined;
 }
 
 const BookPreviewView = memo(function BookPreviewView({
@@ -32,23 +32,14 @@ const BookPreviewView = memo(function BookPreviewView({
   page,
   bookId,
   currentPage,
+  setCurrentPage,
   isLoggedIn,
-  flash,
 }: BookPreviewViewProps) {
-  const { showCta, prevSearch, nextSearch, readParams, readSearch } =
-    useBookPreviewPresenter({ bookId, currentPage });
+  const { showCta, canGoPrev, canGoNext, handlePrev, handleNext } =
+    useBookPreviewPresenter({ currentPage, setCurrentPage });
 
   return (
     <article className="mx-auto max-w-2xl p-6">
-      {flash === "login-required" && (
-        <div
-          role="alert"
-          className="mb-4 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800"
-        >
-          You need to log in to keep reading.
-        </div>
-      )}
-
       <header className="mb-6">
         <h1 className="mb-1 text-3xl font-bold">{book.title}</h1>
         <p className="text-sm text-gray-600">by {book.author}</p>
@@ -65,8 +56,7 @@ const BookPreviewView = memo(function BookPreviewView({
           {isLoggedIn ? (
             <Link
               to="/books/$id"
-              params={readParams}
-              search={readSearch}
+              params={{ id: bookId }}
               className="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
             >
               Read the full book
@@ -92,27 +82,25 @@ const BookPreviewView = memo(function BookPreviewView({
       )}
 
       <nav className="mt-8 flex justify-between">
-        {prevSearch ? (
-          <Link
-            to="/preview-books/$id"
-            params={{ id: bookId }}
-            search={prevSearch}
+        {canGoPrev ? (
+          <button
+            type="button"
+            onClick={handlePrev}
             className="rounded border px-4 py-2 hover:bg-gray-50"
           >
             ← Previous
-          </Link>
+          </button>
         ) : (
           <span />
         )}
-        {nextSearch && (
-          <Link
-            to="/preview-books/$id"
-            params={{ id: bookId }}
-            search={nextSearch}
+        {canGoNext && (
+          <button
+            type="button"
+            onClick={handleNext}
             className="rounded border px-4 py-2 hover:bg-gray-50"
           >
             Next →
-          </Link>
+          </button>
         )}
       </nav>
 
@@ -120,8 +108,7 @@ const BookPreviewView = memo(function BookPreviewView({
         <div className="mt-8 border-t pt-4 text-center">
           <Link
             to="/books/$id"
-            params={readParams}
-            search={readSearch}
+            params={{ id: bookId }}
             className="text-sm text-blue-600 hover:underline"
           >
             Skip preview · Read the full book →
@@ -133,7 +120,6 @@ const BookPreviewView = memo(function BookPreviewView({
 });
 
 export interface BookPreviewComponentProps extends BookPreviewFacade {
-  flash: "login-required" | undefined;
   isLoggedIn: boolean;
 }
 
@@ -144,7 +130,7 @@ export function BookPreviewComponent({
   isFetching,
   bookId,
   currentPage,
-  flash,
+  setCurrentPage,
   isLoggedIn,
 }: BookPreviewComponentProps) {
   if (isPending || !book) {
@@ -158,8 +144,8 @@ export function BookPreviewComponent({
         page={page}
         bookId={bookId}
         currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
         isLoggedIn={isLoggedIn}
-        flash={flash}
       />
     </div>
   );

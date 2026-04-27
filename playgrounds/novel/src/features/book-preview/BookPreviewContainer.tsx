@@ -9,7 +9,6 @@ const route = getRouteApi("/preview-books/$id");
 
 export function BookPreviewContainer() {
   const { id } = route.useParams();
-  const { flash } = route.useSearch();
   const facade = useBookPreviewFacade(id);
   const sidebarFacade = useSidebarFacade();
   const { isLoggedIn } = useAuth();
@@ -22,11 +21,7 @@ export function BookPreviewContainer() {
         isLoggedIn={isLoggedIn}
       />
       <main className="flex-1">
-        <BookPreviewComponent
-          {...facade}
-          flash={flash}
-          isLoggedIn={isLoggedIn}
-        />
+        <BookPreviewComponent {...facade} isLoggedIn={isLoggedIn} />
       </main>
     </div>
   );

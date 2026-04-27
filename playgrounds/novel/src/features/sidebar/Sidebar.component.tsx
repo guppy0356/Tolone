@@ -55,7 +55,6 @@ const SidebarView = memo(function SidebarView({
                 <Link
                   to="/books/$id"
                   params={{ id: item.id }}
-                  search={{ page: 1 }}
                   className={className}
                 >
                   <div className="truncate">{item.title}</div>
@@ -67,7 +66,6 @@ const SidebarView = memo(function SidebarView({
                 <Link
                   to="/preview-books/$id"
                   params={{ id: item.id }}
-                  search={{ page: 1, flash: undefined }}
                   className={className}
                 >
                   <div className="truncate">{item.title}</div>

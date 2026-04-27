@@ -1,13 +1,11 @@
+import { useCallback, useState } from "react";
 import {
   useQuery,
   keepPreviousData,
 } from "@tanstack/react-query";
-import { getRouteApi } from "@tanstack/react-router";
 import { bookPreviewApi, type Book, type Page } from "./BookPreview.api";
 
 export const PREVIEW_PAGE_LIMIT = 3;
-
-const route = getRouteApi("/preview-books/$id");
 
 export interface BookPreviewFacade {
   book: Book | undefined;
@@ -16,6 +14,7 @@ export interface BookPreviewFacade {
   isFetching: boolean;
   bookId: string;
   currentPage: number;
+  setCurrentPage: (n: number) => void;
 }
 
 const bookPreviewKeys = {
@@ -24,7 +23,11 @@ const bookPreviewKeys = {
 };
 
 export function useBookPreviewFacade(id: string): BookPreviewFacade {
-  const { page: currentPage } = route.useSearch();
+  const [currentPage, setCurrentPageState] = useState(1);
+
+  const setCurrentPage = useCallback((n: number) => {
+    setCurrentPageState(Math.max(1, Math.min(PREVIEW_PAGE_LIMIT + 1, n)));
+  }, []);
 
   const bookQuery = useQuery({
     queryKey: bookPreviewKeys.detail(id),
@@ -48,5 +51,6 @@ export function useBookPreviewFacade(id: string): BookPreviewFacade {
     isFetching: bookQuery.isFetching || pageQuery.isFetching,
     bookId: id,
     currentPage,
+    setCurrentPage,
   };
 }

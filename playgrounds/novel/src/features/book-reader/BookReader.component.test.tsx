@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { describe, it, expect, vi } from "vitest";
 import {
   createRouter,
   createRootRoute,
@@ -22,12 +23,10 @@ async function renderWithRouter(props: BookReaderFacade) {
   const previewRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/preview-books/$id",
-    validateSearch: () => ({ page: 1, flash: undefined }),
   });
   const readerRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/books/$id",
-    validateSearch: () => ({ page: 1 }),
   });
   const routeTree = rootRoute.addChildren([previewRoute, readerRoute]);
   const router = createRouter({ routeTree });
@@ -41,6 +40,7 @@ const baseProps: BookReaderFacade = {
   isFetching: false,
   bookId: "1",
   pageNumber: 1,
+  setPageNumber: vi.fn(),
 };
 
 describe("BookReaderComponent", () => {
@@ -52,41 +52,45 @@ describe("BookReaderComponent", () => {
     expect(screen.getByText("Page 1 of 6")).toBeInTheDocument();
   });
 
-  it("renders Next link to page 2 from page 1", async () => {
-    await renderWithRouter(baseProps);
-    expect(screen.getByRole("link", { name: "Next →" })).toHaveAttribute(
-      "href",
-      "/books/1?page=2",
-    );
+  it("Next on page 1 calls setPageNumber(2)", async () => {
+    const setPageNumber = vi.fn();
+    const user = userEvent.setup();
+    await renderWithRouter({ ...baseProps, setPageNumber });
+    await user.click(screen.getByRole("button", { name: "Next →" }));
+    expect(setPageNumber).toHaveBeenCalledWith(2);
   });
 
-  it("renders Back to preview when on page 1 (no Previous)", async () => {
+  it("renders Back-to-preview link when on page 1 (no Previous button)", async () => {
     await renderWithRouter(baseProps);
     expect(
       screen.getByRole("link", { name: "← Back to preview" }),
-    ).toHaveAttribute("href", "/preview-books/1?page=1");
+    ).toHaveAttribute("href", "/preview-books/1");
+    expect(
+      screen.queryByRole("button", { name: "← Previous" }),
+    ).not.toBeInTheDocument();
   });
 
-  it("renders Previous link from page 2", async () => {
+  it("Previous on page 2 calls setPageNumber(1)", async () => {
+    const setPageNumber = vi.fn();
+    const user = userEvent.setup();
     await renderWithRouter({
       ...baseProps,
       pageNumber: 2,
       page: { ...samplePage, number: 2 },
+      setPageNumber,
     });
-    expect(screen.getByRole("link", { name: "← Previous" })).toHaveAttribute(
-      "href",
-      "/books/1?page=1",
-    );
+    await user.click(screen.getByRole("button", { name: "← Previous" }));
+    expect(setPageNumber).toHaveBeenCalledWith(1);
   });
 
-  it("hides Next link on the last page", async () => {
+  it("hides Next button on the last page", async () => {
     await renderWithRouter({
       ...baseProps,
       pageNumber: 6,
       page: { ...samplePage, number: 6 },
     });
     expect(
-      screen.queryByRole("link", { name: "Next →" }),
+      screen.queryByRole("button", { name: "Next →" }),
     ).not.toBeInTheDocument();
   });
 

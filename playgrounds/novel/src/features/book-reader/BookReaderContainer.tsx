@@ -9,8 +9,7 @@ const route = getRouteApi("/books/$id");
 
 export function BookReaderContainer() {
   const { id } = route.useParams();
-  const { page } = route.useSearch();
-  const facade = useBookReaderFacade(id, page);
+  const facade = useBookReaderFacade(id);
   const sidebarFacade = useSidebarFacade();
   const { isLoggedIn } = useAuth();
 

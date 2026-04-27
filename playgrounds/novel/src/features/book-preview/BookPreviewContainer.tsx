@@ -9,8 +9,8 @@ const route = getRouteApi("/preview-books/$id");
 
 export function BookPreviewContainer() {
   const { id } = route.useParams();
-  const { page, flash } = route.useSearch();
-  const facade = useBookPreviewFacade(id, page);
+  const { flash } = route.useSearch();
+  const facade = useBookPreviewFacade(id);
   const sidebarFacade = useSidebarFacade();
   const { isLoggedIn } = useAuth();
 

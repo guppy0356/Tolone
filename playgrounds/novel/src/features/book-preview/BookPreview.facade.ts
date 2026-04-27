@@ -2,9 +2,12 @@ import {
   useQuery,
   keepPreviousData,
 } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 import { bookPreviewApi, type Book, type Page } from "./BookPreview.api";
 
 export const PREVIEW_PAGE_LIMIT = 3;
+
+const route = getRouteApi("/preview-books/$id");
 
 export interface BookPreviewFacade {
   book: Book | undefined;
@@ -20,10 +23,9 @@ const bookPreviewKeys = {
   page: (id: string, n: number) => ["books", id, "pages", n] as const,
 };
 
-export function useBookPreviewFacade(
-  id: string,
-  currentPage: number,
-): BookPreviewFacade {
+export function useBookPreviewFacade(id: string): BookPreviewFacade {
+  const { page: currentPage } = route.useSearch();
+
   const bookQuery = useQuery({
     queryKey: bookPreviewKeys.detail(id),
     queryFn: () => bookPreviewApi.getBook(id),

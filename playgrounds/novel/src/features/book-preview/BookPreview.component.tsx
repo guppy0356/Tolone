@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Link } from "@tanstack/react-router";
 import { useBookPreviewPresenter } from "./BookPreview.presenter";
 import type { BookPreviewFacade } from "./BookPreview.facade";
-import type { Book, Page } from "./BookPreview.api";
+import type { BookPreview, Page } from "./BookPreview.api";
 
 export function BookPreviewSkeleton() {
   return (
@@ -19,7 +19,7 @@ export function BookPreviewSkeleton() {
 }
 
 interface BookPreviewViewProps {
-  book: Book;
+  book: BookPreview;
   page: Page | undefined;
   bookId: string;
   currentPage: number;

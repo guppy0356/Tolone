@@ -11,20 +11,21 @@ import {
   BookPreviewComponent,
   type BookPreviewComponentProps,
 } from "./BookPreview.component";
-import type { Book, Page } from "./BookPreview.api";
-
-const sampleBook: Book = {
-  id: "1",
-  title: "The Lantern Keeper",
-  author: "Mira Halloway",
-  summary: "A coastal town tends a single lantern.",
-  totalPages: 6,
-};
+import type { BookPreview, Page } from "./BookPreview.api";
 
 const samplePage: Page = {
   number: 1,
   totalPages: 6,
   content: "It was a quiet morning in the lighthouse.",
+};
+
+const sampleBook: BookPreview = {
+  id: "1",
+  title: "The Lantern Keeper",
+  author: "Mira Halloway",
+  summary: "A coastal town tends a single lantern.",
+  totalPages: 6,
+  pages: [samplePage],
 };
 
 async function renderWithRouter(props: BookPreviewComponentProps) {

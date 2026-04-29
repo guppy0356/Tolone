@@ -38,7 +38,7 @@ const loginRoute = createRoute({
 const bookPreviewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/preview-books/$id",
-  component: function BookPreviewRoute() {
+  component: () => {
     const { id } = bookPreviewRoute.useParams();
     return <BookPreviewContainer key={id} />;
   },
@@ -47,7 +47,7 @@ const bookPreviewRoute = createRoute({
 const bookReaderRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/books/$id",
-  component: function BookReaderRoute() {
+  component: () => {
     const { id } = bookReaderRoute.useParams();
     return <BookReaderContainer key={id} />;
   },

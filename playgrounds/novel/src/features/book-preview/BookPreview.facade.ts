@@ -1,14 +1,15 @@
 import { useCallback, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
-  useQuery,
-  keepPreviousData,
-} from "@tanstack/react-query";
-import { bookPreviewApi, type Book, type Page } from "./BookPreview.api";
+  bookPreviewApi,
+  type BookPreview,
+  type Page,
+} from "./BookPreview.api";
 
 export const PREVIEW_PAGE_LIMIT = 3;
 
 export interface BookPreviewFacade {
-  book: Book | undefined;
+  book: BookPreview | undefined;
   page: Page | undefined;
   isPending: boolean;
   isFetching: boolean;
@@ -18,8 +19,7 @@ export interface BookPreviewFacade {
 }
 
 const bookPreviewKeys = {
-  detail: (id: string) => ["books", id] as const,
-  page: (id: string, n: number) => ["books", id, "pages", n] as const,
+  detail: (id: string) => ["book-preview", id] as const,
 };
 
 export function useBookPreviewFacade(id: string): BookPreviewFacade {
@@ -29,26 +29,21 @@ export function useBookPreviewFacade(id: string): BookPreviewFacade {
     setCurrentPageState(Math.max(1, Math.min(PREVIEW_PAGE_LIMIT + 1, n)));
   }, []);
 
-  const bookQuery = useQuery({
+  const { data, isPending, isFetching } = useQuery({
     queryKey: bookPreviewKeys.detail(id),
-    queryFn: () => bookPreviewApi.getBook(id),
-    placeholderData: keepPreviousData,
+    queryFn: () => bookPreviewApi.getPreview(id),
   });
 
-  const wantsContent = currentPage <= PREVIEW_PAGE_LIMIT;
-
-  const pageQuery = useQuery({
-    queryKey: bookPreviewKeys.page(id, currentPage),
-    queryFn: () => bookPreviewApi.getPage(id, currentPage),
-    placeholderData: keepPreviousData,
-    enabled: wantsContent,
-  });
+  const page =
+    currentPage <= PREVIEW_PAGE_LIMIT
+      ? data?.pages[currentPage - 1]
+      : undefined;
 
   return {
-    book: bookQuery.data,
-    page: wantsContent ? pageQuery.data : undefined,
-    isPending: bookQuery.isPending || (wantsContent && pageQuery.isPending),
-    isFetching: bookQuery.isFetching || pageQuery.isFetching,
+    book: data,
+    page,
+    isPending,
+    isFetching,
     bookId: id,
     currentPage,
     setCurrentPage,

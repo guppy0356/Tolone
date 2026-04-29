@@ -6,5 +6,5 @@ export type Page = components["schemas"]["Page"];
 
 export const bookPreviewApi = {
   getPreview: (id: string) =>
-    api.get(`books/${id}/preview`).json<BookPreview>(),
+    api.get(`preview-books/${id}`).json<BookPreview>(),
 };

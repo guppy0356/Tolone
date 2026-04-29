@@ -45,20 +45,21 @@ export const handlers = [
 
   http.get("/api/books/{id}", async ({ request, params, response }) => {
     await delay(400);
+    const token = getAuthToken(request);
+    if (!token) return response(401).empty();
     const book = books.find((b) => b.id === params.id);
     if (!book) return response(404).empty();
-    const token = getAuthToken(request);
     return response(200).json({
       id: book.id,
       title: book.title,
       author: book.author,
       summary: book.summary,
       totalPages: book.pages.length,
-      ...(token ? { currentPage: getBookmark(token, book.id) } : {}),
+      currentPage: getBookmark(token, book.id),
     });
   }),
 
-  http.get("/api/books/{id}/preview", async ({ params, response }) => {
+  http.get("/api/preview-books/{id}", async ({ params, response }) => {
     await delay(400);
     const book = books.find((b) => b.id === params.id);
     if (!book) return response(404).empty();
@@ -81,8 +82,9 @@ export const handlers = [
 
   http.get(
     "/api/books/{id}/pages/{pageNumber}",
-    async ({ params, response }) => {
+    async ({ request, params, response }) => {
       await delay(300);
+      if (!getAuthToken(request)) return response(401).empty();
       const book = books.find((b) => b.id === params.id);
       if (!book) return response(404).empty();
       const pageNumber = Number(params.pageNumber);

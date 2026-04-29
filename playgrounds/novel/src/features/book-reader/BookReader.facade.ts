@@ -1,43 +1,113 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import {
   useQuery,
+  useMutation,
+  useQueryClient,
   keepPreviousData,
 } from "@tanstack/react-query";
-import { bookReaderApi, type Page } from "./BookReader.api";
+import { bookReaderApi, type Book, type Page } from "./BookReader.api";
 
 export interface BookReaderFacade {
+  book: Book | undefined;
   page: Page | undefined;
   isPending: boolean;
   isFetching: boolean;
   bookId: string;
   pageNumber: number;
-  setPageNumber: (n: number) => void;
+  goNext: () => Promise<void>;
+  goPrev: () => Promise<void>;
 }
 
 const bookReaderKeys = {
-  page: (bookId: string, pageNumber: number) =>
-    ["books", bookId, "pages", pageNumber] as const,
+  detail: (id: string) => ["books", id] as const,
+  page: (id: string, n: number) => ["books", id, "pages", n] as const,
 };
 
 export function useBookReaderFacade(bookId: string): BookReaderFacade {
-  const [pageNumber, setPageNumberState] = useState(1);
+  const queryClient = useQueryClient();
+  const detailKey = bookReaderKeys.detail(bookId);
 
-  const setPageNumber = useCallback((n: number) => {
-    setPageNumberState(Math.max(1, n));
-  }, []);
+  const bookQuery = useQuery({
+    queryKey: detailKey,
+    queryFn: () => bookReaderApi.getBook(bookId),
+  });
 
-  const { data, isPending, isFetching } = useQuery({
+  const pageNumber = bookQuery.data?.currentPage ?? 1;
+
+  const pageQuery = useQuery({
     queryKey: bookReaderKeys.page(bookId, pageNumber),
     queryFn: () => bookReaderApi.getPage(bookId, pageNumber),
     placeholderData: keepPreviousData,
+    enabled: bookQuery.data !== undefined,
   });
 
+  const optimisticUpdate = (direction: "next" | "prev") => async () => {
+    await queryClient.cancelQueries({ queryKey: detailKey });
+    const previous = queryClient.getQueryData<Book>(detailKey);
+    if (previous) {
+      const current = previous.currentPage ?? 1;
+      const optimistic =
+        direction === "next"
+          ? Math.min(current + 1, previous.totalPages)
+          : Math.max(current - 1, 1);
+      queryClient.setQueryData<Book>(detailKey, {
+        ...previous,
+        currentPage: optimistic,
+      });
+    }
+    return { previous };
+  };
+
+  const onError = (
+    _err: unknown,
+    _vars: void,
+    context: { previous: Book | undefined } | undefined,
+  ) => {
+    if (context?.previous) {
+      queryClient.setQueryData(detailKey, context.previous);
+    }
+  };
+
+  const onSuccess = (data: { page: number }) => {
+    const current = queryClient.getQueryData<Book>(detailKey);
+    if (current) {
+      queryClient.setQueryData<Book>(detailKey, {
+        ...current,
+        currentPage: data.page,
+      });
+    }
+  };
+
+  const nextMutation = useMutation({
+    mutationFn: () => bookReaderApi.nextPage(bookId),
+    onMutate: optimisticUpdate("next"),
+    onError,
+    onSuccess,
+  });
+
+  const prevMutation = useMutation({
+    mutationFn: () => bookReaderApi.prevPage(bookId),
+    onMutate: optimisticUpdate("prev"),
+    onError,
+    onSuccess,
+  });
+
+  const goNext = useCallback(async () => {
+    await nextMutation.mutateAsync();
+  }, [nextMutation]);
+
+  const goPrev = useCallback(async () => {
+    await prevMutation.mutateAsync();
+  }, [prevMutation]);
+
   return {
-    page: data,
-    isPending,
-    isFetching,
+    book: bookQuery.data,
+    page: pageQuery.data,
+    isPending: bookQuery.isPending || pageQuery.isPending,
+    isFetching: bookQuery.isFetching || pageQuery.isFetching,
     bookId,
     pageNumber,
-    setPageNumber,
+    goNext,
+    goPrev,
   };
 }

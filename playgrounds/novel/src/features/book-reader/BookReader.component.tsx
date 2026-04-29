@@ -22,20 +22,23 @@ interface BookReaderViewProps {
   page: Page;
   bookId: string;
   pageNumber: number;
-  setPageNumber: (n: number) => void;
+  goNext: () => Promise<void>;
+  goPrev: () => Promise<void>;
 }
 
 const BookReaderView = memo(function BookReaderView({
   page,
   bookId,
   pageNumber,
-  setPageNumber,
+  goNext,
+  goPrev,
 }: BookReaderViewProps) {
   const { canGoPrev, canGoNext, handlePrev, handleNext } =
     useBookReaderPresenter({
       pageNumber,
       totalPages: page.totalPages,
-      setPageNumber,
+      goNext,
+      goPrev,
     });
 
   return (
@@ -86,7 +89,8 @@ export function BookReaderComponent({
   isFetching,
   bookId,
   pageNumber,
-  setPageNumber,
+  goNext,
+  goPrev,
 }: BookReaderFacade) {
   if (isPending || !page) {
     return <BookReaderSkeleton />;
@@ -98,7 +102,8 @@ export function BookReaderComponent({
         page={page}
         bookId={bookId}
         pageNumber={pageNumber}
-        setPageNumber={setPageNumber}
+        goNext={goNext}
+        goPrev={goPrev}
       />
     </div>
   );

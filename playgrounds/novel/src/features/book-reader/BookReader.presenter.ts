@@ -3,31 +3,35 @@ import { useCallback } from "react";
 export interface BookReaderPresenterProps {
   pageNumber: number;
   totalPages: number;
-  setPageNumber: (n: number) => void;
+  goNext: () => Promise<void>;
+  goPrev: () => Promise<void>;
 }
 
 export interface BookReaderPresenter {
   canGoPrev: boolean;
   canGoNext: boolean;
-  handlePrev: () => void;
-  handleNext: () => void;
+  handlePrev: () => Promise<void>;
+  handleNext: () => Promise<void>;
 }
 
 export function useBookReaderPresenter({
   pageNumber,
   totalPages,
-  setPageNumber,
+  goNext,
+  goPrev,
 }: BookReaderPresenterProps): BookReaderPresenter {
   const canGoPrev = pageNumber > 1;
   const canGoNext = pageNumber < totalPages;
 
-  const handlePrev = useCallback(() => {
-    setPageNumber(pageNumber - 1);
-  }, [pageNumber, setPageNumber]);
+  const handlePrev = useCallback(async () => {
+    if (!canGoPrev) return;
+    await goPrev();
+  }, [canGoPrev, goPrev]);
 
-  const handleNext = useCallback(() => {
-    setPageNumber(pageNumber + 1);
-  }, [pageNumber, setPageNumber]);
+  const handleNext = useCallback(async () => {
+    if (!canGoNext) return;
+    await goNext();
+  }, [canGoNext, goNext]);
 
   return {
     canGoPrev,

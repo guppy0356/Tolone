@@ -35,12 +35,21 @@ async function renderWithRouter(props: BookReaderFacade) {
 }
 
 const baseProps: BookReaderFacade = {
+  book: {
+    id: "1",
+    title: "The Lantern Keeper",
+    author: "Mira Halloway",
+    summary: "...",
+    totalPages: 6,
+    currentPage: 1,
+  },
   page: samplePage,
   isPending: false,
   isFetching: false,
   bookId: "1",
   pageNumber: 1,
-  setPageNumber: vi.fn(),
+  goNext: vi.fn().mockResolvedValue(undefined),
+  goPrev: vi.fn().mockResolvedValue(undefined),
 };
 
 describe("BookReaderComponent", () => {
@@ -52,12 +61,12 @@ describe("BookReaderComponent", () => {
     expect(screen.getByText("Page 1 of 6")).toBeInTheDocument();
   });
 
-  it("Next on page 1 calls setPageNumber(2)", async () => {
-    const setPageNumber = vi.fn();
+  it("Next on page 1 calls goNext", async () => {
+    const goNext = vi.fn().mockResolvedValue(undefined);
     const user = userEvent.setup();
-    await renderWithRouter({ ...baseProps, setPageNumber });
+    await renderWithRouter({ ...baseProps, goNext });
     await user.click(screen.getByRole("button", { name: "Next →" }));
-    expect(setPageNumber).toHaveBeenCalledWith(2);
+    expect(goNext).toHaveBeenCalled();
   });
 
   it("renders Back-to-preview link when on page 1 (no Previous button)", async () => {
@@ -70,17 +79,17 @@ describe("BookReaderComponent", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("Previous on page 2 calls setPageNumber(1)", async () => {
-    const setPageNumber = vi.fn();
+  it("Previous on page 2 calls goPrev", async () => {
+    const goPrev = vi.fn().mockResolvedValue(undefined);
     const user = userEvent.setup();
     await renderWithRouter({
       ...baseProps,
       pageNumber: 2,
       page: { ...samplePage, number: 2 },
-      setPageNumber,
+      goPrev,
     });
     await user.click(screen.getByRole("button", { name: "← Previous" }));
-    expect(setPageNumber).toHaveBeenCalledWith(1);
+    expect(goPrev).toHaveBeenCalled();
   });
 
   it("hides Next button on the last page", async () => {

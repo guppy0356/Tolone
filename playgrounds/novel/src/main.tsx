@@ -38,13 +38,19 @@ const loginRoute = createRoute({
 const bookPreviewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/preview-books/$id",
-  component: BookPreviewContainer,
+  component: function BookPreviewRoute() {
+    const { id } = bookPreviewRoute.useParams();
+    return <BookPreviewContainer key={id} />;
+  },
 });
 
 const bookReaderRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/books/$id",
-  component: BookReaderContainer,
+  component: function BookReaderRoute() {
+    const { id } = bookReaderRoute.useParams();
+    return <BookReaderContainer key={id} />;
+  },
   beforeLoad: ({ params }) => {
     if (!isAuthenticated()) {
       throw redirect({

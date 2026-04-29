@@ -45,11 +45,30 @@ paths:
             type: string
       responses:
         "200":
-          description: Book metadata for the preview screen
+          description: Book metadata; includes currentPage when authenticated
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Book"
+        "404":
+          description: Not found
+
+  /api/books/{id}/preview:
+    get:
+      operationId: getBookPreview
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Book metadata + first N pages of preview content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookPreview"
         "404":
           description: Not found
 
@@ -74,6 +93,48 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Page"
+        "404":
+          description: Not found
+
+  /api/books/{id}/next:
+    post:
+      operationId: nextBookPage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated bookmark after advancing one page (no-op at last page)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bookmark"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+
+  /api/books/{id}/prev:
+    post:
+      operationId: prevBookPage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated bookmark after going back one page (no-op at first page)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bookmark"
+        "401":
+          description: Unauthorized
         "404":
           description: Not found
 
@@ -120,6 +181,28 @@ components:
           type: string
         totalPages:
           type: integer
+        currentPage:
+          type: integer
+          description: Reader's bookmark page; only present when authenticated.
+
+    BookPreview:
+      type: object
+      required: [id, title, author, summary, totalPages, pages]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        author:
+          type: string
+        summary:
+          type: string
+        totalPages:
+          type: integer
+        pages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Page"
 
     Page:
       type: object
@@ -131,3 +214,13 @@ components:
           type: integer
         content:
           type: string
+
+    Bookmark:
+      type: object
+      required: [page, updatedAt]
+      properties:
+        page:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time

@@ -9,12 +9,9 @@ const PREVIEW_PAGE_LIMIT = 3;
 
 const bookmarks = new Map<string, Map<string, number>>();
 
-function getAuthToken(request: Request): string | null {
-  const cookie = request.headers.get("cookie") ?? "";
-  const row = cookie.split("; ").find((r) => r.startsWith("novelAuth="));
-  if (!row) return null;
-  const value = row.slice("novelAuth=".length);
-  return value === "" ? null : value;
+function getAuthToken(cookies: Record<string, string>): string | null {
+  const value = cookies.novelAuth;
+  return value && value !== "" ? value : null;
 }
 
 function getBookmark(token: string, bookId: string): number {
@@ -43,9 +40,9 @@ export const handlers = [
     );
   }),
 
-  http.get("/api/books/{id}", async ({ request, params, response }) => {
+  http.get("/api/books/{id}", async ({ cookies, params, response }) => {
     await delay(400);
-    const token = getAuthToken(request);
+    const token = getAuthToken(cookies);
     if (!token) return response(401).empty();
     const book = books.find((b) => b.id === params.id);
     if (!book) return response(404).empty();
@@ -82,9 +79,9 @@ export const handlers = [
 
   http.get(
     "/api/books/{id}/pages/{pageNumber}",
-    async ({ request, params, response }) => {
+    async ({ cookies, params, response }) => {
       await delay(300);
-      if (!getAuthToken(request)) return response(401).empty();
+      if (!getAuthToken(cookies)) return response(401).empty();
       const book = books.find((b) => b.id === params.id);
       if (!book) return response(404).empty();
       const pageNumber = Number(params.pageNumber);
@@ -98,9 +95,9 @@ export const handlers = [
     },
   ),
 
-  http.post("/api/books/{id}/next", async ({ request, params, response }) => {
+  http.post("/api/books/{id}/next", async ({ cookies, params, response }) => {
     await delay(150);
-    const token = getAuthToken(request);
+    const token = getAuthToken(cookies);
     if (!token) return response(401).empty();
     const book = books.find((b) => b.id === params.id);
     if (!book) return response(404).empty();
@@ -113,9 +110,9 @@ export const handlers = [
     });
   }),
 
-  http.post("/api/books/{id}/prev", async ({ request, params, response }) => {
+  http.post("/api/books/{id}/prev", async ({ cookies, params, response }) => {
     await delay(150);
-    const token = getAuthToken(request);
+    const token = getAuthToken(cookies);
     if (!token) return response(401).empty();
     const book = books.find((b) => b.id === params.id);
     if (!book) return response(404).empty();

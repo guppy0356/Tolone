@@ -5,6 +5,31 @@ import { books } from "./books-seed";
 
 const http = createOpenApiHttp<paths>();
 
+const PREVIEW_PAGE_LIMIT = 3;
+
+const bookmarks = new Map<string, Map<string, number>>();
+
+function getAuthToken(request: Request): string | null {
+  const cookie = request.headers.get("cookie") ?? "";
+  const row = cookie.split("; ").find((r) => r.startsWith("novelAuth="));
+  if (!row) return null;
+  const value = row.slice("novelAuth=".length);
+  return value === "" ? null : value;
+}
+
+function getBookmark(token: string, bookId: string): number {
+  return bookmarks.get(token)?.get(bookId) ?? 1;
+}
+
+function setBookmark(token: string, bookId: string, page: number): void {
+  let userBookmarks = bookmarks.get(token);
+  if (!userBookmarks) {
+    userBookmarks = new Map();
+    bookmarks.set(token, userBookmarks);
+  }
+  userBookmarks.set(bookId, page);
+}
+
 export const handlers = [
   http.post("/api/login", async ({ response }) => {
     await delay(400);
@@ -18,16 +43,39 @@ export const handlers = [
     );
   }),
 
-  http.get("/api/books/{id}", async ({ params, response }) => {
+  http.get("/api/books/{id}", async ({ request, params, response }) => {
     await delay(400);
     const book = books.find((b) => b.id === params.id);
     if (!book) return response(404).empty();
+    const token = getAuthToken(request);
     return response(200).json({
       id: book.id,
       title: book.title,
       author: book.author,
       summary: book.summary,
       totalPages: book.pages.length,
+      ...(token ? { currentPage: getBookmark(token, book.id) } : {}),
+    });
+  }),
+
+  http.get("/api/books/{id}/preview", async ({ params, response }) => {
+    await delay(400);
+    const book = books.find((b) => b.id === params.id);
+    if (!book) return response(404).empty();
+    const previewPages = book.pages
+      .slice(0, PREVIEW_PAGE_LIMIT)
+      .map((content, i) => ({
+        number: i + 1,
+        totalPages: book.pages.length,
+        content,
+      }));
+    return response(200).json({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      summary: book.summary,
+      totalPages: book.pages.length,
+      pages: previewPages,
     });
   }),
 
@@ -47,4 +95,34 @@ export const handlers = [
       });
     },
   ),
+
+  http.post("/api/books/{id}/next", async ({ request, params, response }) => {
+    await delay(150);
+    const token = getAuthToken(request);
+    if (!token) return response(401).empty();
+    const book = books.find((b) => b.id === params.id);
+    if (!book) return response(404).empty();
+    const current = getBookmark(token, book.id);
+    const next = Math.min(current + 1, book.pages.length);
+    setBookmark(token, book.id, next);
+    return response(200).json({
+      page: next,
+      updatedAt: new Date().toISOString(),
+    });
+  }),
+
+  http.post("/api/books/{id}/prev", async ({ request, params, response }) => {
+    await delay(150);
+    const token = getAuthToken(request);
+    if (!token) return response(401).empty();
+    const book = books.find((b) => b.id === params.id);
+    if (!book) return response(404).empty();
+    const current = getBookmark(token, book.id);
+    const prev = Math.max(current - 1, 1);
+    setBookmark(token, book.id, prev);
+    return response(200).json({
+      page: prev,
+      updatedAt: new Date().toISOString(),
+    });
+  }),
 ];

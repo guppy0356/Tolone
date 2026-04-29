@@ -52,7 +52,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/books/{id}/preview": {
+    "/api/preview-books/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -138,8 +138,8 @@ export interface components {
             author: string;
             summary: string;
             totalPages: number;
-            /** @description Reader's bookmark page; only present when authenticated. */
-            currentPage?: number;
+            /** @description Reader's bookmark page. The endpoint is auth-required so this is always present. */
+            currentPage: number;
         };
         BookPreview: {
             id: string;
@@ -223,7 +223,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Book metadata; includes currentPage when authenticated */
+            /** @description Authenticated reader view of the book (metadata + bookmark) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -231,6 +231,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Book"];
                 };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Not found */
             404: {
@@ -252,7 +259,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Book metadata + first N pages of preview content */
+            /** @description Public preview of the book (metadata + first N pages) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -282,7 +289,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Page content */
+            /** @description Page content (authenticated) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -290,6 +297,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Page"];
                 };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Not found */
             404: {

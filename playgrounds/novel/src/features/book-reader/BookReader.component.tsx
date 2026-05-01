@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Link } from "@tanstack/react-router";
 import { useBookReaderPresenter } from "./BookReader.presenter";
 import type { BookReaderFacade } from "./BookReader.facade";
-import type { Page } from "./BookReader.api";
+import type { Book, Page } from "./BookReader.api";
 
 export function BookReaderSkeleton() {
   return (
@@ -19,6 +19,7 @@ export function BookReaderSkeleton() {
 }
 
 interface BookReaderViewProps {
+  book: Book;
   page: Page;
   bookId: string;
   pageNumber: number;
@@ -27,6 +28,7 @@ interface BookReaderViewProps {
 }
 
 const BookReaderView = memo(function BookReaderView({
+  book,
   page,
   bookId,
   pageNumber,
@@ -43,6 +45,10 @@ const BookReaderView = memo(function BookReaderView({
 
   return (
     <article className="mx-auto max-w-2xl p-6">
+      <h1 className="mb-1 text-2xl font-bold text-gray-900">{book.title}</h1>
+      <p className="mb-1 text-sm text-gray-500">{book.author}</p>
+      <p className="mb-6 text-sm leading-relaxed text-gray-600">{book.summary}</p>
+
       <p className="mb-4 text-sm text-gray-500">
         Page {pageNumber} of {page.totalPages}
       </p>
@@ -84,6 +90,7 @@ const BookReaderView = memo(function BookReaderView({
 });
 
 export function BookReaderComponent({
+  book,
   page,
   isPending,
   isFetching,
@@ -92,13 +99,14 @@ export function BookReaderComponent({
   goNext,
   goPrev,
 }: BookReaderFacade) {
-  if (isPending || !page) {
+  if (isPending || !book || !page) {
     return <BookReaderSkeleton />;
   }
 
   return (
     <div className={`transition-opacity ${isFetching ? "opacity-50" : ""}`}>
       <BookReaderView
+        book={book}
         page={page}
         bookId={bookId}
         pageNumber={pageNumber}

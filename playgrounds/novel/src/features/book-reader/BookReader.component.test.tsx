@@ -34,15 +34,17 @@ async function renderWithRouter(props: BookReaderFacade) {
   return render(<RouterProvider router={router} />);
 }
 
+const sampleBook = {
+  id: "1",
+  title: "The Lantern Keeper",
+  author: "Mira Halloway",
+  summary: "A story of light and shadow.",
+  totalPages: 6,
+  currentPage: 1,
+};
+
 const baseProps: BookReaderFacade = {
-  book: {
-    id: "1",
-    title: "The Lantern Keeper",
-    author: "Mira Halloway",
-    summary: "...",
-    totalPages: 6,
-    currentPage: 1,
-  },
+  book: sampleBook,
   page: samplePage,
   isPending: false,
   isFetching: false,

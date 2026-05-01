@@ -46,13 +46,15 @@ export const handlers = [
     if (!token) return response(401).empty();
     const book = books.find((b) => b.id === params.id);
     if (!book) return response(404).empty();
+    const currentPage = getBookmark(token, book.id);
     return response(200).json({
       id: book.id,
       title: book.title,
       author: book.author,
       summary: book.summary,
       totalPages: book.pages.length,
-      currentPage: getBookmark(token, book.id),
+      currentPage,
+      pageContent: book.pages[currentPage - 1],
     });
   }),
 
@@ -77,25 +79,8 @@ export const handlers = [
     });
   }),
 
-  http.get(
-    "/api/books/{id}/pages/{pageNumber}",
-    async ({ cookies, params, response }) => {
-      await delay(300);
-      if (!getAuthToken(cookies)) return response(401).empty();
-      const book = books.find((b) => b.id === params.id);
-      if (!book) return response(404).empty();
-      const pageNumber = Number(params.pageNumber);
-      const content = book.pages[pageNumber - 1];
-      if (!content) return response(404).empty();
-      return response(200).json({
-        number: pageNumber,
-        totalPages: book.pages.length,
-        content,
-      });
-    },
-  ),
 
-  http.post("/api/books/{id}/next", async ({ cookies, params, response }) => {
+http.post("/api/books/{id}/next", async ({ cookies, params, response }) => {
     await delay(150);
     const token = getAuthToken(cookies);
     if (!token) return response(401).empty();
@@ -106,6 +91,8 @@ export const handlers = [
     setBookmark(token, book.id, next);
     return response(200).json({
       page: next,
+      totalPages: book.pages.length,
+      content: book.pages[next - 1],
       updatedAt: new Date().toISOString(),
     });
   }),
@@ -121,6 +108,8 @@ export const handlers = [
     setBookmark(token, book.id, prev);
     return response(200).json({
       page: prev,
+      totalPages: book.pages.length,
+      content: book.pages[prev - 1],
       updatedAt: new Date().toISOString(),
     });
   }),

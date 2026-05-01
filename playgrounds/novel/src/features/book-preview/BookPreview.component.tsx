@@ -24,7 +24,6 @@ interface BookPreviewViewProps {
   currentPage: number;
   setCurrentPage: (n: number) => void;
   isLoggedIn: boolean;
-  onBackToSummary: () => void;
 }
 
 const BookPreviewView = memo(function BookPreviewView({
@@ -34,7 +33,6 @@ const BookPreviewView = memo(function BookPreviewView({
   currentPage,
   setCurrentPage,
   isLoggedIn,
-  onBackToSummary,
 }: BookPreviewViewProps) {
   const { showCta, canGoPrev, canGoNext, handlePrev, handleNext } =
     useBookPreviewPresenter({ currentPage, setCurrentPage });
@@ -84,13 +82,13 @@ const BookPreviewView = memo(function BookPreviewView({
             ← Previous
           </button>
         ) : (
-          <button
-            type="button"
-            onClick={onBackToSummary}
+          <Link
+            to="/preview-books/$id"
+            params={{ id: bookId }}
             className="rounded border px-4 py-2 hover:bg-gray-50"
           >
             ← Back to summary
-          </button>
+          </Link>
         )}
         {canGoNext && (
           <button
@@ -124,7 +122,6 @@ export interface BookPreviewComponentProps
     "book" | "page" | "isPending" | "isFetching" | "bookId" | "currentPage" | "setCurrentPage"
   > {
   isLoggedIn: boolean;
-  onBackToSummary: () => void;
 }
 
 export function BookPreviewComponent({
@@ -136,7 +133,6 @@ export function BookPreviewComponent({
   currentPage,
   setCurrentPage,
   isLoggedIn,
-  onBackToSummary,
 }: BookPreviewComponentProps) {
   if (isPending || !book) {
     return <BookPreviewSkeleton />;
@@ -151,7 +147,6 @@ export function BookPreviewComponent({
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         isLoggedIn={isLoggedIn}
-        onBackToSummary={onBackToSummary}
       />
     </div>
   );

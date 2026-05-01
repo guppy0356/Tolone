@@ -1,13 +1,13 @@
 import { getRouteApi } from "@tanstack/react-router";
 import { useBookPreviewFacade } from "./BookPreview.facade";
-import { BookPreviewSummaryComponent } from "./BookPreviewSummary.component";
+import { BookPreviewComponent } from "./BookPreview.component";
 import { useSidebarFacade } from "../sidebar/Sidebar.facade";
 import { SidebarComponent } from "../sidebar/Sidebar.component";
 import { useAuth } from "../../lib/use-auth";
 
-const route = getRouteApi("/preview-books/$id");
+const route = getRouteApi("/preview-books/$id/read");
 
-export function BookPreviewContainer() {
+export function BookPreviewReadContainer() {
   const { id } = route.useParams();
   const facade = useBookPreviewFacade(id);
   const sidebarFacade = useSidebarFacade();
@@ -21,12 +21,7 @@ export function BookPreviewContainer() {
         isLoggedIn={isLoggedIn}
       />
       <main className="flex-1">
-        <BookPreviewSummaryComponent
-          book={facade.book}
-          isPending={facade.isPending}
-          isFetching={facade.isFetching}
-          bookId={id}
-        />
+        <BookPreviewComponent {...facade} isLoggedIn={isLoggedIn} />
       </main>
     </div>
   );

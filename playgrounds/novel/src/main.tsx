@@ -22,10 +22,10 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
   beforeLoad: () => {
-    throw redirect({
-      to: "/preview-books/$id",
-      params: { id: "1" },
-    });
+    if (isAuthenticated()) {
+      throw redirect({ to: "/books/$id", params: { id: "1" } });
+    }
+    throw redirect({ to: "/preview-books/$id", params: { id: "1" } });
   },
 });
 

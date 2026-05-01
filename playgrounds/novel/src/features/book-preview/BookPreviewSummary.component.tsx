@@ -1,5 +1,4 @@
 import { memo } from "react";
-import { Link } from "@tanstack/react-router";
 import type { BookPreviewFacade } from "./BookPreview.facade";
 import type { BookPreview } from "./BookPreview.api";
 
@@ -19,39 +18,39 @@ export function BookPreviewSummarySkeleton() {
 
 interface BookPreviewSummaryViewProps {
   book: BookPreview;
-  bookId: string;
+  onStartReading: () => void;
 }
 
 const BookPreviewSummaryView = memo(function BookPreviewSummaryView({
   book,
-  bookId,
+  onStartReading,
 }: BookPreviewSummaryViewProps) {
   return (
     <article className="mx-auto max-w-2xl p-6">
       <h1 className="mb-1 text-3xl font-bold">{book.title}</h1>
       <p className="mb-6 text-sm text-gray-600">by {book.author}</p>
       <p className="mb-8 leading-relaxed text-gray-700">{book.summary}</p>
-      <Link
-        to="/preview-books/$id/read"
-        params={{ id: bookId }}
+      <button
+        type="button"
+        onClick={onStartReading}
         className="rounded bg-blue-500 px-6 py-2 text-white hover:bg-blue-600"
       >
         Start reading →
-      </Link>
+      </button>
     </article>
   );
 });
 
 export interface BookPreviewSummaryComponentProps
   extends Pick<BookPreviewFacade, "book" | "isPending" | "isFetching"> {
-  bookId: string;
+  onStartReading: () => void;
 }
 
 export function BookPreviewSummaryComponent({
   book,
   isPending,
   isFetching,
-  bookId,
+  onStartReading,
 }: BookPreviewSummaryComponentProps) {
   if (isPending || !book) {
     return <BookPreviewSummarySkeleton />;
@@ -59,7 +58,7 @@ export function BookPreviewSummaryComponent({
 
   return (
     <div className={`transition-opacity ${isFetching ? "opacity-50" : ""}`}>
-      <BookPreviewSummaryView book={book} bookId={bookId} />
+      <BookPreviewSummaryView book={book} onStartReading={onStartReading} />
     </div>
   );
 }

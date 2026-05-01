@@ -50,11 +50,23 @@ const baseProps: BookReaderFacade = {
   isFetching: false,
   bookId: "1",
   pageNumber: 1,
+  showSummary: false,
+  startReading: vi.fn(),
   goNext: vi.fn().mockResolvedValue(undefined),
   goPrev: vi.fn().mockResolvedValue(undefined),
 };
 
 describe("BookReaderComponent", () => {
+  it("shows summary and Start reading button when showSummary=true", async () => {
+    const startReading = vi.fn();
+    const user = userEvent.setup();
+    await renderWithRouter({ ...baseProps, showSummary: true, startReading });
+    expect(screen.getByText("The Lantern Keeper")).toBeInTheDocument();
+    expect(screen.getByText("A story of light and shadow.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Start reading →" }));
+    expect(startReading).toHaveBeenCalled();
+  });
+
   it("renders page content and pagination label", async () => {
     await renderWithRouter(baseProps);
     expect(

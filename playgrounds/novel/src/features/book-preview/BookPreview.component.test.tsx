@@ -59,6 +59,7 @@ const baseProps: BookPreviewComponentProps = {
   currentPage: 1,
   setCurrentPage: vi.fn(),
   isLoggedIn: false,
+  onBackToSummary: vi.fn(),
 };
 
 describe("BookPreviewComponent", () => {
@@ -76,11 +77,12 @@ describe("BookPreviewComponent", () => {
     expect(setCurrentPage).toHaveBeenCalledWith(2);
   });
 
-  it("shows Back-to-summary link on page 1 (no Previous button)", async () => {
-    await renderWithRouter(baseProps);
-    expect(
-      screen.getByRole("link", { name: "← Back to summary" }),
-    ).toHaveAttribute("href", "/preview-books/1");
+  it("calls onBackToSummary instead of Previous on page 1", async () => {
+    const onBackToSummary = vi.fn();
+    const user = userEvent.setup();
+    await renderWithRouter({ ...baseProps, onBackToSummary });
+    await user.click(screen.getByRole("button", { name: "← Back to summary" }));
+    expect(onBackToSummary).toHaveBeenCalled();
     expect(screen.queryByRole("button", { name: "← Previous" })).not.toBeInTheDocument();
   });
 

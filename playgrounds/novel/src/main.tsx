@@ -10,7 +10,6 @@ import {
 } from "@tanstack/react-router";
 import { LoginContainer } from "./features/login/LoginContainer";
 import { BookPreviewContainer } from "./features/book-preview/BookPreviewContainer";
-import { BookPreviewReadContainer } from "./features/book-preview/BookPreviewReadContainer";
 import { BookReaderContainer } from "./features/book-reader/BookReaderContainer";
 import { isAuthenticated } from "./lib/auth-cookie";
 import "./app.css";
@@ -45,15 +44,6 @@ const bookPreviewRoute = createRoute({
   },
 });
 
-const bookPreviewReadRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/preview-books/$id/read",
-  component: () => {
-    const { id } = bookPreviewReadRoute.useParams();
-    return <BookPreviewReadContainer key={id} />;
-  },
-});
-
 const bookReaderRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/books/$id",
@@ -75,7 +65,6 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   bookPreviewRoute,
-  bookPreviewReadRoute,
   bookReaderRoute,
 ]);
 

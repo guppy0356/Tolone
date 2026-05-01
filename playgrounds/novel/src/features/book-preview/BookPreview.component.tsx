@@ -7,12 +7,11 @@ import type { BookPreview, Page } from "./BookPreview.api";
 export function BookPreviewSkeleton() {
   return (
     <div className="mx-auto max-w-2xl animate-pulse p-6">
-      <div className="mb-3 h-8 w-2/3 rounded bg-gray-200" />
-      <div className="mb-6 h-4 w-1/3 rounded bg-gray-200" />
+      <div className="mb-4 h-4 w-1/4 rounded bg-gray-200" />
       <div className="space-y-2">
         <div className="h-3 w-full rounded bg-gray-200" />
         <div className="h-3 w-full rounded bg-gray-200" />
-        <div className="h-3 w-4/5 rounded bg-gray-200" />
+        <div className="h-3 w-5/6 rounded bg-gray-200" />
       </div>
     </div>
   );
@@ -25,6 +24,7 @@ interface BookPreviewViewProps {
   currentPage: number;
   setCurrentPage: (n: number) => void;
   isLoggedIn: boolean;
+  onBackToSummary: () => void;
 }
 
 const BookPreviewView = memo(function BookPreviewView({
@@ -34,18 +34,13 @@ const BookPreviewView = memo(function BookPreviewView({
   currentPage,
   setCurrentPage,
   isLoggedIn,
+  onBackToSummary,
 }: BookPreviewViewProps) {
   const { showCta, canGoPrev, canGoNext, handlePrev, handleNext } =
     useBookPreviewPresenter({ currentPage, setCurrentPage });
 
   return (
     <article className="mx-auto max-w-2xl p-6">
-      <header className="mb-6">
-        <h1 className="mb-1 text-3xl font-bold">{book.title}</h1>
-        <p className="mb-4 text-sm text-gray-600">by {book.author}</p>
-        <p className="text-gray-700">{book.summary}</p>
-      </header>
-
       {showCta || !page ? (
         <div className="rounded border border-amber-300 bg-amber-50 p-6 text-center">
           <p className="mb-4 text-amber-800">
@@ -89,7 +84,13 @@ const BookPreviewView = memo(function BookPreviewView({
             ← Previous
           </button>
         ) : (
-          <span />
+          <button
+            type="button"
+            onClick={onBackToSummary}
+            className="rounded border px-4 py-2 hover:bg-gray-50"
+          >
+            ← Back to summary
+          </button>
         )}
         {canGoNext && (
           <button
@@ -117,8 +118,13 @@ const BookPreviewView = memo(function BookPreviewView({
   );
 });
 
-export interface BookPreviewComponentProps extends BookPreviewFacade {
+export interface BookPreviewComponentProps
+  extends Pick<
+    BookPreviewFacade,
+    "book" | "page" | "isPending" | "isFetching" | "bookId" | "currentPage" | "setCurrentPage"
+  > {
   isLoggedIn: boolean;
+  onBackToSummary: () => void;
 }
 
 export function BookPreviewComponent({
@@ -130,6 +136,7 @@ export function BookPreviewComponent({
   currentPage,
   setCurrentPage,
   isLoggedIn,
+  onBackToSummary,
 }: BookPreviewComponentProps) {
   if (isPending || !book) {
     return <BookPreviewSkeleton />;
@@ -144,6 +151,7 @@ export function BookPreviewComponent({
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         isLoggedIn={isLoggedIn}
+        onBackToSummary={onBackToSummary}
       />
     </div>
   );

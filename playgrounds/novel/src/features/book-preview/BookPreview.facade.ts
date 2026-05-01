@@ -14,7 +14,7 @@ export interface BookPreviewFacade {
   setCurrentPage: (n: number) => void;
 }
 
-const bookPreviewKeys = {
+export const bookPreviewKeys = {
   detail: (id: string) => ["book-preview", id] as const,
 };
 
@@ -35,13 +35,5 @@ export function useBookPreviewFacade(id: string): BookPreviewFacade {
       ? data?.pages[currentPage - 1]
       : undefined;
 
-  return {
-    book: data,
-    page,
-    isPending,
-    isFetching,
-    bookId: id,
-    currentPage,
-    setCurrentPage,
-  };
+  return { book: data, page, isPending, isFetching, bookId: id, currentPage, setCurrentPage };
 }

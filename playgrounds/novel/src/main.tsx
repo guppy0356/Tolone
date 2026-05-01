@@ -38,6 +38,11 @@ const loginRoute = createRoute({
 const bookPreviewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/preview-books/$id",
+  beforeLoad: ({ params }) => {
+    if (isAuthenticated()) {
+      throw redirect({ to: "/books/$id", params: { id: params.id } });
+    }
+  },
   component: () => {
     const { id } = bookPreviewRoute.useParams();
     return <BookPreviewContainer key={id} />;

@@ -3,7 +3,6 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
-  keepPreviousData,
 } from "@tanstack/react-query";
 import { bookReaderApi, type Book, type Page } from "./BookReader.api";
 
@@ -22,7 +21,6 @@ export interface BookReaderFacade {
 
 const bookReaderKeys = {
   detail: (id: string) => ["books", id] as const,
-  page: (id: string, n: number) => ["books", id, "pages", n] as const,
 };
 
 export function useBookReaderFacade(bookId: string): BookReaderFacade {
@@ -36,20 +34,17 @@ export function useBookReaderFacade(bookId: string): BookReaderFacade {
     queryFn: () => bookReaderApi.getBook(bookId),
   });
 
-  const pageNumber = bookQuery.data?.currentPage ?? 1;
-
-  const pageQuery = useQuery({
-    queryKey: bookReaderKeys.page(bookId, pageNumber),
-    queryFn: () => bookReaderApi.getPage(bookId, pageNumber),
-    placeholderData: keepPreviousData,
-    enabled: bookQuery.data !== undefined,
-  });
+  const book = bookQuery.data;
+  const pageNumber = book?.currentPage ?? 1;
+  const page: Page | undefined = book
+    ? { number: book.currentPage, totalPages: book.totalPages, content: book.pageContent }
+    : undefined;
 
   const optimisticUpdate = (direction: "next" | "prev") => async () => {
     await queryClient.cancelQueries({ queryKey: detailKey });
     const previous = queryClient.getQueryData<Book>(detailKey);
     if (previous) {
-      const current = previous.currentPage ?? 1;
+      const current = previous.currentPage;
       const optimistic =
         direction === "next"
           ? Math.min(current + 1, previous.totalPages)
@@ -72,12 +67,13 @@ export function useBookReaderFacade(bookId: string): BookReaderFacade {
     }
   };
 
-  const onSuccess = (data: { page: number }) => {
+  const onSuccess = (data: { page: number; content: string; totalPages: number }) => {
     const current = queryClient.getQueryData<Book>(detailKey);
     if (current) {
       queryClient.setQueryData<Book>(detailKey, {
         ...current,
         currentPage: data.page,
+        pageContent: data.content,
       });
     }
   };
@@ -105,10 +101,10 @@ export function useBookReaderFacade(bookId: string): BookReaderFacade {
   }, [prevMutation]);
 
   return {
-    book: bookQuery.data,
-    page: pageQuery.data,
-    isPending: bookQuery.isPending || pageQuery.isPending,
-    isFetching: bookQuery.isFetching || pageQuery.isFetching,
+    book,
+    page,
+    isPending: bookQuery.isPending,
+    isFetching: bookQuery.isFetching,
     bookId,
     pageNumber,
     showSummary,

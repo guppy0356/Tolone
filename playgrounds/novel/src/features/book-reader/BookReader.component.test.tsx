@@ -41,6 +41,7 @@ const sampleBook = {
   summary: "A story of light and shadow.",
   totalPages: 6,
   currentPage: 1,
+  pageContent: "It was a quiet morning in the lighthouse.",
 };
 
 const baseProps: BookReaderFacade = {

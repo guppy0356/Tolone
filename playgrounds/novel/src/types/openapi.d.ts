@@ -68,22 +68,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/books/{id}/pages/{pageNumber}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getPage"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/books/{id}/next": {
         parameters: {
             query?: never;
@@ -140,6 +124,8 @@ export interface components {
             totalPages: number;
             /** @description Reader's bookmark page. The endpoint is auth-required so this is always present. */
             currentPage: number;
+            /** @description Text content of the current bookmark page. */
+            pageContent: string;
         };
         BookPreview: {
             id: string;
@@ -156,6 +142,8 @@ export interface components {
         };
         Bookmark: {
             page: number;
+            totalPages: number;
+            content: string;
             /** Format: date-time */
             updatedAt: string;
         };
@@ -267,43 +255,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["BookPreview"];
                 };
-            };
-            /** @description Not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    getPage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-                pageNumber: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Page content (authenticated) */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Page"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
             /** @description Not found */
             404: {

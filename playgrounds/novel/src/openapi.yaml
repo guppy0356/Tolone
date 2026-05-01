@@ -74,32 +74,6 @@ paths:
         "404":
           description: Not found
 
-  /api/books/{id}/pages/{pageNumber}:
-    get:
-      operationId: getPage
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pageNumber
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Page content (authenticated)
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Page"
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not found
-
   /api/books/{id}/next:
     post:
       operationId: nextBookPage
@@ -173,7 +147,7 @@ components:
 
     Book:
       type: object
-      required: [id, title, author, summary, totalPages, currentPage]
+      required: [id, title, author, summary, totalPages, currentPage, pageContent]
       properties:
         id:
           type: string
@@ -188,6 +162,9 @@ components:
         currentPage:
           type: integer
           description: Reader's bookmark page. The endpoint is auth-required so this is always present.
+        pageContent:
+          type: string
+          description: Text content of the current bookmark page.
 
     BookPreview:
       type: object
@@ -221,10 +198,14 @@ components:
 
     Bookmark:
       type: object
-      required: [page, updatedAt]
+      required: [page, totalPages, content, updatedAt]
       properties:
         page:
           type: integer
+        totalPages:
+          type: integer
+        content:
+          type: string
         updatedAt:
           type: string
           format: date-time

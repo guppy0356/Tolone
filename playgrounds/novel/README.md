@@ -1,8 +1,8 @@
 # novel
 
-小説プレビュー＆リーダーのプレイグラウンド。認証ゲート・サーバー側ブックマーク・共有サイドバーを題材に 4 層アーキテクチャを実装している。
+A novel preview & reader playground demonstrating the 4-layer architecture with auth-gated content, server-side bookmarks, and a shared sidebar.
 
-## 起動
+## Getting started
 
 ```bash
 pnpm --filter @tolone/novel dev   # http://localhost:5174
@@ -11,87 +11,87 @@ pnpm --filter @tolone/novel test
 
 ---
 
-## ルーティング
+## Routes
 
 ```
-/                        → 認証状態に応じてリダイレクト
-                           ログイン済み → /books/1
-                           ゲスト      → /preview-books/1
+/                        → Redirects based on auth state
+                           Authenticated → /books/1
+                           Guest         → /preview-books/1
 
-/login                   → ログイン画面（サイドバーなし）
+/login                   → Login screen (no sidebar)
 
-/preview-books/:id       → 書籍サマリー画面（認証不要）
-                           サマリー（タイトル・著者・概要）を表示
-                           "Start reading →" でプレビュー読書に切り替わる（同一 URL・state 遷移）
-                           プレビューは先頭 3 ページまで読める
-                           3 ページ読み終えるとログイン CTA が表示される
+/preview-books/:id       → Book summary page (public)
+                           Shows title, author, and summary
+                           "Start reading →" transitions to the preview reader (same URL, state-driven)
+                           Preview allows reading up to the first 3 pages
+                           After page 3 a login CTA is shown
 
-/books/:id               → 認証済みリーダー画面
-                           未認証の場合は /preview-books/:id にリダイレクト
-                           サマリーを最初に表示し "Start reading →" でページ読書へ
-                           サーバー側ブックマーク（currentPage）から続きを再開できる
+/books/:id               → Authenticated reader
+                           Redirects to /preview-books/:id if not logged in
+                           Shows summary first; "Start reading →" opens the page reader
+                           Resumes from the server-side bookmark (currentPage)
 ```
 
 ---
 
-## API エンドポイント（MSW でモック）
+## API endpoints (mocked with MSW)
 
-| Method | Path | 認証 | 説明 |
-|--------|------|------|------|
-| POST | `/api/login` | 不要 | `{ email, password }` → `{ token }` |
-| GET | `/api/books` | 不要 | サイドバー用の書籍一覧 |
-| GET | `/api/preview-books/:id` | 不要 | 書籍メタデータ＋先頭 3 ページ |
-| GET | `/api/books/:id` | 必要 | 書籍メタデータ＋現在ページ番号＋ページ本文 |
-| POST | `/api/books/:id/next` | 必要 | ブックマークを 1 ページ進める → 新しいページ本文を返す |
-| POST | `/api/books/:id/prev` | 必要 | ブックマークを 1 ページ戻す → 新しいページ本文を返す |
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/api/login` | No | `{ email, password }` → `{ token }` |
+| GET | `/api/books` | No | Book list for the sidebar |
+| GET | `/api/preview-books/:id` | No | Book metadata + first 3 pages |
+| GET | `/api/books/:id` | Yes | Book metadata + current page number + page content |
+| POST | `/api/books/:id/next` | Yes | Advance bookmark by one page → returns new page content |
+| POST | `/api/books/:id/prev` | Yes | Go back one page → returns new page content |
 
-`GET /api/books/:id` のレスポンスに `currentPage`（ページ番号）と `pageContent`（本文）が含まれるため、ページ読書に必要なデータは 1 リクエストで揃う。next/prev もレスポンスにページ本文を含むため追加フェッチが不要。
-
----
-
-## 認証
-
-`document.cookie` に `novelAuth` キーで保存するシンプルなクッキー認証（プレイグラウンド用）。
-
-- `src/lib/auth-cookie.ts` — 読み書き＋subscriber パターン
-- `src/lib/use-auth.ts` — `useSyncExternalStore` で `{ isLoggedIn }` をリアクティブに提供
-- ログアウトはクッキーをクリアするだけ（API 呼び出しなし）
+`GET /api/books/:id` includes both `currentPage` and `pageContent` in its response, so a single request is enough to render the reader. `next` and `prev` also return page content, so no follow-up fetch is needed after navigation.
 
 ---
 
-## 機能ごとの構成
+## Auth
+
+A simple cookie-based scheme stored under the `novelAuth` key in `document.cookie` (playground-only).
+
+- `src/lib/auth-cookie.ts` — read/write helpers with a subscriber set
+- `src/lib/use-auth.ts` — wraps `useSyncExternalStore` to expose reactive `{ isLoggedIn }`
+- Logout only clears the cookie — no API call needed
+
+---
+
+## Feature breakdown
 
 ### `book-preview/`
 
-| ファイル | 役割 |
-|----------|------|
-| `BookPreviewContainer` | `showSummary` state を持ち、SummaryComponent と BookPreviewComponent を切り替える |
-| `BookPreviewSummaryComponent` | タイトル・著者・概要＋"Start reading" ボタン |
-| `BookPreviewComponent` | プレビューページネーション（1〜3 ページ）＋CTA |
-| `BookPreview.facade` | `GET /api/preview-books/:id` を 1 回フェッチ。ページ状態（`currentPage`）を `useState` で管理 |
-| `BookPreview.presenter` | prev/next の可否・CTA 表示判定を導出 |
+| File | Role |
+|------|------|
+| `BookPreviewContainer` | Owns `showSummary` state; switches between `BookPreviewSummaryComponent` and `BookPreviewComponent` |
+| `BookPreviewSummaryComponent` | Title, author, summary + "Start reading" button |
+| `BookPreviewComponent` | Paginated preview (pages 1–3) + login/reader CTA |
+| `BookPreview.facade` | Fetches `GET /api/preview-books/:id` once; manages `currentPage` with `useState` |
+| `BookPreview.presenter` | Derives prev/next availability and CTA visibility |
 
 ### `book-reader/`
 
-| ファイル | 役割 |
-|----------|------|
-| `BookReaderContainer` | Facade を呼び出して BookReaderComponent に spread |
-| `BookReaderComponent` | `showSummary=true` のときサマリービュー、`false` のときページビューを表示 |
-| `BookReader.facade` | `GET /api/books/:id` でブックマーク＋ページ本文を取得。next/prev mutation でキャッシュを楽観的更新 |
-| `BookReader.presenter` | prev/next ボタンの表示判定 |
+| File | Role |
+|------|------|
+| `BookReaderContainer` | Calls the facade and spreads its return to `BookReaderComponent` |
+| `BookReaderComponent` | Shows summary view when `showSummary=true`, page view otherwise |
+| `BookReader.facade` | Fetches `GET /api/books/:id` for bookmark + page content; optimistically updates the cache on next/prev mutations |
+| `BookReader.presenter` | Derives prev/next button visibility |
 
 ### `sidebar/`
 
-Facade が書籍一覧（`GET /api/books`）を取得。ログアウトはクッキークリアのみで mutation の invalidation は不要（`useSyncExternalStore` が subscriber に通知する）。
+The facade fetches the book list (`GET /api/books`). Logout only calls `clearAuthCookie()` — no query invalidation needed because `useSyncExternalStore` notifies all subscribers directly.
 
 ### `login/`
 
-Facade の `onSuccess` で `setAuthCookie(token)` を呼ぶ。ログイン後はルートの index redirect が `isAuthenticated()` を見て `/books/1` に遷移させる。
+The facade's `onSuccess` calls `setAuthCookie(token)`. After login the index route's `beforeLoad` checks `isAuthenticated()` and redirects to `/books/1`.
 
 ---
 
-## 注意点
+## Notes
 
-- 認証はクライアントサイドのみ。実際のバックエンドでは `Set-Cookie` とサーバーサイドガードが必要。
-- ブックマークは MSW のインメモリ `Map` に保存されるため、ページリロードでリセットされる。
-- 書籍データは `src/mocks/books-seed.ts` に 5 冊ハードコードされている。
+- Auth is client-side only. A real backend would use `Set-Cookie` and server-side guards.
+- Bookmarks are stored in an in-memory `Map` inside MSW and reset on page reload.
+- Book data is hardcoded in `src/mocks/books-seed.ts` (5 books).

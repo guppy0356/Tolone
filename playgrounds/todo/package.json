@@ -13,28 +13,28 @@
   "dependencies": {
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
+    "ky": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:",
-    "ky": "catalog:"
+    "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@tolone/tailwind": "workspace:*",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^4.0.0",
-    "tailwindcss": "catalog:",
     "@tailwindcss/vite": "catalog:",
-    "vite-plugin-checker": "catalog:",
-    "vite": "^6.0.0",
-    "vitest": "catalog:",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@tolone/tailwind": "workspace:*",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "jsdom": "^25.0.1",
     "msw": "catalog:",
     "openapi-msw": "catalog:",
     "openapi-typescript": "catalog:",
-    "@testing-library/react": "^16.0.0",
-    "@testing-library/jest-dom": "^6.0.0",
-    "@testing-library/user-event": "^14.0.0",
-    "jsdom": "^25.0.0",
-    "typescript": "^5.7.0"
+    "tailwindcss": "catalog:",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.2",
+    "vite-plugin-checker": "catalog:",
+    "vitest": "catalog:"
   },
   "msw": {
     "workerDirectory": [

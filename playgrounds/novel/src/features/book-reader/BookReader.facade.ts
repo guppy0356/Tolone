@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import {
   useQuery,
   useMutation,
@@ -13,8 +13,6 @@ export interface BookReaderFacade {
   isFetching: boolean;
   bookId: string;
   pageNumber: number;
-  showSummary: boolean;
-  startReading: () => void;
   goNext: () => Promise<void>;
   goPrev: () => Promise<void>;
 }
@@ -25,8 +23,6 @@ const bookReaderKeys = {
 
 export function useBookReaderFacade(bookId: string): BookReaderFacade {
   const queryClient = useQueryClient();
-  const [showSummary, setShowSummary] = useState(true);
-  const startReading = useCallback(() => setShowSummary(false), []);
   const detailKey = bookReaderKeys.detail(bookId);
 
   const bookQuery = useQuery({
@@ -107,8 +103,6 @@ export function useBookReaderFacade(bookId: string): BookReaderFacade {
     isFetching: bookQuery.isFetching,
     bookId,
     pageNumber,
-    showSummary,
-    startReading,
     goNext,
     goPrev,
   };

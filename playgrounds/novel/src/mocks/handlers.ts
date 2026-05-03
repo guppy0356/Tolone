@@ -47,14 +47,16 @@ export const handlers = [
     const book = books.find((b) => b.id === params.id);
     if (!book) return response(404).empty();
     const currentPage = getBookmark(token, book.id);
+    const totalPages = book.pages.length + 1;
+    const pageContent = currentPage === 1 ? book.summary : book.pages[currentPage - 2];
     return response(200).json({
       id: book.id,
       title: book.title,
       author: book.author,
       summary: book.summary,
-      totalPages: book.pages.length,
+      totalPages,
       currentPage,
-      pageContent: book.pages[currentPage - 1],
+      pageContent,
     });
   }),
 
@@ -62,37 +64,38 @@ export const handlers = [
     await delay(400);
     const book = books.find((b) => b.id === params.id);
     if (!book) return response(404).empty();
-    const previewPages = book.pages
-      .slice(0, PREVIEW_PAGE_LIMIT)
-      .map((content, i) => ({
-        number: i + 1,
-        totalPages: book.pages.length,
-        content,
-      }));
+    const totalPages = book.pages.length + 1;
+    const summaryPage = { number: 1, totalPages, content: book.summary };
+    const contentPages = book.pages.slice(0, PREVIEW_PAGE_LIMIT).map((content, i) => ({
+      number: i + 2,
+      totalPages,
+      content,
+    }));
     return response(200).json({
       id: book.id,
       title: book.title,
       author: book.author,
       summary: book.summary,
-      totalPages: book.pages.length,
-      pages: previewPages,
+      totalPages,
+      pages: [summaryPage, ...contentPages],
     });
   }),
 
-
-http.post("/api/books/{id}/next", async ({ cookies, params, response }) => {
+  http.post("/api/books/{id}/next", async ({ cookies, params, response }) => {
     await delay(150);
     const token = getAuthToken(cookies);
     if (!token) return response(401).empty();
     const book = books.find((b) => b.id === params.id);
     if (!book) return response(404).empty();
+    const totalPages = book.pages.length + 1;
     const current = getBookmark(token, book.id);
-    const next = Math.min(current + 1, book.pages.length);
+    const next = Math.min(current + 1, totalPages);
     setBookmark(token, book.id, next);
+    const content = next === 1 ? book.summary : book.pages[next - 2];
     return response(200).json({
       page: next,
-      totalPages: book.pages.length,
-      content: book.pages[next - 1],
+      totalPages,
+      content,
       updatedAt: new Date().toISOString(),
     });
   }),
@@ -103,13 +106,15 @@ http.post("/api/books/{id}/next", async ({ cookies, params, response }) => {
     if (!token) return response(401).empty();
     const book = books.find((b) => b.id === params.id);
     if (!book) return response(404).empty();
+    const totalPages = book.pages.length + 1;
     const current = getBookmark(token, book.id);
     const prev = Math.max(current - 1, 1);
     setBookmark(token, book.id, prev);
+    const content = prev === 1 ? book.summary : book.pages[prev - 2];
     return response(200).json({
       page: prev,
-      totalPages: book.pages.length,
-      content: book.pages[prev - 1],
+      totalPages,
+      content,
       updatedAt: new Date().toISOString(),
     });
   }),

@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { bookPreviewApi, type BookPreview, type Page } from "./BookPreview.api";
 
-export const PREVIEW_PAGE_LIMIT = 3;
+export const PREVIEW_PAGE_LIMIT = 4; // 1 summary page + 3 content pages
 
 export interface BookPreviewFacade {
   book: BookPreview | undefined;
@@ -30,10 +30,7 @@ export function useBookPreviewFacade(id: string): BookPreviewFacade {
     queryFn: () => bookPreviewApi.getPreview(id),
   });
 
-  const page =
-    currentPage <= PREVIEW_PAGE_LIMIT
-      ? data?.pages[currentPage - 1]
-      : undefined;
+  const page = data?.pages[currentPage - 1];
 
   return { book: data, page, isPending, isFetching, bookId: id, currentPage, setCurrentPage };
 }

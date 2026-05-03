@@ -59,7 +59,6 @@ const baseProps: BookPreviewComponentProps = {
   currentPage: 1,
   setCurrentPage: vi.fn(),
   isLoggedIn: false,
-  onBackToSummary: vi.fn(),
 };
 
 describe("BookPreviewComponent", () => {
@@ -77,13 +76,10 @@ describe("BookPreviewComponent", () => {
     expect(setCurrentPage).toHaveBeenCalledWith(2);
   });
 
-  it("calls onBackToSummary instead of Previous on page 1", async () => {
-    const onBackToSummary = vi.fn();
-    const user = userEvent.setup();
-    await renderWithRouter({ ...baseProps, onBackToSummary });
-    await user.click(screen.getByRole("button", { name: "← Back to summary" }));
-    expect(onBackToSummary).toHaveBeenCalled();
+  it("no Previous button on page 1", async () => {
+    await renderWithRouter(baseProps);
     expect(screen.queryByRole("button", { name: "← Previous" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "← Back to summary" })).not.toBeInTheDocument();
   });
 
   it("Previous on page 2 calls setCurrentPage(1)", async () => {
@@ -99,16 +95,16 @@ describe("BookPreviewComponent", () => {
     expect(setCurrentPage).toHaveBeenCalledWith(1);
   });
 
-  it("shows guest CTA after page 3", async () => {
-    await renderWithRouter({ ...baseProps, currentPage: 4, page: undefined });
+  it("shows guest CTA after page 4", async () => {
+    await renderWithRouter({ ...baseProps, currentPage: 5, page: undefined });
     expect(screen.getByText("You've reached the end of the preview.")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Log in to keep reading" }),
     ).toHaveAttribute("href", "/login");
   });
 
-  it("shows logged-in CTA after page 3", async () => {
-    await renderWithRouter({ ...baseProps, currentPage: 4, page: undefined, isLoggedIn: true });
+  it("shows logged-in CTA after page 4", async () => {
+    await renderWithRouter({ ...baseProps, currentPage: 5, page: undefined, isLoggedIn: true });
     expect(
       screen.getByRole("link", { name: "Read the full book" }),
     ).toHaveAttribute("href", "/books/1");

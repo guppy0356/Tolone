@@ -18,31 +18,6 @@ export function BookReaderSkeleton() {
   );
 }
 
-interface BookReaderSummaryViewProps {
-  book: Book;
-  onStartReading: () => void;
-}
-
-const BookReaderSummaryView = memo(function BookReaderSummaryView({
-  book,
-  onStartReading,
-}: BookReaderSummaryViewProps) {
-  return (
-    <article className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-1 text-3xl font-bold">{book.title}</h1>
-      <p className="mb-6 text-sm text-gray-600">by {book.author}</p>
-      <p className="mb-8 leading-relaxed text-gray-700">{book.summary}</p>
-      <button
-        type="button"
-        onClick={onStartReading}
-        className="rounded bg-blue-500 px-6 py-2 text-white hover:bg-blue-600"
-      >
-        Start reading →
-      </button>
-    </article>
-  );
-});
-
 interface BookReaderViewProps {
   book: Book;
   page: Page;
@@ -117,24 +92,10 @@ export function BookReaderComponent({
   isFetching,
   bookId,
   pageNumber,
-  showSummary,
-  startReading,
   goNext,
   goPrev,
 }: BookReaderFacade) {
-  if (isPending || !book) {
-    return <BookReaderSkeleton />;
-  }
-
-  if (showSummary) {
-    return (
-      <div className={`transition-opacity ${isFetching ? "opacity-50" : ""}`}>
-        <BookReaderSummaryView book={book} onStartReading={startReading} />
-      </div>
-    );
-  }
-
-  if (!page) {
+  if (isPending || !book || !page) {
     return <BookReaderSkeleton />;
   }
 

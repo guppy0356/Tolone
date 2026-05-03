@@ -24,7 +24,6 @@ interface BookPreviewViewProps {
   currentPage: number;
   setCurrentPage: (n: number) => void;
   isLoggedIn: boolean;
-  onBackToSummary: () => void;
 }
 
 const BookPreviewView = memo(function BookPreviewView({
@@ -34,7 +33,6 @@ const BookPreviewView = memo(function BookPreviewView({
   currentPage,
   setCurrentPage,
   isLoggedIn,
-  onBackToSummary,
 }: BookPreviewViewProps) {
   const { showCta, canGoPrev, canGoNext, handlePrev, handleNext } =
     useBookPreviewPresenter({ currentPage, setCurrentPage });
@@ -75,21 +73,13 @@ const BookPreviewView = memo(function BookPreviewView({
       )}
 
       <nav className="mt-8 flex justify-between">
-        {canGoPrev ? (
+        {canGoPrev && (
           <button
             type="button"
             onClick={handlePrev}
             className="rounded border px-4 py-2 hover:bg-gray-50"
           >
             ← Previous
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={onBackToSummary}
-            className="rounded border px-4 py-2 hover:bg-gray-50"
-          >
-            ← Back to summary
           </button>
         )}
         {canGoNext && (
@@ -124,7 +114,6 @@ export interface BookPreviewComponentProps
     "book" | "page" | "isPending" | "isFetching" | "bookId" | "currentPage" | "setCurrentPage"
   > {
   isLoggedIn: boolean;
-  onBackToSummary: () => void;
 }
 
 export function BookPreviewComponent({
@@ -136,7 +125,6 @@ export function BookPreviewComponent({
   currentPage,
   setCurrentPage,
   isLoggedIn,
-  onBackToSummary,
 }: BookPreviewComponentProps) {
   if (isPending || !book) {
     return <BookPreviewSkeleton />;
@@ -151,7 +139,6 @@ export function BookPreviewComponent({
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         isLoggedIn={isLoggedIn}
-        onBackToSummary={onBackToSummary}
       />
     </div>
   );

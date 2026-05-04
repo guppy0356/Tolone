@@ -89,13 +89,13 @@ Use `pnpm outdated -r` to check for updates across all workspaces.
 
 ### Order of updates
 
-Apply updates in this order, committing after each package:
+Update one package at a time regardless of patch/minor/major, committing after each. Order by impact (lowest first):
 
-1. **Patch / minor** — Update all at once with `pnpm update -r`
-2. **Major** — Handle one package at a time, ordered by impact (lowest first):
-   - Test-only dependencies (e.g. `jsdom`, `vitest`) — isolated to the test environment
-   - Packages that can be updated independently (e.g. `ky`, `zod`)
-   - Packages that must be updated together (e.g. `vite` + `vitest` + `@vitejs/plugin-react`)
+- Test-only dependencies (e.g. `jsdom`) — isolated to the test environment
+- Packages that can be updated independently (e.g. `ky`, `zod`, `react`)
+- Packages that must be updated together (e.g. `vite` + `vitest` + `@vitejs/plugin-react`) — treat as a single unit
+
+Exception: packages sharing the same version in the catalog (e.g. `tailwindcss` and `@tailwindcss/vite`) may be updated in one step if they are always released together.
 
 ### Verification after each update
 

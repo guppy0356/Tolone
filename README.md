@@ -116,12 +116,11 @@ First, present a full impact assessment of all outdated packages
 (patch/minor and major) and the proposed update order with reasons.
 Wait for confirmation before starting any updates.
 
-Then proceed in the confirmed order:
-- Patch/minor: update all at once with `pnpm update -r`
-- Major: research release notes, assess impact on this codebase,
-  update one package at a time (lowest impact first)
-- Verify with `pnpm test` and `pnpm -r build` after each update
-- Commit per package
+Then proceed in the confirmed order, one package at a time:
+- Research release notes and assess impact on this codebase
+- Update, verify with `pnpm test` and `pnpm -r build`, then commit
+- Exception: packages that must be updated together (e.g. vite +
+  vitest + @vitejs/plugin-react) are treated as a single unit
 ```
 
 

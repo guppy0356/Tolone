@@ -34,7 +34,7 @@
     "msw": "catalog:",
     "openapi-typescript": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "vite": "^6.4.2",
     "vite-plugin-checker": "catalog:",
     "vitest": "catalog:"

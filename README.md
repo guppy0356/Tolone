@@ -110,13 +110,16 @@ and implement following docs/architecture.md.
 ### Update packages
 
 ```
-Check for outdated packages with `pnpm outdated -r` and update them.
+Check for outdated packages with `pnpm outdated -r`.
 
-- Start with patch/minor updates all at once
-- For major updates, research the release notes for each package,
-  assess the impact on this codebase, and update in order of lowest
-  impact first (test-only deps first, then independent packages, then
-  packages that must be updated together)
+First, present a full impact assessment of all outdated packages
+(patch/minor and major) and the proposed update order with reasons.
+Wait for confirmation before starting any updates.
+
+Then proceed in the confirmed order:
+- Patch/minor: update all at once with `pnpm update -r`
+- Major: research release notes, assess impact on this codebase,
+  update one package at a time (lowest impact first)
 - Verify with `pnpm test` and `pnpm -r build` after each update
 - Commit per package
 ```

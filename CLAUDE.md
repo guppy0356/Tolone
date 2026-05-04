@@ -117,7 +117,7 @@ Before updating a major version, fetch the release notes and check for breaking 
 If a breaking change requires a code fix, apply it in the same commit as the version bump.
 If the impact cannot be determined, skip the package and open a GitHub Issue to track it.
 
-Before starting updates, present an impact assessment and proposed order for user confirmation:
+Before starting any updates, present a full impact assessment covering all outdated packages (patch/minor and major) and the proposed update order. Wait for user confirmation before proceeding.
 
 ```
 ## Impact assessment

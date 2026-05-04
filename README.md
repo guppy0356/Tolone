@@ -92,7 +92,9 @@ API → Facade → Presenter → Component
 
 Features are placed under `src/features/{feature-name}/`.
 
-## Sample Prompt for Claude
+## Sample Prompts for Claude
+
+### Create a new playground
 
 ```
 Create a bookmark management playground.
@@ -103,6 +105,20 @@ Features:
 
 Scaffold with `pnpm new:playground bookmark`, then define openapi.yaml
 and implement following docs/architecture.md.
+```
+
+### Update packages
+
+```
+Check for outdated packages with `pnpm outdated -r` and update them.
+
+- Start with patch/minor updates all at once
+- For major updates, research the release notes for each package,
+  assess the impact on this codebase, and update in order of lowest
+  impact first (test-only deps first, then independent packages, then
+  packages that must be updated together)
+- Verify with `pnpm test` and `pnpm -r build` after each update
+- Commit per package
 ```
 
 ## Tech Stack

@@ -83,9 +83,49 @@ Typical commit sequence:
 
 Once a feature is working end-to-end, if a single Component/Presenter contains multiple distinct UI concerns (e.g. form, filter, list), **propose** splitting into sub-components each with its own Presenter. Do not split without user approval.
 
+## Updating Dependencies
+
+Use `pnpm outdated -r` to check for updates across all workspaces.
+
+### Order of updates
+
+Apply updates in this order, committing after each package:
+
+1. **Patch / minor** — Update all at once with `pnpm update -r`
+2. **Major** — Handle one package at a time, ordered by impact (lowest first):
+   - Test-only dependencies (e.g. `jsdom`, `vitest`) — isolated to the test environment
+   - Packages that can be updated independently (e.g. `ky`, `zod`)
+   - Packages that must be updated together (e.g. `vite` + `vitest` + `@vitejs/plugin-react`)
+
+### Verification after each update
+
+Run in this order; all must pass before committing:
+
+```bash
+pnpm test       # Vitest unit tests
+pnpm -r build   # Production build (also runs tsc via vite-plugin-checker)
+```
+
+### Major updates: changelog review required
+
+Before updating a major version, fetch the release notes and check for breaking changes against the actual code in this repo. Specifically look for:
+
+- Renamed or removed options used in `vite.config.ts`, `vitest.config.ts`, or `src/lib/api-client.ts`
+- Changed default behavior that affects runtime (not just types)
+- Peer dependency conflicts
+
+If a breaking change requires a code fix, apply it in the same commit as the version bump.
+If the impact cannot be determined, skip the package and open a GitHub Issue to track it.
+
+### Known gap
+
+MSW intercepts at the fetch level, so unit tests do not exercise `ky` directly.
+A `ky` update that changes HTTP behavior will pass tests but may break the dev server.
+Verify manually with `pnpm dev` after updating `ky`.
+
 ## Tech Stack
 
-React 19, TanStack Query 5, TanStack Router 1, Vite 6, Vitest 3, TailwindCSS 4, MSW 2, openapi-msw 2, openapi-typescript 7, ky 1, TypeScript 5.7, vite-plugin-checker
+React 19, TanStack Query 5, TanStack Router 1, Vite 8, Vitest 4, TailwindCSS 4, MSW 2, openapi-msw 2, openapi-typescript 7, ky 2, TypeScript 6, vite-plugin-checker
 
 ## Workspace Layout
 

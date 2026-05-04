@@ -97,6 +97,15 @@ Update one package at a time regardless of patch/minor/major, committing after e
 
 Exception: packages sharing the same version in the catalog (e.g. `tailwindcss` and `@tailwindcss/vite`) may be updated in one step if they are always released together.
 
+### How to update a package
+
+Check whether the package is managed via the workspace catalog (`pnpm-workspace.yaml`) or directly in each playground's `package.json`:
+
+- **Catalog package** (listed under `catalog:` in `pnpm-workspace.yaml`): edit the version in `pnpm-workspace.yaml`, then run `pnpm install`
+- **Non-catalog package** (version written in each `package.json`): run `pnpm update <package> --latest -r`
+
+To check: `grep <package> pnpm-workspace.yaml`
+
 ### Verification after each update
 
 Run in this order; all must pass before committing:

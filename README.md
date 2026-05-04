@@ -121,29 +121,6 @@ Check for outdated packages with `pnpm outdated -r` and update them.
 - Commit per package
 ```
 
-Expected output before starting major updates:
-
-```
-## Impact assessment
-
-| Package         | Current → Latest | Impact | Notes |
-|---|---|---|---|
-| jsdom           | 25 → 29 | Low | Test environment only, no production impact |
-| ky              | 1 → 2   | Low | API layer only; `prefixUrl` renamed to `prefix` in api-client.ts |
-| zod             | 3 → 4   | Low | Used in 2 playgrounds; no breaking APIs in use |
-| typescript      | 5.9 → 6 | Medium | Affects all type checking; tsconfig already uses recommended options |
-| vite            | 6 → 8   | Medium | Must update with vitest and @vitejs/plugin-react together |
-| vitest          | 3 → 4   | Medium | Coupled with vite; update together |
-| @vitejs/plugin-react | 4 → 6 | Medium | Coupled with vite; Babel option removed but not used here |
-
-## Update order
-
-1. jsdom — test-only, fully isolated, no risk
-2. ky — small surface area (api-client.ts only); requires renaming `prefixUrl` → `prefix`
-3. zod — limited to account-settings and blog; no breaking APIs in use
-4. typescript — affects all type checking but independent of build tooling
-5. vite + vitest + @vitejs/plugin-react — must be updated together; largest change but no config migration needed
-```
 
 ## Tech Stack
 

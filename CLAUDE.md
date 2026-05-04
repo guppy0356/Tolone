@@ -117,6 +117,30 @@ Before updating a major version, fetch the release notes and check for breaking 
 If a breaking change requires a code fix, apply it in the same commit as the version bump.
 If the impact cannot be determined, skip the package and open a GitHub Issue to track it.
 
+Before starting updates, present an impact assessment and proposed order for user confirmation:
+
+```
+## Impact assessment
+
+| Package              | Current → Latest | Impact | Notes                                                        |
+|---|---|---|---|
+| jsdom                | 25 → 29          | Low    | Test environment only, no production impact                  |
+| ky                   | 1 → 2            | Low    | API layer only; `prefixUrl` renamed to `prefix` in api-client.ts |
+| zod                  | 3 → 4            | Low    | Used in 2 playgrounds; no breaking APIs in use               |
+| typescript           | 5.9 → 6          | Medium | Affects all type checking; tsconfig already uses recommended options |
+| vite                 | 6 → 8            | Medium | Must update with vitest and @vitejs/plugin-react together    |
+| vitest               | 3 → 4            | Medium | Coupled with vite; update together                           |
+| @vitejs/plugin-react | 4 → 6            | Medium | Coupled with vite; Babel option removed but not used here    |
+
+## Update order
+
+1. jsdom — test-only, fully isolated, no risk
+2. ky — small surface area (api-client.ts only); requires renaming `prefixUrl` → `prefix`
+3. zod — limited to account-settings and blog; no breaking APIs in use
+4. typescript — affects all type checking but independent of build tooling
+5. vite + vitest + @vitejs/plugin-react — must be updated together; largest change but no config migration needed
+```
+
 ### Known gap
 
 MSW intercepts at the fetch level, so unit tests do not exercise `ky` directly.

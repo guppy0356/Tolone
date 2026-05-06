@@ -21,10 +21,7 @@ export function BookPreviewContainer() {
         isLoggedIn={isLoggedIn}
       />
       <main className="flex-1">
-        <BookPreviewComponent
-          {...facade}
-          isLoggedIn={isLoggedIn}
-        />
+        <BookPreviewComponent {...facade} />
       </main>
     </div>
   );

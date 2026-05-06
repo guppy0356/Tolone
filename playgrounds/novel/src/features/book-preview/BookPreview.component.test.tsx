@@ -58,7 +58,6 @@ const baseProps: BookPreviewComponentProps = {
   bookId: "1",
   currentPage: 1,
   setCurrentPage: vi.fn(),
-  isLoggedIn: false,
 };
 
 describe("BookPreviewComponent", () => {
@@ -95,26 +94,12 @@ describe("BookPreviewComponent", () => {
     expect(setCurrentPage).toHaveBeenCalledWith(1);
   });
 
-  it("shows guest CTA after page 4", async () => {
+  it("shows CTA after page 4", async () => {
     await renderWithRouter({ ...baseProps, currentPage: 5, page: undefined });
     expect(screen.getByText("You've reached the end of the preview.")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Log in to keep reading" }),
     ).toHaveAttribute("href", "/login");
-  });
-
-  it("shows logged-in CTA after page 4", async () => {
-    await renderWithRouter({ ...baseProps, currentPage: 5, page: undefined, isLoggedIn: true });
-    expect(
-      screen.getByRole("link", { name: "Read the full book" }),
-    ).toHaveAttribute("href", "/books/1");
-  });
-
-  it("logged-in users see skip-preview link on content pages", async () => {
-    await renderWithRouter({ ...baseProps, isLoggedIn: true });
-    expect(
-      screen.getByRole("link", { name: "Skip preview · Read the full book →" }),
-    ).toHaveAttribute("href", "/books/1");
   });
 
   it("renders skeleton when isPending", async () => {

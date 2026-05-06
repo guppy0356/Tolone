@@ -52,7 +52,7 @@ const bookReaderRoute = createRoute({
     const { id } = bookReaderRoute.useParams();
     return <BookReaderContainer key={id} />;
   },
-  beforeLoad: ({ params }) => {
+  beforeLoad: ({ params }: { params: { id: string } }) => {
     if (!isAuthenticated()) {
       throw redirect({
         to: "/preview-books/$id",

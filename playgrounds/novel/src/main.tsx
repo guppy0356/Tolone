@@ -8,6 +8,7 @@ import {
   redirect,
   RouterProvider,
 } from "@tanstack/react-router";
+import { IndexContainer } from "./IndexContainer";
 import { LoginContainer } from "./features/login/LoginContainer";
 import { BookPreviewContainer } from "./features/book-preview/BookPreviewContainer";
 import { BookReaderContainer } from "./features/book-reader/BookReaderContainer";
@@ -21,12 +22,7 @@ const rootRoute = createRootRoute();
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  beforeLoad: () => {
-    if (isAuthenticated()) {
-      throw redirect({ to: "/books/$id", params: { id: "1" } });
-    }
-    throw redirect({ to: "/preview-books/$id", params: { id: "1" } });
-  },
+  component: IndexContainer,
 });
 
 const loginRoute = createRoute({
@@ -38,6 +34,11 @@ const loginRoute = createRoute({
 const bookPreviewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/preview-books/$id",
+  beforeLoad: ({ params }: { params: { id: string } }) => {
+    if (isAuthenticated()) {
+      throw redirect({ to: "/books/$id", params: { id: params.id } });
+    }
+  },
   component: () => {
     const { id } = bookPreviewRoute.useParams();
     return <BookPreviewContainer key={id} />;

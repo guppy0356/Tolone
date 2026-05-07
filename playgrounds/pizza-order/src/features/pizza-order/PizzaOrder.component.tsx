@@ -50,6 +50,19 @@ const PizzaOrderView = memo(function PizzaOrderView(props: PizzaOrderViewProps) 
     <div className="mx-auto max-w-2xl space-y-6 p-6">
       <h1 className="text-2xl font-bold">Build Your Pizza</h1>
 
+      {/* Order rules */}
+      <section className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="mb-2 font-semibold">How it works</p>
+        <ul className="space-y-1 list-disc list-inside">
+          <li>Max 5 toppings per side, max 3 meat toppings per side</li>
+          <li>Topping price: +$1.50 (whole) / +$0.75 per half</li>
+          <li>Meat Lovers discount: 3+ meat toppings on a side → −$1.00</li>
+          <li>Stuffed Crust: +$2.00</li>
+          <li>Thin &amp; Crispy: Large size not available</li>
+          <li>Select a crust, a size, and at least 1 topping per active side to place your order</li>
+        </ul>
+      </section>
+
       {/* Crust */}
       <section>
         <h2 className="mb-2 font-semibold">Crust</h2>

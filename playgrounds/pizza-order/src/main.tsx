@@ -7,20 +7,23 @@ import {
   createRoute,
   RouterProvider,
 } from "@tanstack/react-router";
+import { usePizzaOrderFacade } from "./features/pizza-order/PizzaOrder.facade";
+import { PizzaOrderComponent } from "./features/pizza-order/PizzaOrder.component";
 import "./app.css";
 
 const queryClient = new QueryClient();
+
+function PizzaOrderContainer() {
+  const facade = usePizzaOrderFacade();
+  return <PizzaOrderComponent {...facade} />;
+}
 
 const rootRoute = createRootRoute();
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => (
-    <div>
-      <h1>Pizza-order Playground</h1>
-    </div>
-  ),
+  component: PizzaOrderContainer,
 });
 
 const routeTree = rootRoute.addChildren([indexRoute]);

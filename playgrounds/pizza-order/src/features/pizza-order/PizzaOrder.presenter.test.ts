@@ -14,7 +14,6 @@ const baseProps: PizzaOrderPresenterProps = {
   setMode: vi.fn(),
   setLeftToppings: vi.fn(),
   setRightToppings: vi.fn(),
-  isSubmitting: false,
   submitOrder: vi.fn(),
 };
 

@@ -8,7 +8,7 @@ import {
 } from "./PizzaOrder.api";
 import type { PizzaOrderFacade } from "./PizzaOrder.facade";
 
-export interface PizzaOrderPresenterProps extends PizzaOrderFacade {}
+export type PizzaOrderPresenterProps = Omit<PizzaOrderFacade, "isSubmitting">;
 
 export interface CrustOptionVM {
   id: CrustId;

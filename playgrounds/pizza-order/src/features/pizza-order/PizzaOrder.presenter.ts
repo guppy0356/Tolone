@@ -118,45 +118,46 @@ function buildToppingOptions(
 export function usePizzaOrderPresenter({
   crust,
   size,
-  mode,
-  leftToppings,
-  rightToppings,
+  selection,
   setCrust,
   setSize,
-  setMode,
-  setLeftToppings,
-  setRightToppings,
+  setSelection,
   submitOrder,
 }: PizzaOrderPresenterProps): PizzaOrderPresenter {
   const basePrice = size === "medium" ? 15.0 : size === "large" ? 20.0 : 0.0;
   const crustPremium = crust === "stuffed" ? 2.0 : 0.0;
 
+  const wholeToppings = selection.mode === "whole" ? selection.toppings : [];
+  const leftToppings = selection.mode === "half" ? selection.left : [];
+  const rightToppings = selection.mode === "half" ? selection.right : [];
+
+  const wholeMeatCount = calcMeatCount(wholeToppings);
   const leftMeatCount = calcMeatCount(leftToppings);
   const rightMeatCount = calcMeatCount(rightToppings);
 
-  let totalPrice: number;
-  if (mode === "whole") {
-    totalPrice = basePrice + crustPremium + calcSidePrice(leftToppings, 1.5);
-  } else {
-    totalPrice =
-      basePrice +
-      crustPremium +
-      calcSidePrice(leftToppings, 0.75) +
-      calcSidePrice(rightToppings, 0.75);
-  }
+  const totalPrice =
+    selection.mode === "whole"
+      ? basePrice + crustPremium + calcSidePrice(wholeToppings, 1.5)
+      : basePrice +
+        crustPremium +
+        calcSidePrice(leftToppings, 0.75) +
+        calcSidePrice(rightToppings, 0.75);
 
   const leftDiscountLabel =
-    leftMeatCount >= 3 ? "Meat Lovers applied (−$1.00)" : null;
+    (selection.mode === "whole" ? wholeMeatCount : leftMeatCount) >= 3
+      ? "Meat Lovers applied (−$1.00)"
+      : null;
   const rightDiscountLabel =
-    mode === "half" && rightMeatCount >= 3
+    selection.mode === "half" && rightMeatCount >= 3
       ? "Meat Lovers applied (−$1.00)"
       : null;
 
   const isSubmitDisabled =
     !crust ||
     !size ||
-    leftToppings.length === 0 ||
-    (mode === "half" && rightToppings.length === 0);
+    (selection.mode === "whole"
+      ? selection.toppings.length === 0
+      : selection.left.length === 0 || selection.right.length === 0);
 
   const crustOptions: CrustOptionVM[] = CRUST_META.map((c) => ({
     ...c,
@@ -168,30 +169,14 @@ export function usePizzaOrderPresenter({
     isDisabled: s.id === "large" && crust === "thin-crispy",
   }));
 
-  const wholeToppingOptions = buildToppingOptions(
-    leftToppings,
-    leftToppings.length,
-    leftMeatCount,
-  );
-
-  const leftToppingOptions = buildToppingOptions(
-    leftToppings,
-    leftToppings.length,
-    leftMeatCount,
-  );
-
-  const rightToppingOptions = buildToppingOptions(
-    rightToppings,
-    rightToppings.length,
-    rightMeatCount,
-  );
+  const wholeToppingOptions = buildToppingOptions(wholeToppings, wholeToppings.length, wholeMeatCount);
+  const leftToppingOptions = buildToppingOptions(leftToppings, leftToppings.length, leftMeatCount);
+  const rightToppingOptions = buildToppingOptions(rightToppings, rightToppings.length, rightMeatCount);
 
   const handleSelectCrust = useCallback(
     (id: CrustId) => {
       setCrust(id);
-      if (id === "thin-crispy" && size === "large") {
-        setSize(null);
-      }
+      if (id === "thin-crispy" && size === "large") setSize(null);
     },
     [setCrust, setSize, size],
   );
@@ -199,56 +184,70 @@ export function usePizzaOrderPresenter({
   const handleSelectSize = useCallback(
     (id: SizeId) => {
       setSize(id);
-      if (id === "large" && crust === "thin-crispy") {
-        setCrust(null);
-      }
+      if (id === "large" && crust === "thin-crispy") setCrust(null);
     },
     [setSize, setCrust, crust],
   );
 
   const handleToggleMode = useCallback(() => {
-    setMode(mode === "whole" ? "half" : "whole");
-  }, [setMode, mode]);
+    setSelection((prev) =>
+      prev.mode === "whole"
+        ? { mode: "half", left: [], right: [] }
+        : { mode: "whole", toppings: [] },
+    );
+  }, [setSelection]);
 
   const handleToggleWholeTopping = useCallback(
     (id: ToppingId) => {
-      setLeftToppings((prev) =>
-        prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id],
-      );
+      setSelection((prev) => {
+        if (prev.mode !== "whole") return prev;
+        const toppings = prev.toppings.includes(id)
+          ? prev.toppings.filter((t) => t !== id)
+          : [...prev.toppings, id];
+        return { mode: "whole", toppings };
+      });
     },
-    [setLeftToppings],
+    [setSelection],
   );
 
   const handleToggleLeftTopping = useCallback(
     (id: ToppingId) => {
-      setLeftToppings((prev) =>
-        prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id],
-      );
+      setSelection((prev) => {
+        if (prev.mode !== "half") return prev;
+        const left = prev.left.includes(id)
+          ? prev.left.filter((t) => t !== id)
+          : [...prev.left, id];
+        return { ...prev, left };
+      });
     },
-    [setLeftToppings],
+    [setSelection],
   );
 
   const handleToggleRightTopping = useCallback(
     (id: ToppingId) => {
-      setRightToppings((prev) =>
-        prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id],
-      );
+      setSelection((prev) => {
+        if (prev.mode !== "half") return prev;
+        const right = prev.right.includes(id)
+          ? prev.right.filter((t) => t !== id)
+          : [...prev.right, id];
+        return { ...prev, right };
+      });
     },
-    [setRightToppings],
+    [setSelection],
   );
 
   const handleSubmit = useCallback(async () => {
     if (!crust || !size) return;
     const input: PizzaOrderInput =
-      mode === "whole"
-        ? { crust, size, mode, toppings: leftToppings }
-        : { crust, size, mode, leftToppings, rightToppings };
+      selection.mode === "whole"
+        ? { crust, size, mode: "whole", toppings: selection.toppings }
+        : { crust, size, mode: "half", leftToppings: selection.left, rightToppings: selection.right };
     await submitOrder(input);
-  }, [crust, size, mode, leftToppings, rightToppings, submitOrder]);
+  }, [crust, size, selection, submitOrder]);
 
   return {
     totalPrice: formatPrice(totalPrice),
-    wholeToppingCount: `${leftToppings.length} / 5`,
+    wholeToppingCount: `${wholeToppings.length} / 5`,
     leftToppingCount: `${leftToppings.length} / 5`,
     rightToppingCount: `${rightToppings.length} / 5`,
     leftDiscountLabel,

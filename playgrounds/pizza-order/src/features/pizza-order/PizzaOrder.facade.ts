@@ -8,17 +8,17 @@ import {
   type ToppingId,
 } from "./PizzaOrder.api";
 
+export type ToppingSelection =
+  | { mode: "whole"; toppings: ToppingId[] }
+  | { mode: "half"; left: ToppingId[]; right: ToppingId[] };
+
 export interface PizzaOrderFacade {
   crust: CrustId | null;
   size: SizeId | null;
-  mode: "whole" | "half";
-  leftToppings: ToppingId[];
-  rightToppings: ToppingId[];
+  selection: ToppingSelection;
   setCrust: (c: CrustId | null) => void;
   setSize: (s: SizeId | null) => void;
-  setMode: (m: "whole" | "half") => void;
-  setLeftToppings: Dispatch<SetStateAction<ToppingId[]>>;
-  setRightToppings: Dispatch<SetStateAction<ToppingId[]>>;
+  setSelection: Dispatch<SetStateAction<ToppingSelection>>;
   isSubmitting: boolean;
   submitOrder: (input: PizzaOrderInput) => Promise<void>;
 }
@@ -26,9 +26,10 @@ export interface PizzaOrderFacade {
 export function usePizzaOrderFacade(): PizzaOrderFacade {
   const [crust, setCrust] = useState<CrustId | null>(null);
   const [size, setSize] = useState<SizeId | null>(null);
-  const [mode, setMode] = useState<"whole" | "half">("whole");
-  const [leftToppings, setLeftToppings] = useState<ToppingId[]>([]);
-  const [rightToppings, setRightToppings] = useState<ToppingId[]>([]);
+  const [selection, setSelection] = useState<ToppingSelection>({
+    mode: "whole",
+    toppings: [],
+  });
 
   const mutation = useMutation({
     mutationFn: (input: PizzaOrderInput) => pizzaOrderApi.submit(input),
@@ -44,14 +45,10 @@ export function usePizzaOrderFacade(): PizzaOrderFacade {
   return {
     crust,
     size,
-    mode,
-    leftToppings,
-    rightToppings,
+    selection,
     setCrust,
     setSize,
-    setMode,
-    setLeftToppings,
-    setRightToppings,
+    setSelection,
     isSubmitting: mutation.isPending,
     submitOrder,
   };

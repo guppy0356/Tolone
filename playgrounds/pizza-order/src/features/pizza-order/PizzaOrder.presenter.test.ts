@@ -6,14 +6,10 @@ import type { PizzaOrderPresenterProps } from "./PizzaOrder.presenter";
 const baseProps: PizzaOrderPresenterProps = {
   crust: null,
   size: null,
-  mode: "whole",
-  leftToppings: [],
-  rightToppings: [],
+  selection: { mode: "whole", toppings: [] },
   setCrust: vi.fn(),
   setSize: vi.fn(),
-  setMode: vi.fn(),
-  setLeftToppings: vi.fn(),
-  setRightToppings: vi.fn(),
+  setSelection: vi.fn(),
   submitOrder: vi.fn(),
 };
 
@@ -24,8 +20,7 @@ describe("usePizzaOrderPresenter — price calculation", () => {
         ...baseProps,
         crust: "hand-tossed",
         size: "medium",
-        mode: "whole",
-        leftToppings: ["pepperoni"],
+        selection: { mode: "whole", toppings: ["pepperoni"] },
       }),
     );
     expect(result.current.totalPrice).toBe("$16.50");
@@ -39,8 +34,7 @@ describe("usePizzaOrderPresenter — price calculation", () => {
         ...baseProps,
         crust: "stuffed",
         size: "large",
-        mode: "whole",
-        leftToppings: ["pepperoni", "sausage", "bacon"],
+        selection: { mode: "whole", toppings: ["pepperoni", "sausage", "bacon"] },
       }),
     );
     expect(result.current.totalPrice).toBe("$25.50");
@@ -54,9 +48,11 @@ describe("usePizzaOrderPresenter — price calculation", () => {
         ...baseProps,
         crust: "pan",
         size: "large",
-        mode: "half",
-        leftToppings: ["pepperoni", "sausage", "ham"],
-        rightToppings: ["mushroom", "onion"],
+        selection: {
+          mode: "half",
+          left: ["pepperoni", "sausage", "ham"],
+          right: ["mushroom", "onion"],
+        },
       }),
     );
     expect(result.current.totalPrice).toBe("$22.75");
@@ -70,9 +66,11 @@ describe("usePizzaOrderPresenter — price calculation", () => {
         ...baseProps,
         crust: "hand-tossed",
         size: "large",
-        mode: "half",
-        leftToppings: ["pepperoni", "sausage", "bacon", "mushroom", "onion"],
-        rightToppings: ["chicken", "ham", "pepperoni", "green-pepper", "black-olive"],
+        selection: {
+          mode: "half",
+          left: ["pepperoni", "sausage", "bacon", "mushroom", "onion"],
+          right: ["chicken", "ham", "pepperoni", "green-pepper", "black-olive"],
+        },
       }),
     );
     expect(result.current.totalPrice).toBe("$25.50");
@@ -86,9 +84,11 @@ describe("usePizzaOrderPresenter — price calculation", () => {
         ...baseProps,
         crust: "thin-crispy",
         size: "medium",
-        mode: "half",
-        leftToppings: ["extra-cheese"],
-        rightToppings: ["mushroom", "onion", "green-pepper", "black-olive", "jalapeno"],
+        selection: {
+          mode: "half",
+          left: ["extra-cheese"],
+          right: ["mushroom", "onion", "green-pepper", "black-olive", "jalapeno"],
+        },
       }),
     );
     expect(result.current.totalPrice).toBe("$19.50");

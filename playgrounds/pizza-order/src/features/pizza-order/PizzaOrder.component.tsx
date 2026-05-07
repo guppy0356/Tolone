@@ -10,19 +10,7 @@ import type { CrustId, SizeId, ToppingId } from "./PizzaOrder.api";
 
 // --- View (memo) ---
 
-interface PizzaOrderViewProps {
-  crust: PizzaOrderFacade["crust"];
-  size: PizzaOrderFacade["size"];
-  mode: PizzaOrderFacade["mode"];
-  leftToppings: PizzaOrderFacade["leftToppings"];
-  rightToppings: PizzaOrderFacade["rightToppings"];
-  setCrust: PizzaOrderFacade["setCrust"];
-  setSize: PizzaOrderFacade["setSize"];
-  setMode: PizzaOrderFacade["setMode"];
-  setLeftToppings: PizzaOrderFacade["setLeftToppings"];
-  setRightToppings: PizzaOrderFacade["setRightToppings"];
-  submitOrder: PizzaOrderFacade["submitOrder"];
-}
+type PizzaOrderViewProps = Omit<PizzaOrderFacade, "isSubmitting">;
 
 const PizzaOrderView = memo(function PizzaOrderView(props: PizzaOrderViewProps) {
   const {
@@ -47,7 +35,7 @@ const PizzaOrderView = memo(function PizzaOrderView(props: PizzaOrderViewProps) 
     handleSubmit,
   } = usePizzaOrderPresenter(props);
 
-  const { crust, size, mode } = props;
+  const { crust, size, selection } = props;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-6">
@@ -94,14 +82,14 @@ const PizzaOrderView = memo(function PizzaOrderView(props: PizzaOrderViewProps) 
           onClick={handleToggleMode}
           className="rounded border px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100"
         >
-          {mode === "whole" ? "Switch to Half & Half" : "Switch to Whole Pizza"}
+          {selection.mode === "whole" ? "Switch to Half & Half" : "Switch to Whole Pizza"}
         </button>
       </section>
 
       {/* Toppings */}
       <section>
         <h2 className="mb-2 font-semibold">Toppings</h2>
-        {mode === "whole" ? (
+        {selection.mode === "whole" ? (
           <ToppingPanel
             label="Whole Pizza"
             count={wholeToppingCount}
@@ -111,16 +99,13 @@ const PizzaOrderView = memo(function PizzaOrderView(props: PizzaOrderViewProps) 
           />
         ) : (
           <div className="grid grid-cols-2 gap-4">
-            <div>
-
-              <ToppingPanel
-                label="Left Half"
-                count={leftToppingCount}
-                options={leftToppingOptions}
-                onToggle={handleToggleLeftTopping}
-                discountLabel={leftDiscountLabel}
-              />
-            </div>
+            <ToppingPanel
+              label="Left Half"
+              count={leftToppingCount}
+              options={leftToppingOptions}
+              onToggle={handleToggleLeftTopping}
+              discountLabel={leftDiscountLabel}
+            />
             <ToppingPanel
               label="Right Half"
               count={rightToppingCount}
@@ -134,9 +119,7 @@ const PizzaOrderView = memo(function PizzaOrderView(props: PizzaOrderViewProps) 
 
       {/* Price + Submit */}
       <section className="flex items-center justify-between border-t pt-4">
-        <div>
-          <p className="text-xl font-bold">{totalPrice}</p>
-        </div>
+        <p className="text-xl font-bold">{totalPrice}</p>
         <button
           type="button"
           onClick={handleSubmit}
@@ -289,14 +272,10 @@ function ToppingCheckbox({
 export function PizzaOrderComponent({
   crust,
   size,
-  mode,
-  leftToppings,
-  rightToppings,
+  selection,
   setCrust,
   setSize,
-  setMode,
-  setLeftToppings,
-  setRightToppings,
+  setSelection,
   isSubmitting,
   submitOrder,
 }: PizzaOrderFacade) {
@@ -305,14 +284,10 @@ export function PizzaOrderComponent({
       <PizzaOrderView
         crust={crust}
         size={size}
-        mode={mode}
-        leftToppings={leftToppings}
-        rightToppings={rightToppings}
+        selection={selection}
         setCrust={setCrust}
         setSize={setSize}
-        setMode={setMode}
-        setLeftToppings={setLeftToppings}
-        setRightToppings={setRightToppings}
+        setSelection={setSelection}
         submitOrder={submitOrder}
       />
     </div>

@@ -7,14 +7,10 @@ import type { PizzaOrderFacade } from "./PizzaOrder.facade";
 const baseFacade: PizzaOrderFacade = {
   crust: null,
   size: null,
-  mode: "whole",
-  leftToppings: [],
-  rightToppings: [],
+  selection: { mode: "whole", toppings: [] },
   setCrust: vi.fn(),
   setSize: vi.fn(),
-  setMode: vi.fn(),
-  setLeftToppings: vi.fn(),
-  setRightToppings: vi.fn(),
+  setSelection: vi.fn(),
   isSubmitting: false,
   submitOrder: vi.fn(),
 };
@@ -45,7 +41,7 @@ describe("PizzaOrderComponent", () => {
     expect(screen.getByRole("button", { name: "Place Order" })).toBeDisabled();
   });
 
-  it("submit button is disabled when size is selected but no toppings", () => {
+  it("submit button is disabled when crust and size selected but no toppings", () => {
     render(<PizzaOrderComponent {...baseFacade} crust="hand-tossed" size="medium" />);
     expect(screen.getByRole("button", { name: "Place Order" })).toBeDisabled();
   });
@@ -56,7 +52,7 @@ describe("PizzaOrderComponent", () => {
         {...baseFacade}
         crust="hand-tossed"
         size="medium"
-        leftToppings={["pepperoni"]}
+        selection={{ mode: "whole", toppings: ["pepperoni"] }}
       />,
     );
     expect(screen.getByRole("button", { name: "Place Order" })).not.toBeDisabled();
@@ -78,12 +74,12 @@ describe("PizzaOrderComponent", () => {
     expect(setSize).toHaveBeenCalledWith("medium");
   });
 
-  it("calls setLeftToppings when a topping checkbox is toggled", async () => {
-    const setLeftToppings = vi.fn();
+  it("calls setSelection when a topping checkbox is toggled", async () => {
+    const setSelection = vi.fn();
     const user = userEvent.setup();
-    render(<PizzaOrderComponent {...baseFacade} setLeftToppings={setLeftToppings} />);
+    render(<PizzaOrderComponent {...baseFacade} setSelection={setSelection} />);
     await user.click(screen.getByLabelText("Pepperoni"));
-    expect(setLeftToppings).toHaveBeenCalled();
+    expect(setSelection).toHaveBeenCalled();
   });
 
   it("shows Meat Lovers discount label when 3+ meat toppings selected (whole mode)", () => {
@@ -92,14 +88,19 @@ describe("PizzaOrderComponent", () => {
         {...baseFacade}
         crust="hand-tossed"
         size="medium"
-        leftToppings={["pepperoni", "sausage", "bacon"]}
+        selection={{ mode: "whole", toppings: ["pepperoni", "sausage", "bacon"] }}
       />,
     );
     expect(screen.getByText("Meat Lovers applied (−$1.00)")).toBeInTheDocument();
   });
 
   it("shows Half & Half panels when mode is half", () => {
-    render(<PizzaOrderComponent {...baseFacade} mode="half" />);
+    render(
+      <PizzaOrderComponent
+        {...baseFacade}
+        selection={{ mode: "half", left: [], right: [] }}
+      />,
+    );
     expect(screen.getByText("Left Half")).toBeInTheDocument();
     expect(screen.getByText("Right Half")).toBeInTheDocument();
   });
@@ -113,14 +114,12 @@ describe("PizzaOrderComponent", () => {
 
   it("Thin & Crispy is disabled when Large is selected", () => {
     render(<PizzaOrderComponent {...baseFacade} size="large" />);
-    const thinCrispy = screen.getByRole("button", { name: /Thin & Crispy/i });
-    expect(thinCrispy).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Thin & Crispy/i })).toBeDisabled();
   });
 
   it("Large is disabled when Thin & Crispy is selected", () => {
     render(<PizzaOrderComponent {...baseFacade} crust="thin-crispy" />);
-    const large = screen.getByRole("button", { name: /Large/i });
-    expect(large).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Large/i })).toBeDisabled();
   });
 
   it("shows price summary", () => {
@@ -129,9 +128,26 @@ describe("PizzaOrderComponent", () => {
         {...baseFacade}
         crust="hand-tossed"
         size="medium"
-        leftToppings={["pepperoni"]}
+        selection={{ mode: "whole", toppings: ["pepperoni"] }}
       />,
     );
     expect(screen.getByText("$16.50")).toBeInTheDocument();
+  });
+
+  it("toggle mode resets toppings", async () => {
+    const setSelection = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <PizzaOrderComponent
+        {...baseFacade}
+        selection={{ mode: "whole", toppings: ["pepperoni"] }}
+        setSelection={setSelection}
+      />,
+    );
+    await user.click(screen.getByText("Switch to Half & Half"));
+    expect(setSelection).toHaveBeenCalled();
+    const updater = setSelection.mock.calls[0][0];
+    const next = updater({ mode: "whole", toppings: ["pepperoni"] });
+    expect(next).toEqual({ mode: "half", left: [], right: [] });
   });
 });

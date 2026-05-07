@@ -14,8 +14,8 @@ export interface PizzaOrderFacade {
   mode: "whole" | "half";
   leftToppings: ToppingId[];
   rightToppings: ToppingId[];
-  setCrust: (c: CrustId) => void;
-  setSize: (s: SizeId) => void;
+  setCrust: (c: CrustId | null) => void;
+  setSize: (s: SizeId | null) => void;
   setMode: (m: "whole" | "half") => void;
   setLeftToppings: Dispatch<SetStateAction<ToppingId[]>>;
   setRightToppings: Dispatch<SetStateAction<ToppingId[]>>;

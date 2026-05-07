@@ -104,21 +104,6 @@ describe("PizzaOrderComponent", () => {
     expect(screen.getByText("Right Half")).toBeInTheDocument();
   });
 
-  it("copy to right button calls setRightToppings with left toppings", async () => {
-    const setRightToppings = vi.fn();
-    const user = userEvent.setup();
-    render(
-      <PizzaOrderComponent
-        {...baseFacade}
-        mode="half"
-        leftToppings={["pepperoni", "sausage"]}
-        setRightToppings={setRightToppings}
-      />,
-    );
-    await user.click(screen.getByText("Copy to Right Half"));
-    expect(setRightToppings).toHaveBeenCalledWith(["pepperoni", "sausage"]);
-  });
-
   it("apply to whole calls setMode with whole", async () => {
     const setMode = vi.fn();
     const user = userEvent.setup();

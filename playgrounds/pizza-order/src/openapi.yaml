@@ -1,0 +1,97 @@
+openapi: 3.1.0
+info:
+  title: Pizza Order API
+  version: 0.1.0
+
+paths:
+  /api/orders:
+    post:
+      operationId: submitOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PizzaOrderInput"
+      responses:
+        "201":
+          description: Order confirmed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PizzaOrderConfirmation"
+
+components:
+  schemas:
+    Crust:
+      type: string
+      enum:
+        - hand-tossed
+        - pan
+        - thin-crispy
+        - stuffed
+
+    Size:
+      type: string
+      enum:
+        - medium
+        - large
+
+    Topping:
+      type: string
+      enum:
+        - pepperoni
+        - sausage
+        - bacon
+        - chicken
+        - ham
+        - mushroom
+        - onion
+        - green-pepper
+        - black-olive
+        - jalapeno
+        - extra-cheese
+        - pineapple
+
+    PizzaOrderMode:
+      type: string
+      enum:
+        - whole
+        - half
+
+    PizzaOrderInput:
+      type: object
+      required:
+        - crust
+        - size
+        - mode
+      properties:
+        crust:
+          $ref: "#/components/schemas/Crust"
+        size:
+          $ref: "#/components/schemas/Size"
+        mode:
+          $ref: "#/components/schemas/PizzaOrderMode"
+        toppings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Topping"
+        leftToppings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Topping"
+        rightToppings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Topping"
+
+    PizzaOrderConfirmation:
+      type: object
+      required:
+        - orderId
+        - totalPrice
+      properties:
+        orderId:
+          type: string
+        totalPrice:
+          type: number

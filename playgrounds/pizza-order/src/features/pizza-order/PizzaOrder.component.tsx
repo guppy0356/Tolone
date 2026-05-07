@@ -27,6 +27,9 @@ interface PizzaOrderViewProps {
 const PizzaOrderView = memo(function PizzaOrderView(props: PizzaOrderViewProps) {
   const {
     totalPrice,
+    wholeToppingCount,
+    leftToppingCount,
+    rightToppingCount,
     leftDiscountLabel,
     rightDiscountLabel,
     isSubmitDisabled,
@@ -101,6 +104,7 @@ const PizzaOrderView = memo(function PizzaOrderView(props: PizzaOrderViewProps) 
         {mode === "whole" ? (
           <ToppingPanel
             label="Whole Pizza"
+            count={wholeToppingCount}
             options={wholeToppingOptions}
             onToggle={handleToggleWholeTopping}
             discountLabel={leftDiscountLabel}
@@ -111,6 +115,7 @@ const PizzaOrderView = memo(function PizzaOrderView(props: PizzaOrderViewProps) 
 
               <ToppingPanel
                 label="Left Half"
+                count={leftToppingCount}
                 options={leftToppingOptions}
                 onToggle={handleToggleLeftTopping}
                 discountLabel={leftDiscountLabel}
@@ -118,6 +123,7 @@ const PizzaOrderView = memo(function PizzaOrderView(props: PizzaOrderViewProps) 
             </div>
             <ToppingPanel
               label="Right Half"
+              count={rightToppingCount}
               options={rightToppingOptions}
               onToggle={handleToggleRightTopping}
               discountLabel={rightDiscountLabel}
@@ -210,11 +216,13 @@ function SizeSelector({
 
 function ToppingPanel({
   label,
+  count,
   options,
   onToggle,
   discountLabel,
 }: {
   label: string;
+  count: string;
   options: ToppingOptionVM[];
   onToggle: (id: ToppingId) => void;
   discountLabel: string | null;
@@ -224,7 +232,10 @@ function ToppingPanel({
 
   return (
     <div className="rounded border p-3">
-      <p className="mb-2 text-sm font-medium text-gray-600">{label}</p>
+      <div className="mb-2 flex items-baseline justify-between">
+        <p className="text-sm font-medium text-gray-600">{label}</p>
+        <p className="text-xs text-gray-400">{count}</p>
+      </div>
       {discountLabel ? (
         <p className="mb-2 text-xs font-medium text-green-700">{discountLabel}</p>
       ) : null}

@@ -34,6 +34,9 @@ export interface ToppingOptionVM {
 
 export interface PizzaOrderPresenter {
   totalPrice: string;
+  wholeToppingCount: string;
+  leftToppingCount: string;
+  rightToppingCount: string;
   leftDiscountLabel: string | null;
   rightDiscountLabel: string | null;
   isSubmitDisabled: boolean;
@@ -245,6 +248,9 @@ export function usePizzaOrderPresenter({
 
   return {
     totalPrice: formatPrice(totalPrice),
+    wholeToppingCount: `${leftToppings.length} / 5`,
+    leftToppingCount: `${leftToppings.length} / 5`,
+    rightToppingCount: `${rightToppings.length} / 5`,
     leftDiscountLabel,
     rightDiscountLabel,
     isSubmitDisabled,

@@ -48,7 +48,6 @@ export interface PizzaOrderPresenter {
   handleToggleWholeTopping: (id: ToppingId) => void;
   handleToggleLeftTopping: (id: ToppingId) => void;
   handleToggleRightTopping: (id: ToppingId) => void;
-  handleApplyToWhole: () => void;
   handleSubmit: () => Promise<void>;
 }
 
@@ -235,10 +234,6 @@ export function usePizzaOrderPresenter({
     [setRightToppings],
   );
 
-  const handleApplyToWhole = useCallback(() => {
-    setMode("whole");
-  }, [setMode]);
-
   const handleSubmit = useCallback(async () => {
     if (!crust || !size) return;
     const input: PizzaOrderInput =
@@ -264,7 +259,6 @@ export function usePizzaOrderPresenter({
     handleToggleWholeTopping,
     handleToggleLeftTopping,
     handleToggleRightTopping,
-    handleApplyToWhole,
     handleSubmit,
   };
 }

@@ -104,14 +104,6 @@ describe("PizzaOrderComponent", () => {
     expect(screen.getByText("Right Half")).toBeInTheDocument();
   });
 
-  it("apply to whole calls setMode with whole", async () => {
-    const setMode = vi.fn();
-    const user = userEvent.setup();
-    render(<PizzaOrderComponent {...baseFacade} mode="half" setMode={setMode} />);
-    await user.click(screen.getByText("Apply to Whole Pizza"));
-    expect(setMode).toHaveBeenCalledWith("whole");
-  });
-
   it("shows opacity-50 overlay when isSubmitting", () => {
     const { container } = render(
       <PizzaOrderComponent {...baseFacade} isSubmitting={true} />,

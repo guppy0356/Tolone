@@ -41,7 +41,6 @@ const PizzaOrderView = memo(function PizzaOrderView(props: PizzaOrderViewProps) 
     handleToggleWholeTopping,
     handleToggleLeftTopping,
     handleToggleRightTopping,
-    handleApplyToWhole,
     handleSubmit,
   } = usePizzaOrderPresenter(props);
 
@@ -96,15 +95,7 @@ const PizzaOrderView = memo(function PizzaOrderView(props: PizzaOrderViewProps) 
         ) : (
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <div className="mb-2">
-                <button
-                  type="button"
-                  onClick={handleApplyToWhole}
-                  className="rounded border px-3 py-1 text-xs hover:bg-gray-100"
-                >
-                  Apply to Whole Pizza
-                </button>
-              </div>
+
               <ToppingPanel
                 label="Left Half"
                 options={leftToppingOptions}

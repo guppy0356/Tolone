@@ -1,5 +1,5 @@
 import { type Dispatch, type SetStateAction, useCallback, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   pizzaOrderApi,
   type CrustId,
@@ -24,6 +24,7 @@ export interface PizzaOrderFacade {
 }
 
 export function usePizzaOrderFacade(): PizzaOrderFacade {
+  const queryClient = useQueryClient();
   const [crust, setCrust] = useState<CrustId | null>(null);
   const [size, setSize] = useState<SizeId | null>(null);
   const [selection, setSelection] = useState<ToppingSelection>({
@@ -33,6 +34,9 @@ export function usePizzaOrderFacade(): PizzaOrderFacade {
 
   const mutation = useMutation({
     mutationFn: (input: PizzaOrderInput) => pizzaOrderApi.submit(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+    },
   });
 
   const submitOrder = useCallback(

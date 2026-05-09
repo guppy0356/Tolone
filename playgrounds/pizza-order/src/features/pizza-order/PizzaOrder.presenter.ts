@@ -32,6 +32,11 @@ export interface ToppingOptionVM {
   isDisabled: boolean;
 }
 
+export interface SuccessBannerVM {
+  orderId: string;
+  totalPriceLabel: string;
+}
+
 export interface PizzaOrderPresenter {
   totalPrice: string;
   wholeToppingCount: string;
@@ -40,6 +45,7 @@ export interface PizzaOrderPresenter {
   leftDiscountLabel: string | null;
   rightDiscountLabel: string | null;
   isSubmitDisabled: boolean;
+  successBanner: SuccessBannerVM | null;
   crustOptions: CrustOptionVM[];
   sizeOptions: SizeOptionVM[];
   wholeToppingOptions: ToppingOptionVM[];
@@ -123,6 +129,7 @@ export function usePizzaOrderPresenter({
   setSize,
   setSelection,
   submitOrder,
+  lastConfirmation,
 }: PizzaOrderPresenterProps): PizzaOrderPresenter {
   const basePrice = size === "medium" ? 15.0 : size === "large" ? 20.0 : 0.0;
   const crustPremium = crust === "stuffed" ? 2.0 : 0.0;
@@ -245,6 +252,13 @@ export function usePizzaOrderPresenter({
     await submitOrder(input);
   }, [crust, size, selection, submitOrder]);
 
+  const successBanner: SuccessBannerVM | null = lastConfirmation
+    ? {
+        orderId: lastConfirmation.orderId,
+        totalPriceLabel: formatPrice(lastConfirmation.totalPrice),
+      }
+    : null;
+
   return {
     totalPrice: formatPrice(totalPrice),
     wholeToppingCount: `${wholeToppings.length} / 5`,
@@ -253,6 +267,7 @@ export function usePizzaOrderPresenter({
     leftDiscountLabel,
     rightDiscountLabel,
     isSubmitDisabled,
+    successBanner,
     crustOptions,
     sizeOptions,
     wholeToppingOptions,

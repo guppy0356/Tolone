@@ -21,6 +21,7 @@ const PizzaOrderView = memo(function PizzaOrderView(props: PizzaOrderViewProps) 
     leftDiscountLabel,
     rightDiscountLabel,
     isSubmitDisabled,
+    successBanner,
     crustOptions,
     sizeOptions,
     wholeToppingOptions,
@@ -40,6 +41,19 @@ const PizzaOrderView = memo(function PizzaOrderView(props: PizzaOrderViewProps) 
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-6">
       <h1 className="text-2xl font-bold">Build Your Pizza</h1>
+
+      {successBanner ? (
+        <section
+          role="status"
+          className="rounded-lg border border-green-300 bg-green-50 p-4 text-sm text-green-900"
+        >
+          <p className="font-semibold">Order placed!</p>
+          <p className="mt-1">
+            Order ID: <span className="font-mono">{successBanner.orderId}</span>
+          </p>
+          <p>Total: {successBanner.totalPriceLabel}</p>
+        </section>
+      ) : null}
 
       {/* Order rules */}
       <section className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
@@ -278,6 +292,7 @@ export function PizzaOrderComponent({
   setSelection,
   isSubmitting,
   submitOrder,
+  lastConfirmation,
 }: PizzaOrderFacade) {
   return (
     <div className={isSubmitting ? "pointer-events-none opacity-50" : ""}>
@@ -289,6 +304,7 @@ export function PizzaOrderComponent({
         setSize={setSize}
         setSelection={setSelection}
         submitOrder={submitOrder}
+        lastConfirmation={lastConfirmation}
       />
     </div>
   );

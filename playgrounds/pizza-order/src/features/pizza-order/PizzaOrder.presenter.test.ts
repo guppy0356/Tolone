@@ -11,6 +11,7 @@ const baseProps: PizzaOrderPresenterProps = {
   setSize: vi.fn(),
   setSelection: vi.fn(),
   submitOrder: vi.fn(),
+  lastConfirmation: null,
 };
 
 describe("usePizzaOrderPresenter — price calculation", () => {

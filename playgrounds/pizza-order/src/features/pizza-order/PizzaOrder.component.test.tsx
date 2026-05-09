@@ -13,6 +13,7 @@ const baseFacade: PizzaOrderFacade = {
   setSelection: vi.fn(),
   isSubmitting: false,
   submitOrder: vi.fn(),
+  lastConfirmation: null,
 };
 
 describe("PizzaOrderComponent", () => {
@@ -132,6 +133,18 @@ describe("PizzaOrderComponent", () => {
       />,
     );
     expect(screen.getByText("$16.50")).toBeInTheDocument();
+  });
+
+  it("shows success banner when lastConfirmation is set", () => {
+    render(
+      <PizzaOrderComponent
+        {...baseFacade}
+        lastConfirmation={{ orderId: "abc-123", totalPrice: 16.5 }}
+      />,
+    );
+    expect(screen.getByText("Order placed!")).toBeInTheDocument();
+    expect(screen.getByText("abc-123")).toBeInTheDocument();
+    expect(screen.getByText("Total: $16.50")).toBeInTheDocument();
   });
 
   it("toggle mode resets toppings", async () => {

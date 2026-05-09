@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   pizzaOrderApi,
   type CrustId,
+  type PizzaOrderConfirmation,
   type PizzaOrderInput,
   type SizeId,
   type ToppingId,
@@ -21,6 +22,7 @@ export interface PizzaOrderFacade {
   setSelection: Dispatch<SetStateAction<ToppingSelection>>;
   isSubmitting: boolean;
   submitOrder: (input: PizzaOrderInput) => Promise<void>;
+  lastConfirmation: PizzaOrderConfirmation | null;
 }
 
 export function usePizzaOrderFacade(): PizzaOrderFacade {
@@ -36,6 +38,9 @@ export function usePizzaOrderFacade(): PizzaOrderFacade {
     mutationFn: (input: PizzaOrderInput) => pizzaOrderApi.submit(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      setCrust(null);
+      setSize(null);
+      setSelection({ mode: "whole", toppings: [] });
     },
   });
 
@@ -55,5 +60,6 @@ export function usePizzaOrderFacade(): PizzaOrderFacade {
     setSelection,
     isSubmitting: mutation.isPending,
     submitOrder,
+    lastConfirmation: mutation.data ?? null,
   };
 }

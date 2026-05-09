@@ -5,6 +5,17 @@ info:
 
 paths:
   /api/orders:
+    get:
+      operationId: getOrders
+      responses:
+        "200":
+          description: Order history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PizzaOrderRecord"
     post:
       operationId: submitOrder
       requestBody:
@@ -95,3 +106,39 @@ components:
           type: string
         totalPrice:
           type: number
+
+    PizzaOrderRecord:
+      type: object
+      required:
+        - orderId
+        - totalPrice
+        - crust
+        - size
+        - mode
+        - createdAt
+      properties:
+        orderId:
+          type: string
+        totalPrice:
+          type: number
+        crust:
+          $ref: "#/components/schemas/Crust"
+        size:
+          $ref: "#/components/schemas/Size"
+        mode:
+          $ref: "#/components/schemas/PizzaOrderMode"
+        toppings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Topping"
+        leftToppings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Topping"
+        rightToppings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Topping"
+        createdAt:
+          type: string
+          format: date-time

@@ -11,7 +11,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["getOrders"];
         put?: never;
         post: operations["submitOrder"];
         delete?: never;
@@ -44,6 +44,18 @@ export interface components {
             orderId: string;
             totalPrice: number;
         };
+        PizzaOrderRecord: {
+            orderId: string;
+            totalPrice: number;
+            crust: components["schemas"]["Crust"];
+            size: components["schemas"]["Size"];
+            mode: components["schemas"]["PizzaOrderMode"];
+            toppings?: components["schemas"]["Topping"][];
+            leftToppings?: components["schemas"]["Topping"][];
+            rightToppings?: components["schemas"]["Topping"][];
+            /** Format: date-time */
+            createdAt: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -53,6 +65,26 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getOrders: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Order history */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PizzaOrderRecord"][];
+                };
+            };
+        };
+    };
     submitOrder: {
         parameters: {
             query?: never;

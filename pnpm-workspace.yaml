@@ -20,3 +20,5 @@ catalog:
 onlyBuiltDependencies:
   - esbuild
   - msw
+
+minimumReleaseAge: 10080

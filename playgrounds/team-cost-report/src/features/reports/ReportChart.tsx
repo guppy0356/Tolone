@@ -23,6 +23,13 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
+const compactCurrencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
 export const ReportChart = memo(function ReportChart({
   monthly,
   teamNames,
@@ -33,7 +40,9 @@ export const ReportChart = memo(function ReportChart({
       <BarChart data={monthly}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="month" />
-        <YAxis tickFormatter={(v) => currencyFormatter.format(Number(v))} />
+        <YAxis
+          tickFormatter={(v) => compactCurrencyFormatter.format(Number(v))}
+        />
         <Tooltip
           formatter={(value) => currencyFormatter.format(Number(value))}
         />

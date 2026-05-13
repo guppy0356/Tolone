@@ -8,10 +8,16 @@ import {
   Outlet,
   RouterProvider,
   redirect,
+  useParams,
 } from "@tanstack/react-router";
 import { useTeamFacade } from "./features/teams/Team.facade";
 import { TeamListComponent } from "./features/teams/TeamList.component";
 import { TeamFormComponent } from "./features/teams/TeamForm.component";
+import { useReportFacade } from "./features/reports/Report.facade";
+import { useReportDetailFacade } from "./features/reports/ReportDetail.facade";
+import { ReportListComponent } from "./features/reports/ReportList.component";
+import { ReportFormComponent } from "./features/reports/ReportForm.component";
+import { ReportDetailComponent } from "./features/reports/ReportDetail.component";
 import { NavComponent } from "./features/nav/Nav.component";
 import "./app.css";
 
@@ -25,6 +31,28 @@ function TeamListContainer() {
 function TeamFormContainer() {
   const facade = useTeamFacade();
   return <TeamFormComponent {...facade} />;
+}
+
+function ReportListContainer() {
+  const facade = useReportFacade();
+  return <ReportListComponent {...facade} />;
+}
+
+function ReportFormContainer() {
+  const teamFacade = useTeamFacade();
+  const reportFacade = useReportFacade();
+  return (
+    <ReportFormComponent
+      teams={teamFacade.teams}
+      addReport={reportFacade.addReport}
+    />
+  );
+}
+
+function ReportDetailContainer() {
+  const { reportId } = useParams({ from: "/reports/$reportId" });
+  const facade = useReportDetailFacade({ reportId });
+  return <ReportDetailComponent {...facade} />;
 }
 
 const rootRoute = createRootRoute({
@@ -58,10 +86,31 @@ const teamsNewRoute = createRoute({
   component: TeamFormContainer,
 });
 
+const reportsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/reports",
+  component: ReportListContainer,
+});
+
+const reportsNewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/reports/new",
+  component: ReportFormContainer,
+});
+
+const reportDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/reports/$reportId",
+  component: ReportDetailContainer,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   teamsRoute,
   teamsNewRoute,
+  reportsRoute,
+  reportsNewRoute,
+  reportDetailRoute,
 ]);
 const router = createRouter({ routeTree });
 

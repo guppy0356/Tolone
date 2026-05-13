@@ -105,11 +105,14 @@ export interface components {
             name: string;
             teamIds: string[];
         };
+        /**
+         * @description Recharts-ready row. `month` (ISO YYYY-MM) plus one numeric key per
+         *     team name; the team-name keys are dynamic so they aren't enumerated
+         *     in the schema — see MonthlyPaymentRow type alias in Report.api.ts.
+         */
         MonthlyPaymentRow: {
             /** @description ISO month, e.g. "2026-01" */
             month: string;
-        } & {
-            [key: string]: number;
         };
         ReportDetail: {
             id: string;

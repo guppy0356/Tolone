@@ -183,8 +183,10 @@ components:
     MonthlyPaymentRow:
       type: object
       required: [month]
-      additionalProperties:
-        type: number
+      description: |
+        Recharts-ready row. `month` (ISO YYYY-MM) plus one numeric key per
+        team name; the team-name keys are dynamic so they aren't enumerated
+        in the schema — see MonthlyPaymentRow type alias in Report.api.ts.
       properties:
         month:
           type: string

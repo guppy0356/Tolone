@@ -4,6 +4,8 @@ import type { paths, components } from "../types/openapi";
 
 type Member = components["schemas"]["Member"];
 type Team = components["schemas"]["Team"];
+type ReportSummary = components["schemas"]["ReportSummary"];
+type MonthlyPaymentRow = { month: string } & Record<string, number | string>;
 
 const http = createOpenApiHttp<paths>();
 
@@ -80,6 +82,15 @@ const workLogs: WorkLog[] = [
   { memberId: "m4", month: "2026-05", hours: 100 },
 ];
 
+const reports: ReportSummary[] = [
+  {
+    id: "r1",
+    name: "Q1 2026 Cost",
+    teamIds: ["t1", "t2"],
+    createdAt: "2026-04-01T00:00:00Z",
+  },
+];
+
 function seedWorkLogsForMember(memberId: string) {
   if (workLogs.some((log) => log.memberId === memberId)) return;
   for (const month of SEED_MONTHS) {
@@ -124,5 +135,81 @@ export const handlers = [
     };
     teams.push(team);
     return response(201).json(team);
+  }),
+
+  http.get("/api/reports", async ({ response }) => {
+    await delay(300);
+    return response(200).json(reports);
+  }),
+
+  http.post("/api/reports", async ({ request, response }) => {
+    const input = await request.json();
+    const report: ReportSummary = {
+      id: crypto.randomUUID(),
+      name: input.name,
+      teamIds: input.teamIds,
+      createdAt: new Date().toISOString(),
+    };
+    reports.push(report);
+    return response(201).json(report);
+  }),
+
+  http.get("/api/reports/{id}", async ({ params, response }) => {
+    await delay(500);
+    const report = reports.find((r) => r.id === params.id);
+    if (!report) return response(404).empty();
+
+    const selectedTeams = teams.filter((t) => report.teamIds.includes(t.id));
+    const memberToTeam = new Map<string, Team>();
+    for (const team of selectedTeams) {
+      for (const member of team.members) {
+        memberToTeam.set(member.memberId, team);
+      }
+    }
+
+    const monthSet = new Set<string>();
+    for (const log of workLogs) {
+      if (memberToTeam.has(log.memberId)) monthSet.add(log.month);
+    }
+    // ISO YYYY-MM sorts lexicographically — relies on the seed/runtime format.
+    const months = [...monthSet].sort();
+
+    const payment: Record<string, Record<string, number>> = {};
+    for (const team of selectedTeams) payment[team.name] = {};
+
+    for (const log of workLogs) {
+      const team = memberToTeam.get(log.memberId);
+      if (!team) continue;
+      const tm = team.members.find((m) => m.memberId === log.memberId);
+      if (!tm) continue;
+      payment[team.name][log.month] =
+        (payment[team.name][log.month] ?? 0) + log.hours * tm.hourlyRate;
+    }
+
+    const monthly: MonthlyPaymentRow[] = months.map((month) => {
+      const row: Record<string, number | string> = { month };
+      for (const team of selectedTeams) {
+        row[team.name] = payment[team.name][month] ?? 0;
+      }
+      return row as MonthlyPaymentRow;
+    });
+
+    const totalPayment = monthly.reduce(
+      (sum, row) =>
+        sum +
+        selectedTeams.reduce(
+          (s, t) => s + ((row[t.name] as number | undefined) ?? 0),
+          0,
+        ),
+      0,
+    );
+
+    return response(200).json({
+      id: report.id,
+      name: report.name,
+      teams: selectedTeams,
+      totalPayment,
+      monthly,
+    });
   }),
 ];

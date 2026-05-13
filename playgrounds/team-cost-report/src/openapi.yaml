@@ -1,0 +1,211 @@
+openapi: 3.1.0
+info:
+  title: Team Cost Report API
+  version: 0.1.0
+
+paths:
+  /api/members:
+    get:
+      operationId: getMembers
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Member directory (optionally filtered by q)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Member"
+
+  /api/teams:
+    get:
+      operationId: getTeams
+      responses:
+        "200":
+          description: All teams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Team"
+    post:
+      operationId: createTeam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTeamInput"
+      responses:
+        "201":
+          description: Created team
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+
+  /api/reports:
+    get:
+      operationId: getReports
+      responses:
+        "200":
+          description: All reports (summary view)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReportSummary"
+    post:
+      operationId: createReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReportInput"
+      responses:
+        "201":
+          description: Created report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportSummary"
+
+  /api/reports/{id}:
+    get:
+      operationId: getReportDetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Report detail with aggregated monthly payments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportDetail"
+        "404":
+          description: Report not found
+
+components:
+  schemas:
+    Member:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    TeamMember:
+      type: object
+      required: [memberId, name, hourlyRate]
+      properties:
+        memberId:
+          type: string
+        name:
+          type: string
+        hourlyRate:
+          type: number
+
+    Team:
+      type: object
+      required: [id, name, members]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeamMember"
+
+    CreateTeamMemberInput:
+      type: object
+      required: [memberId, hourlyRate]
+      properties:
+        memberId:
+          type: string
+        hourlyRate:
+          type: number
+
+    CreateTeamInput:
+      type: object
+      required: [name, members]
+      properties:
+        name:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateTeamMemberInput"
+
+    ReportSummary:
+      type: object
+      required: [id, name, teamIds, createdAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        teamIds:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateReportInput:
+      type: object
+      required: [name, teamIds]
+      properties:
+        name:
+          type: string
+        teamIds:
+          type: array
+          items:
+            type: string
+
+    MonthlyPaymentRow:
+      type: object
+      required: [month]
+      additionalProperties:
+        type: number
+      properties:
+        month:
+          type: string
+          description: ISO month, e.g. "2026-01"
+
+    ReportDetail:
+      type: object
+      required: [id, name, teams, totalPayment, monthly]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        teams:
+          type: array
+          items:
+            $ref: "#/components/schemas/Team"
+        totalPayment:
+          type: number
+        monthly:
+          type: array
+          description: Recharts-ready rows. Each row has `month` + one numeric key per team name.
+          items:
+            $ref: "#/components/schemas/MonthlyPaymentRow"

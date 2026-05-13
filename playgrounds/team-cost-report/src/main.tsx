@@ -5,25 +5,64 @@ import {
   createRouter,
   createRootRoute,
   createRoute,
+  Outlet,
   RouterProvider,
+  redirect,
 } from "@tanstack/react-router";
+import { useTeamFacade } from "./features/teams/Team.facade";
+import { TeamListComponent } from "./features/teams/TeamList.component";
+import { TeamFormComponent } from "./features/teams/TeamForm.component";
+import { NavComponent } from "./features/nav/Nav.component";
 import "./app.css";
 
 const queryClient = new QueryClient();
 
-const rootRoute = createRootRoute();
+function TeamListContainer() {
+  const facade = useTeamFacade();
+  return <TeamListComponent {...facade} />;
+}
 
-const indexRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/",
+function TeamFormContainer() {
+  const facade = useTeamFacade();
+  return <TeamFormComponent {...facade} />;
+}
+
+const rootRoute = createRootRoute({
   component: () => (
-    <div>
-      <h1>Team-cost-report Playground</h1>
+    <div className="flex min-h-screen bg-gray-50">
+      <NavComponent />
+      <main className="flex-1 overflow-y-auto">
+        <Outlet />
+      </main>
     </div>
   ),
 });
 
-const routeTree = rootRoute.addChildren([indexRoute]);
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/",
+  beforeLoad: () => {
+    throw redirect({ to: "/teams" });
+  },
+});
+
+const teamsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/teams",
+  component: TeamListContainer,
+});
+
+const teamsNewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/teams/new",
+  component: TeamFormContainer,
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  teamsRoute,
+  teamsNewRoute,
+]);
 const router = createRouter({ routeTree });
 
 async function enableMocking() {

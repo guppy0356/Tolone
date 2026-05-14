@@ -8,6 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
     "generate:api": "openapi-typescript src/openapi.yaml -o src/types/openapi.d.ts"
   },
   "dependencies": {
@@ -25,11 +27,13 @@
     "@tolone/tailwind": "workspace:*",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@storybook/react-vite": "catalog:",
     "@vitejs/plugin-react": "^6.0.1",
     "jsdom": "^29.1.1",
     "msw": "catalog:",
     "openapi-msw": "catalog:",
     "openapi-typescript": "catalog:",
+    "storybook": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "^6.0.3",
     "vite": "^8.0.10",

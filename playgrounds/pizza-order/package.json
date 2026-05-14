@@ -8,6 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
     "generate:api": "openapi-typescript src/openapi.yaml -o src/types/openapi.d.ts"
   },
   "dependencies": {
@@ -23,11 +25,13 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.0.0",
+    "@storybook/react-vite": "catalog:",
     "tailwindcss": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "vite": "^6.0.0",
     "vite-plugin-checker": "catalog:",
     "vitest": "catalog:",
+    "storybook": "catalog:",
     "msw": "catalog:",
     "openapi-typescript": "catalog:",
     "@testing-library/react": "^16.0.0",

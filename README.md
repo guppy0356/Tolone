@@ -22,7 +22,14 @@ A pnpm monorepo for experimenting with the Facade + Presenter pattern in React.
 
 ```bash
 pnpm install
+pnpm exec playwright install chromium
 ```
+
+The first command installs npm dependencies and runs MSW's postinstall to
+generate `mockServiceWorker.js` in each playground's `public/`. The second
+command downloads the Chromium binary to `~/Library/Caches/ms-playwright/`
+(or the OS-specific cache), which is used by Storybook play-function tests.
+Run it once per machine; the cache is shared by all playgrounds.
 
 ## Creating a Playground
 

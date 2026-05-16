@@ -72,6 +72,15 @@ pnpm --filter @tolone/todo dev
 
 Open `http://localhost:5173` in your browser.
 
+## Storybook
+
+```bash
+pnpm --filter @tolone/<name> storybook
+```
+
+Open `http://localhost:6006`. Each playground has its own `.storybook/`
+configuration and stories live next to features as `{Feature}.stories.tsx`.
+
 ## Running Tests
 
 ```bash
@@ -142,3 +151,4 @@ Then proceed in the confirmed order, one package at a time:
 - ky (HTTP client)
 - react-hook-form + zod (form validation, blog playground)
 - Vitest + Testing Library
+- Storybook 10 + Playwright (component catalog; play-function tests run in Chromium via `@storybook/addon-vitest`)

@@ -17,6 +17,9 @@ pnpm test
 # Single playground tests
 pnpm --filter @tolone/todo test
 
+# Storybook dev server (single playground)
+pnpm --filter @tolone/todo storybook
+
 # Scaffold a new playground
 pnpm new:playground <name>
 
@@ -24,7 +27,7 @@ pnpm new:playground <name>
 pnpm --filter @tolone/todo generate:api
 ```
 
-No linter is configured. Tests use Vitest with jsdom + Testing Library.
+No linter is configured. Tests run as Storybook play functions via `@storybook/addon-vitest` in browser mode (Playwright Chromium); there is no jsdom or `@testing-library/*` in scope.
 
 ## Architecture
 
@@ -58,12 +61,12 @@ src/features/{feature-name}/
 ├── {Feature}.facade.ts
 ├── {Feature}.presenter.ts
 ├── {Feature}.component.tsx
-└── {Feature}.component.test.tsx
+└── {Feature}.stories.tsx
 ```
 
 ### Testing approach
 
-Component tests pass Facade-shaped props with `vi.fn()` mocks. Since the Component calls Presenter internally, tests exercise both Component and Presenter layers together.
+Stories double as tests. Visual states (`Default`, `Empty`, `Skeleton`) and interaction tests (`play` functions) live in the same `{Feature}.stories.tsx` file, with Facade-shaped props mocked via `fn()` from `storybook/test`. Running `pnpm test` executes every story in browser-mode Vitest, so the same file is both the documentation and the test suite. See [docs/architecture.md](./docs/architecture.md#writing-tests) for the full convention.
 
 ## Commit Strategy
 
@@ -76,7 +79,7 @@ Typical commit sequence:
 4. Facade layer → commit
 5. Presenter layer → commit
 6. MSW handlers → commit
-7. Component + tests (run tests before committing) → commit
+7. Component + stories (run `pnpm test` before committing) → commit
 8. Wire in main.tsx → commit
 
 ## Future Work
@@ -158,7 +161,7 @@ Verify manually with `pnpm dev` after updating `ky`.
 
 ## Tech Stack
 
-React 19, TanStack Query 5, TanStack Router 1, Vite 8, Vitest 4, TailwindCSS 4, MSW 2, openapi-msw 2, openapi-typescript 7, ky 2, TypeScript 6, vite-plugin-checker
+React 19, TanStack Query 5, TanStack Router 1, Vite 8, Vitest 4, Storybook 10 (+ `@storybook/addon-vitest`), Playwright 1, TailwindCSS 4, MSW 2, openapi-msw 2, openapi-typescript 7, ky 2, TypeScript 6, vite-plugin-checker
 
 ## Workspace Layout
 

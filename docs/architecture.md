@@ -484,46 +484,109 @@ export const handlers = [
 
 ## Writing Tests
 
-Component tests pass Facade-shaped props. Since the Component calls the Presenter internally, tests exercise both layers together.
+Tests live as Storybook stories in `{Feature}.stories.tsx`, colocated with the Component. Stories serve two purposes:
+
+- **Visual catalog** — each Component state (populated, empty, loading) is its own story
+- **Interaction tests** — `play` functions assert behavior, executed by `@storybook/addon-vitest` in browser mode (Playwright Chromium)
+
+There is no `*.test.tsx` file and no jsdom / `@testing-library/react` setup; `pnpm test` runs every story as a browser-mode Vitest test.
+
+### What to story (and what not to)
+
+- ✅ View / Component (outer + inner)
+- ✅ Skeleton / loading components
+- ❌ Facade / Presenter / API layers — these have no UI, never write stories for them
+
+### Minimum coverage per Component
+
+For each `{Feature}.component.tsx`, write at minimum:
+
+- One populated state (`Default`)
+- One empty state (`Empty`)
+- One loading state (`Skeleton`) if a skeleton component exists
+- One `play`-function story per interaction handler the Component exposes (e.g. `TogglesTodo`, `SubmitsNewTodo`)
+
+### Story file template
 
 ```tsx
-// Todo.component.test.tsx
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { describe, it, expect, vi } from "vitest";
-import { TodoComponent } from "./Todo.component";
-import type { TodoFacade } from "./Todo.facade";
+// Todo.stories.tsx
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, fn, userEvent, within } from "storybook/test";
+import { TodoComponent, TodoSkeleton } from "./Todo.component";
 
-const baseFacade: TodoFacade = {
-  todos: [
-    { id: "1", title: "Test todo", completed: false },
-    { id: "2", title: "Done todo", completed: true },
-  ],
-  isPending: false,
-  isFetching: false,
-  addTodo: vi.fn(),
-  toggleTodo: vi.fn(),
-  deleteTodo: vi.fn(),
+const meta = {
+  title: "features/Todo",
+  component: TodoComponent,
+  args: {
+    addTodo: fn(),
+    toggleTodo: fn(),
+    deleteTodo: fn(),
+  },
+} satisfies Meta<typeof TodoComponent>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+const sampleTodos = [
+  { id: "1", title: "Test todo", completed: false },
+  { id: "2", title: "Done todo", completed: true },
+];
+
+// --- Visual states ---
+export const Default: Story = {
+  args: { todos: sampleTodos },
 };
 
-describe("TodoComponent", () => {
-  it("renders todos", () => {
-    render(<TodoComponent {...baseFacade} />);
-    expect(screen.getByText("Test todo")).toBeInTheDocument();
-    expect(screen.getByText("Done todo")).toBeInTheDocument();
-  });
+export const Empty: Story = {
+  args: { todos: [] },
+};
 
-  it("submits new todo via form", async () => {
-    const addTodo = vi.fn();
-    const user = userEvent.setup();
-    render(<TodoComponent {...baseFacade} addTodo={addTodo} />);
-    const input = screen.getByPlaceholderText("What needs to be done?");
-    await user.type(input, "New todo");
-    await user.click(screen.getByText("Add"));
-    expect(addTodo).toHaveBeenCalledWith({ title: "New todo" });
-  });
-});
+export const Skeleton: StoryObj = {
+  render: () => <TodoSkeleton />,
+};
+
+// --- Interaction tests ---
+export const TogglesTodo: Story = {
+  args: { todos: sampleTodos },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getAllByRole("checkbox")[0]);
+    await expect(args.toggleTodo).toHaveBeenCalledWith("1", true);
+  },
+};
+
+export const SubmitsNewTodo: Story = {
+  args: { todos: sampleTodos },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByPlaceholderText("What needs to be done?");
+    await userEvent.type(input, "New todo");
+    await userEvent.click(canvas.getByText("Add"));
+    await expect(args.addTodo).toHaveBeenCalledWith({ title: "New todo" });
+  },
+};
 ```
+
+### Conventions
+
+- **`title`**: `features/{Feature}` for feature-level stories
+- **Action handler mocks**: declare in `meta.args` with `fn()` from `storybook/test`; each story inherits them. Override per-story only when the call signature differs
+- **Assertions**: import `expect` from `storybook/test`, not `vitest`
+- **DOM queries**: use `within(canvasElement)`, not `screen` (browser-mode Vitest does not expose Testing Library globals)
+- **Global setup** (CSS, providers): in `.storybook/preview.ts`; do not repeat in stories
+
+### Anti-patterns
+
+- ❌ Calling the Facade hook from a story — pass Facade-shaped props instead
+- ❌ Importing `vi`, `vitest`, `@testing-library/react`, or `@testing-library/jest-dom` inside a story — they are not in scope and break the browser-mode runner
+- ❌ Adding a `play` function to a purely visual story (`Default` / `Empty` / `Skeleton`) — keep visual and interaction stories separate
+- ❌ Creating a `*.test.tsx` file under `src/features/` — the test entry point is the story file
+
+### Browser-mode caveats
+
+- `play` functions verify DOM structure only — CSS layout / color regressions are not caught. Open the Storybook UI to eyeball visual changes
+- Playwright Chromium must be installed once per machine; see [README.md](../README.md#setup) for the setup command
 
 ---
 
@@ -576,6 +639,6 @@ Commit after each step. Do not batch multiple steps into one commit.
 5. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (useQuery + keepPreviousData + useMutation) → **commit**
 6. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook + `{Feature}Presenter` interface → **commit**
 7. `{Feature}.component.tsx` — `{Feature}Component` (outer, handles loading) + `{Feature}View` (`memo`, calls Presenter internally)
-8. `{Feature}.component.test.tsx` — component tests with Facade-shaped props; run `pnpm test` to verify → **commit** (Component + tests together)
+8. `{Feature}.stories.tsx` — visual states (`Default` / `Empty` / `Skeleton`) + `play`-function interaction stories with Facade-shaped props; run `pnpm test` to verify → **commit** (Component + stories together)
 9. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
 10. Wire the feature in `main.tsx` (add route; Container calls Facade, passes to Component) → **commit**

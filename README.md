@@ -44,20 +44,23 @@ playgrounds/<name>/
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
-├── vitest.config.ts
+├── vitest.config.ts                  # Browser-mode Vitest via @storybook/addon-vitest
 ├── index.html
+├── .storybook/
+│   ├── main.ts                       # Storybook config + addon-vitest
+│   └── preview.ts                    # Tailwind import
 └── src/
-    ├── main.tsx              # MSW initialization + React render
-    ├── app.css               # Tailwind import
+    ├── main.tsx                      # MSW initialization + React render
+    ├── app.css                       # Tailwind import
     ├── vite-env.d.ts
     ├── lib/
-    │   └── api-client.ts     # ky instance
-    ├── features/             # Implement features here
-    ├── mocks/
-    │   ├── handlers.ts       # MSW handlers
-    │   └── browser.ts        # MSW worker
-    └── test/
-        └── setup.ts
+    │   └── api-client.ts             # ky instance
+    ├── features/
+    │   └── welcome/
+    │       └── Welcome.stories.tsx   # Starter story; delete once you have a real feature
+    └── mocks/
+        ├── handlers.ts               # MSW handlers
+        └── browser.ts                # MSW worker
 ```
 
 ## Dev Server

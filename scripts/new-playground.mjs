@@ -17,6 +17,7 @@ const dirs = [
   join(root, "src"),
   join(root, "src", "lib"),
   join(root, "src", "features"),
+  join(root, "src", "features", "welcome"),
   join(root, "src", "mocks"),
   join(root, "src", "types"),
   join(root, "public"),
@@ -38,7 +39,7 @@ const packageJson = `{
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "generate:api": "openapi-typescript src/openapi.yaml -o src/types/openapi.d.ts"
@@ -149,6 +150,27 @@ const preview: Preview = {};
 export default preview;
 `;
 
+const welcomeStory = `import type { Meta, StoryObj } from "@storybook/react-vite";
+
+const meta = {
+  title: "Welcome",
+  render: () => (
+    <div className="p-8">
+      <h1 className="text-2xl font-bold">Welcome to ${pascal}</h1>
+      <p className="text-gray-600">
+        Replace this with your first feature story.
+      </p>
+    </div>
+  ),
+} satisfies Meta;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};
+`;
+
 const indexHtml = `<!doctype html>
 <html lang="en">
   <head>
@@ -245,6 +267,7 @@ const files = [
   [join(root, "src", "mocks", "browser.ts"), mockBrowser],
   [join(root, ".storybook", "main.ts"), storybookMain],
   [join(root, ".storybook", "preview.ts"), storybookPreview],
+  [join(root, "src", "features", "welcome", "Welcome.stories.tsx"), welcomeStory],
 ];
 
 for (const [filePath, content] of files) {

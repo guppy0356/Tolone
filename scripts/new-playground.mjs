@@ -19,8 +19,8 @@ const dirs = [
   join(root, "src", "features"),
   join(root, "src", "mocks"),
   join(root, "src", "types"),
-  join(root, "src", "test"),
   join(root, "public"),
+  join(root, ".storybook"),
 ];
 
 for (const dir of dirs) {
@@ -38,7 +38,9 @@ const packageJson = `{
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
     "generate:api": "openapi-typescript src/openapi.yaml -o src/types/openapi.d.ts"
   },
   "dependencies": {
@@ -50,22 +52,24 @@ const packageJson = `{
     "ky": "catalog:"
   },
   "devDependencies": {
+    "@storybook/addon-vitest": "catalog:",
+    "@storybook/react-vite": "catalog:",
+    "@tailwindcss/vite": "catalog:",
     "@tolone/tailwind": "workspace:*",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.0.0",
-    "tailwindcss": "catalog:",
-    "@tailwindcss/vite": "catalog:",
-    "vite": "^6.0.0",
-    "vite-plugin-checker": "catalog:",
-    "vitest": "catalog:",
+    "@vitest/browser": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
     "msw": "catalog:",
     "openapi-typescript": "catalog:",
-    "@testing-library/react": "^16.0.0",
-    "@testing-library/jest-dom": "^6.0.0",
-    "@testing-library/user-event": "^14.0.0",
-    "jsdom": "^25.0.0",
-    "typescript": "^5.7.0"
+    "playwright": "catalog:",
+    "storybook": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vite-plugin-checker": "catalog:",
+    "vitest": "catalog:"
   }
 }
 `;
@@ -88,16 +92,61 @@ export default defineConfig({
 
 const vitestConfig = `import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
+import { playwright } from "@vitest/browser-playwright";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   test: {
-    environment: "jsdom",
-    globals: true,
-    css: false,
-    setupFiles: ["./src/test/setup.ts"],
+    projects: [
+      {
+        extends: true,
+        plugins: [
+          storybookTest({
+            configDir: path.join(dirname, ".storybook"),
+            storybookScript: "pnpm storybook --no-open",
+          }),
+        ],
+        test: {
+          name: "storybook",
+          browser: {
+            enabled: true,
+            // pnpm resolves two vitest instances via peer graphs, splitting the
+            // BrowserProviderOption type. Cast bridges them; runtime is unaffected.
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            provider: playwright({}) as any,
+            headless: true,
+            instances: [{ browser: "chromium" }],
+          },
+        },
+      },
+    ],
   },
 });
+`;
+
+const storybookMain = `import type { StorybookConfig } from "@storybook/react-vite";
+
+const config: StorybookConfig = {
+  framework: "@storybook/react-vite",
+  stories: ["../src/**/*.stories.@(ts|tsx)"],
+  addons: ["@storybook/addon-vitest"],
+};
+
+export default config;
+`;
+
+const storybookPreview = `import type { Preview } from "@storybook/react-vite";
+import "../src/app.css";
+
+const preview: Preview = {};
+
+export default preview;
 `;
 
 const indexHtml = `<!doctype html>
@@ -166,7 +215,7 @@ const viteEnvDts = `/// <reference types="vite/client" />
 
 const apiClient = `import ky from "ky";
 
-export const api = ky.create({ prefixUrl: "/api" });
+export const api = ky.create({ prefix: "/api" });
 `;
 
 const mockHandlers = `import type { HttpHandler } from "msw";
@@ -178,9 +227,6 @@ const mockBrowser = `import { setupWorker } from "msw/browser";
 import { handlers } from "./handlers";
 
 export const worker = setupWorker(...handlers);
-`;
-
-const testSetup = `import "@testing-library/jest-dom/vitest";
 `;
 
 // --- Write files ---
@@ -197,7 +243,8 @@ const files = [
   [join(root, "src", "lib", "api-client.ts"), apiClient],
   [join(root, "src", "mocks", "handlers.ts"), mockHandlers],
   [join(root, "src", "mocks", "browser.ts"), mockBrowser],
-  [join(root, "src", "test", "setup.ts"), testSetup],
+  [join(root, ".storybook", "main.ts"), storybookMain],
+  [join(root, ".storybook", "preview.ts"), storybookPreview],
 ];
 
 for (const [filePath, content] of files) {

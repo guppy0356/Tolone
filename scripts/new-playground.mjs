@@ -57,9 +57,9 @@ const packageJson = `{
     "@storybook/react-vite": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@tolone/tailwind": "workspace:*",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^4.0.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
     "@vitest/browser": "catalog:",
     "@vitest/browser-playwright": "catalog:",
     "msw": "catalog:",
@@ -67,8 +67,8 @@ const packageJson = `{
     "playwright": "catalog:",
     "storybook": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "^5.7.0",
-    "vite": "^6.0.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10",
     "vite-plugin-checker": "catalog:",
     "vitest": "catalog:"
   }

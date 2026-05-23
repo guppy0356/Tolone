@@ -88,35 +88,103 @@ Once a feature is working end-to-end, if a single Component/Presenter contains m
 
 ## Updating Dependencies
 
-Use `pnpm outdated -r` to check for updates across all workspaces.
+Every bump — patch, minor, or major — is investigated against its release notes before execution. The workflow is deliberately strict so the decisions are reproducible: today they are made by hand, but the same rules will later drive an automated bot (PR creation, auto-merge for safe bumps, human discussion for impactful ones). Follow the steps exactly even for trivial patches.
 
-### Order of updates
+### 1. Collect outdated packages
 
-Update one package at a time regardless of patch/minor/major, committing after each. Order by impact (lowest first):
+```bash
+pnpm outdated -r                     # human-readable table
+pnpm outdated -r --format list       # machine-readable, includes Dependents
+```
 
-- Test-only dependencies (e.g. `jsdom`) — isolated to the test environment
-- Packages that can be updated independently (e.g. `ky`, `zod`, `react`)
-- Packages that must be updated together (e.g. `vite` + `vitest` + `@vitejs/plugin-react`) — treat as a single unit
+Group entries by SemVer step (patch, minor, major). Process the groups in order: **patch → minor → major**. Within a group, every candidate is investigated (step 2) before any execution (step 4).
 
-Exception: packages sharing the same version in the catalog (e.g. `tailwindcss` and `@tailwindcss/vite`) may be updated in one step if they are always released together.
+Packages released as a unit (same version across the catalog) form a single candidate:
 
-### How to update a package
+- `tailwindcss` + `@tailwindcss/vite`
+- `storybook` + `@storybook/addon-vitest` + `@storybook/react-vite`
+- `vitest` + `@vitest/browser` + `@vitest/browser-playwright`
+- `react` + `react-dom`
 
-Check whether the package is managed via the workspace catalog (`pnpm-workspace.yaml`) or directly in each playground's `package.json`:
+### 2. Investigate each candidate
 
-- **Catalog package** (listed under `catalog:` in `pnpm-workspace.yaml`): edit the version in `pnpm-workspace.yaml`, then run `pnpm install` at the repo root
-- **Non-catalog package, used by all playgrounds** (e.g. `vite`): run `pnpm update <package> --latest -r` at the repo root
-- **Non-catalog package, used by only some playgrounds** (e.g. `react-hook-form`): update per-playground to keep the scope explicit:
+For each candidate in the current group:
+
+```bash
+# A. Bump the version in pnpm-workspace.yaml (catalog) or per playground/package.json (non-catalog)
+# B. Dry-run the install — writes pnpm-lock.yaml but skips node_modules:
+pnpm install --lockfile-only
+
+# C. Enumerate transitive bumps from the lockfile diff:
+git diff pnpm-lock.yaml
+
+# D. Revert before moving to the next candidate:
+git checkout pnpm-workspace.yaml pnpm-lock.yaml  # adjust paths for per-package edits
+```
+
+Read the release notes for **every package that appears in the lockfile diff** (direct + transitive), covering **every intermediate version**. Example: `msw 2.14.3 → 2.14.6` requires reading 2.14.4, 2.14.5, and 2.14.6.
+
+Classify the candidate:
+
+- **No impact** — every release note describes only bug fixes, internal refactors, or features in APIs this repo does not use. No change to options/exports/behaviors touched by `vite.config.ts`, `vitest.config.ts`, `src/lib/api-client.ts`, the feature layers, MSW handlers, or Storybook config. No peer dep change that conflicts with our other deps.
+- **Impact** — any release note describes a renamed/removed option, changed default behavior, peer dep shift, or new requirement that touches our code. When unsure, treat as impact.
+
+If a package release page does not exist or is empty ("various fixes" with no detail), check the package's `CHANGELOG.md` or commit log. If still indeterminate, classify as impact.
+
+### 3. Present the impact assessment
+
+For the current group, present a table and wait for explicit confirmation:
+
+```markdown
+## Impact assessment — patch group
+
+| Package | Current → Latest | Transitive bumps | Release notes summary | Affects our code? | Plan / done criteria |
+|---|---|---|---|---|---|
+| msw | 2.14.3 → 2.14.6 | 0 | Bug fixes only — [2.14.6](...), [2.14.5](...), [2.14.4](...) | No | — |
+| react + react-dom | 19.2.5 → 19.2.6 | scheduler 0.27.x → 0.27.y | Internal scheduler fix — [link] | No | — |
+| vite | 8.0.10 → 8.0.13 | rolldown rc.16 → rc.18, esbuild 0.24.0 → 0.24.2 | `optimizeDeps.entries` default changed — [link] | Yes | Add explicit `entries` to `vite.config.ts`; `pnpm dev` must serve `/api` after restart |
+```
+
+Order rows by **ascending transitive bump count** (fewest dependents shifting → smallest blast radius first). Ties are broken by **no-impact first**.
+
+For every "impact" entry, both **Plan** (what code change is required) and **done criteria** (how to verify it works beyond `pnpm test` + `pnpm -r build`) must be filled in before execution.
+
+### 4. Execute one candidate at a time
+
+Apply the candidates in the order presented in step 3. For each:
+
+#### a. Where to edit the version
+
+- **Catalog package** (in `pnpm-workspace.yaml`): edit the catalog, then `pnpm install` at the repo root.
+- **Non-catalog, used by all playgrounds** (e.g. `vite`): `pnpm update <package> --latest -r` at the repo root.
+- **Non-catalog, used by only some playgrounds** (e.g. `react-hook-form`): one command per dependent playground:
   ```bash
   pnpm --filter @tolone/account-settings update <package> --latest
   pnpm --filter @tolone/blog update <package> --latest
   ```
 
-To check the catalog: `grep <package> pnpm-workspace.yaml`. To check which playgrounds depend on a non-catalog package, see the `Dependents:` column of `pnpm outdated -r --format list`.
+To check the catalog: `grep <package> pnpm-workspace.yaml`. To check dependents for a non-catalog package: see `Dependents:` in `pnpm outdated -r --format list`.
 
-### When a root-level command fails, fall back to `--filter`
+#### b. Verify
 
-`pnpm exec <bin>` run at the repo root can resolve to the wrong binary (or fail) when the bin is not a direct dep of the root `package.json`. Re-run inside a playground via `--filter`.
+Both must pass before committing:
+
+```bash
+pnpm test       # Vitest unit tests (Storybook play functions, browser mode)
+pnpm -r build   # Production build (also runs tsc via vite-plugin-checker)
+```
+
+For "impact" candidates, additionally execute the **done criteria** declared in step 3.
+
+If a "no-impact" candidate fails verification, reclassify as impact: roll back the bump, write a plan, and re-present.
+
+#### c. Commit
+
+One commit per candidate (single package or bundled group). Subject: `Bump <package> to <version>` (or `Bump <group> to <version>` for bundles).
+
+### 5. Fallback for post-install bins: use `--filter`
+
+`pnpm exec <bin>` at the repo root can resolve to the wrong binary (or fail) when the bin is not a direct dep of the root `package.json`. Re-run inside a playground via `--filter`.
 
 Example — Playwright browser re-download after a `playwright` bump:
 
@@ -128,57 +196,11 @@ pnpm exec playwright install
 pnpm --filter @tolone/blog exec playwright install chromium chromium-headless-shell
 ```
 
-This pattern (root → `--filter` fallback) applies to any post-install step that depends on the package's bin.
-
-### Verification after each update
-
-Run in this order; all must pass before committing:
-
-```bash
-pnpm test       # Vitest unit tests
-pnpm -r build   # Production build (also runs tsc via vite-plugin-checker)
-```
-
-### Major updates: changelog review required
-
-Before updating a major version, fetch the release notes and check for breaking changes against the actual code in this repo. Specifically look for:
-
-- Renamed or removed options used in `vite.config.ts`, `vitest.config.ts`, or `src/lib/api-client.ts`
-- Changed default behavior that affects runtime (not just types)
-- Peer dependency conflicts
-
-If a breaking change requires a code fix, apply it in the same commit as the version bump.
-If the impact cannot be determined, skip the package and open a GitHub Issue to track it.
-
-Before starting any updates, present a full impact assessment covering all outdated packages (patch/minor and major) and the proposed update order. Wait for user confirmation before proceeding.
-
-```
-## Impact assessment
-
-| Package              | Current → Latest | Impact | Notes                                                        |
-|---|---|---|---|
-| jsdom                | 25 → 29          | Low    | Test environment only, no production impact                  |
-| ky                   | 1 → 2            | Low    | API layer only; `prefixUrl` renamed to `prefix` in api-client.ts |
-| zod                  | 3 → 4            | Low    | Used in 2 playgrounds; no breaking APIs in use               |
-| typescript           | 5.9 → 6          | Medium | Affects all type checking; tsconfig already uses recommended options |
-| vite                 | 6 → 8            | Medium | Must update with vitest and @vitejs/plugin-react together    |
-| vitest               | 3 → 4            | Medium | Coupled with vite; update together                           |
-| @vitejs/plugin-react | 4 → 6            | Medium | Coupled with vite; Babel option removed but not used here    |
-
-## Update order
-
-1. jsdom — test-only, fully isolated, no risk
-2. ky — small surface area (api-client.ts only); requires renaming `prefixUrl` → `prefix`
-3. zod — limited to account-settings and blog; no breaking APIs in use
-4. typescript — affects all type checking but independent of build tooling
-5. vite + vitest + @vitejs/plugin-react — must be updated together; largest change but no config migration needed
-```
+This pattern applies to any post-install step that depends on the package's bin.
 
 ### Known gap
 
-MSW intercepts at the fetch level, so unit tests do not exercise `ky` directly.
-A `ky` update that changes HTTP behavior will pass tests but may break the dev server.
-Verify manually with `pnpm dev` after updating `ky`.
+MSW intercepts at the fetch level, so unit tests do not exercise `ky` directly. A `ky` update that changes HTTP behavior will pass tests but may break the dev server. For `ky` updates, add `pnpm dev` smoke-test as an explicit done criterion in step 3.
 
 ## Tech Stack
 

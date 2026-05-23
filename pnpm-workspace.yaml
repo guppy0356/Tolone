@@ -17,9 +17,9 @@ catalog:
   '@storybook/react-vite': ^10.4.1
   tailwindcss: ^4.2.4
   vite-plugin-checker: ^0.13.0
-  vitest: ^4.1.5
-  '@vitest/browser': ^4.1.5
-  '@vitest/browser-playwright': ^4.1.5
+  vitest: ^4.1.6
+  '@vitest/browser': ^4.1.6
+  '@vitest/browser-playwright': ^4.1.6
   playwright: ^1.60.0
 
 onlyBuiltDependencies:

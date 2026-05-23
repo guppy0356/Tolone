@@ -104,10 +104,31 @@ Exception: packages sharing the same version in the catalog (e.g. `tailwindcss` 
 
 Check whether the package is managed via the workspace catalog (`pnpm-workspace.yaml`) or directly in each playground's `package.json`:
 
-- **Catalog package** (listed under `catalog:` in `pnpm-workspace.yaml`): edit the version in `pnpm-workspace.yaml`, then run `pnpm install`
-- **Non-catalog package** (version written in each `package.json`): run `pnpm update <package> --latest -r`
+- **Catalog package** (listed under `catalog:` in `pnpm-workspace.yaml`): edit the version in `pnpm-workspace.yaml`, then run `pnpm install` at the repo root
+- **Non-catalog package, used by all playgrounds** (e.g. `vite`): run `pnpm update <package> --latest -r` at the repo root
+- **Non-catalog package, used by only some playgrounds** (e.g. `react-hook-form`): update per-playground to keep the scope explicit:
+  ```bash
+  pnpm --filter @tolone/account-settings update <package> --latest
+  pnpm --filter @tolone/blog update <package> --latest
+  ```
 
-To check: `grep <package> pnpm-workspace.yaml`
+To check the catalog: `grep <package> pnpm-workspace.yaml`. To check which playgrounds depend on a non-catalog package, see the `Dependents:` column of `pnpm outdated -r --format list`.
+
+### When a root-level command fails, fall back to `--filter`
+
+`pnpm exec <bin>` run at the repo root can resolve to the wrong binary (or fail) when the bin is not a direct dep of the root `package.json`. Re-run inside a playground via `--filter`.
+
+Example — Playwright browser re-download after a `playwright` bump:
+
+```bash
+# At the repo root: may not download the new browser version
+pnpm exec playwright install
+
+# Via a playground: uses that playground's playwright binary, downloads correctly
+pnpm --filter @tolone/blog exec playwright install chromium chromium-headless-shell
+```
+
+This pattern (root → `--filter` fallback) applies to any post-install step that depends on the package's bin.
 
 ### Verification after each update
 

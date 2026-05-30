@@ -12,7 +12,7 @@ import {
 } from "@tanstack/react-router";
 import { useTeamFacade } from "./features/teams/Team.facade";
 import { TeamListContainer } from "./features/teams/TeamList.container";
-import { TeamFormComponent } from "./features/teams/TeamForm.component";
+import { TeamFormContainer } from "./features/teams/TeamForm.container";
 import { useReportFacade } from "./features/reports/Report.facade";
 import { useReportDetailFacade } from "./features/reports/ReportDetail.facade";
 import { ReportListComponent } from "./features/reports/ReportList.component";
@@ -22,11 +22,6 @@ import { NavComponent } from "./features/nav/Nav.component";
 import "./app.css";
 
 const queryClient = new QueryClient();
-
-function TeamFormContainer() {
-  const facade = useTeamFacade();
-  return <TeamFormComponent {...facade} />;
-}
 
 function ReportListContainer() {
   const facade = useReportFacade();

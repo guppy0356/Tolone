@@ -20,9 +20,6 @@ const meta = {
   title: "features/TeamForm",
   component: TeamFormComponent,
   args: {
-    teams: [],
-    isPending: false,
-    isFetching: false,
     addTeam: fn(),
   },
   decorators: [

@@ -1,18 +1,12 @@
-import { memo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import type { TeamFacade } from "./Team.facade";
 import { useTeamFormPresenter } from "./TeamForm.presenter";
 import { TeamMemberPicker } from "./TeamMemberPicker.component";
 
-interface TeamFormViewProps {
-  addTeam: TeamFacade["addTeam"];
-  onSaved?: () => void;
-}
-
-const TeamFormView = memo(function TeamFormView({
+export function TeamFormComponent({
   addTeam,
-  onSaved,
-}: TeamFormViewProps) {
+}: Pick<TeamFacade, "addTeam">) {
+  const navigate = useNavigate();
   const {
     teamName,
     setTeamName,
@@ -23,7 +17,10 @@ const TeamFormView = memo(function TeamFormView({
     canSubmit,
     submitting,
     handleSubmit,
-  } = useTeamFormPresenter({ addTeam, onSaved });
+  } = useTeamFormPresenter({
+    addTeam,
+    onSaved: () => navigate({ to: "/teams" }),
+  });
 
   return (
     <form
@@ -74,12 +71,5 @@ const TeamFormView = memo(function TeamFormView({
         </button>
       </div>
     </form>
-  );
-});
-
-export function TeamFormComponent({ addTeam }: TeamFacade) {
-  const navigate = useNavigate();
-  return (
-    <TeamFormView addTeam={addTeam} onSaved={() => navigate({ to: "/teams" })} />
   );
 }

@@ -49,7 +49,11 @@ function TeamListSkeleton() {
   );
 }
 
-export function TeamListComponent({ teams, isPending, isFetching }: TeamFacade) {
+export function TeamListComponent({
+  teams,
+  isPending,
+  isFetching,
+}: Pick<TeamFacade, "teams" | "isPending" | "isFetching">) {
   const { rows } = useTeamListPresenter({ teams });
 
   return (

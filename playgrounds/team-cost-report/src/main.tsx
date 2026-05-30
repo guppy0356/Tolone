@@ -11,7 +11,7 @@ import {
   useParams,
 } from "@tanstack/react-router";
 import { useTeamFacade } from "./features/teams/Team.facade";
-import { TeamListComponent } from "./features/teams/TeamList.component";
+import { TeamListContainer } from "./features/teams/TeamList.container";
 import { TeamFormComponent } from "./features/teams/TeamForm.component";
 import { useReportFacade } from "./features/reports/Report.facade";
 import { useReportDetailFacade } from "./features/reports/ReportDetail.facade";
@@ -22,11 +22,6 @@ import { NavComponent } from "./features/nav/Nav.component";
 import "./app.css";
 
 const queryClient = new QueryClient();
-
-function TeamListContainer() {
-  const facade = useTeamFacade();
-  return <TeamListComponent {...facade} />;
-}
 
 function TeamFormContainer() {
   const facade = useTeamFacade();

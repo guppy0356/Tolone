@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useEffect, useRef } from "react";
 import type { Member } from "./Members.api";
 
 export interface TeamMemberPickerProps {
@@ -20,6 +20,22 @@ export const TeamMemberPicker = memo(function TeamMemberPicker({
   onAdd,
   onClose,
 }: TeamMemberPickerProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        onClose();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   const selectMember = (member: Member) => {
@@ -28,7 +44,7 @@ export const TeamMemberPicker = memo(function TeamMemberPicker({
   };
 
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative">
       <div className="flex items-center gap-2">
         <input
           autoFocus

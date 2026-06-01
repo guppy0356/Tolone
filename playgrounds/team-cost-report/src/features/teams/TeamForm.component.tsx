@@ -1,11 +1,25 @@
 import { useNavigate } from "@tanstack/react-router";
 import type { TeamFacade } from "./Team.facade";
 import { useTeamFormPresenter } from "./TeamForm.presenter";
+import { TeamMemberList } from "./TeamMemberList.component";
 import { TeamMemberPicker } from "./TeamMemberPicker.component";
+
+type TeamFormComponentProps = Pick<
+  TeamFacade,
+  | "addTeam"
+  | "memberSearch"
+  | "setMemberSearch"
+  | "members"
+  | "isFetchingMembers"
+>;
 
 export function TeamFormComponent({
   addTeam,
-}: Pick<TeamFacade, "addTeam">) {
+  memberSearch,
+  setMemberSearch,
+  members,
+  isFetchingMembers,
+}: TeamFormComponentProps) {
   const navigate = useNavigate();
   const {
     teamName,
@@ -17,9 +31,15 @@ export function TeamFormComponent({
     canSubmit,
     submitting,
     handleSubmit,
+    candidates,
+    isPickerOpen,
+    openPicker,
+    closePicker,
   } = useTeamFormPresenter({
     addTeam,
     onSaved: () => navigate({ to: "/teams" }),
+    members,
+    setMemberSearch,
   });
 
   return (
@@ -51,13 +71,28 @@ export function TeamFormComponent({
         />
       </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium text-gray-700">Members</h2>
-        <TeamMemberPicker
+      <div className="space-y-3">
+        <h2 className="text-sm font-medium text-gray-700">Members</h2>
+        <TeamMemberList
           picked={picked}
-          onAdd={addMember}
-          onRemove={removeMember}
           onRateChange={setRate}
+          onRemove={removeMember}
+        />
+        <button
+          type="button"
+          onClick={openPicker}
+          className="w-full rounded border border-dashed border-gray-300 px-3 py-2 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600"
+        >
+          + Add member
+        </button>
+        <TeamMemberPicker
+          open={isPickerOpen}
+          query={memberSearch}
+          setQuery={setMemberSearch}
+          candidates={candidates}
+          isSearching={isFetchingMembers}
+          onAdd={addMember}
+          onClose={closePicker}
         />
       </div>
 

@@ -1,23 +1,46 @@
+import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import {
-  expect,
-  fireEvent,
-  fn,
-  userEvent,
-  waitFor,
-  within,
-} from "storybook/test";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+  QueryClient,
+  QueryClientProvider,
+  keepPreviousData,
+  useQuery,
+} from "@tanstack/react-query";
+import { membersApi, type Member } from "./Members.api";
 import { TeamMemberPicker } from "./TeamMemberPicker.component";
+
+interface HarnessProps {
+  onAdd: (member: Member) => void;
+  onClose: () => void;
+}
+
+function TeamMemberPickerHarness({ onAdd, onClose }: HarnessProps) {
+  const [query, setQuery] = useState("");
+  const { data, isFetching } = useQuery({
+    queryKey: query ? ["members", { q: query }] : ["members"],
+    queryFn: () => membersApi.getAll(query || undefined),
+    placeholderData: keepPreviousData,
+  });
+  return (
+    <TeamMemberPicker
+      open={true}
+      query={query}
+      setQuery={setQuery}
+      candidates={data ?? []}
+      isSearching={isFetching}
+      onAdd={onAdd}
+      onClose={onClose}
+    />
+  );
+}
 
 const meta = {
   title: "features/TeamMemberPicker",
-  component: TeamMemberPicker,
+  component: TeamMemberPickerHarness,
   args: {
-    picked: [],
     onAdd: fn(),
-    onRemove: fn(),
-    onRateChange: fn(),
+    onClose: fn(),
   },
   decorators: [
     (Story) => {
@@ -31,7 +54,7 @@ const meta = {
       );
     },
   ],
-} satisfies Meta<typeof TeamMemberPicker>;
+} satisfies Meta<typeof TeamMemberPickerHarness>;
 
 export default meta;
 
@@ -39,23 +62,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-export const OpensComboboxAndListsMatches: Story = {
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: /Add member/ }));
-    await expect(
-      canvas.getByRole("combobox", { name: "Search members" }),
-    ).toBeInTheDocument();
-    await waitFor(async () => {
-      await expect(canvas.getByText("Ada Lovelace")).toBeInTheDocument();
-    });
-  },
-};
-
 export const FiltersAsUserTypes: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: /Add member/ }));
     const input = canvas.getByRole("combobox", { name: "Search members" });
     await userEvent.type(input, "Ada");
     await waitFor(async () => {
@@ -65,10 +74,9 @@ export const FiltersAsUserTypes: Story = {
   },
 };
 
-export const CallsOnAddOnSelect: Story = {
+export const CallsOnAddAndOnCloseOnSelect: Story = {
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: /Add member/ }));
     await waitFor(async () => {
       await expect(canvas.getByText("Grace Hopper")).toBeInTheDocument();
     });
@@ -77,41 +85,16 @@ export const CallsOnAddOnSelect: Story = {
       id: "m3",
       name: "Grace Hopper",
     });
+    await expect(args.onClose).toHaveBeenCalled();
   },
 };
 
-export const RendersPickedWithRateAndRemove: Story = {
-  args: {
-    picked: [{ memberId: "m1", name: "Ada Lovelace", hourlyRate: 120 }],
-  },
+export const CallsOnCloseOnEscape: Story = {
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);
-    const rateInput = canvas.getByLabelText(
-      "Hourly rate for Ada Lovelace",
-    ) as HTMLInputElement;
-    await expect(rateInput).toHaveValue(120);
-    await fireEvent.change(rateInput, { target: { value: "150" } });
-    await expect(args.onRateChange).toHaveBeenLastCalledWith("m1", 150);
-
-    await userEvent.click(
-      canvas.getByRole("button", { name: "Remove Ada Lovelace" }),
-    );
-    await expect(args.onRemove).toHaveBeenCalledWith("m1");
-  },
-};
-
-export const ExcludesAlreadyPickedMembers: Story = {
-  args: {
-    picked: [{ memberId: "m1", name: "Ada Lovelace", hourlyRate: 100 }],
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: /Add member/ }));
-    await waitFor(async () => {
-      await expect(canvas.getByText("Alan Turing")).toBeInTheDocument();
-    });
-    // Ada appears only in the chip area, not the dropdown
-    const adaElements = canvas.getAllByText("Ada Lovelace");
-    await expect(adaElements).toHaveLength(1);
+    const input = canvas.getByRole("combobox", { name: "Search members" });
+    await userEvent.click(input);
+    await userEvent.keyboard("{Escape}");
+    await expect(args.onClose).toHaveBeenCalled();
   },
 };

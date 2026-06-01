@@ -1,10 +1,11 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import {
   useQuery,
   useMutation,
   useQueryClient,
   keepPreviousData,
 } from "@tanstack/react-query";
+import { membersApi, type Member } from "./Members.api";
 import { teamApi, type Team, type CreateTeamInput } from "./Team.api";
 
 export interface TeamFacade {
@@ -12,18 +13,39 @@ export interface TeamFacade {
   isPending: boolean;
   isFetching: boolean;
   addTeam: (input: CreateTeamInput) => Promise<void>;
+  memberSearch: string;
+  setMemberSearch: (q: string) => void;
+  members: Member[];
+  isFetchingMembers: boolean;
 }
 
 const teamKeys = {
   all: ["teams"] as const,
 };
 
+const memberKeys = {
+  all: ["members"] as const,
+  search: (q: string) => [...memberKeys.all, { q }] as const,
+};
+
 export function useTeamFacade(): TeamFacade {
   const queryClient = useQueryClient();
 
-  const { data, isPending, isFetching } = useQuery({
+  const {
+    data: teams,
+    isPending,
+    isFetching,
+  } = useQuery({
     queryKey: teamKeys.all,
     queryFn: teamApi.getAll,
+    placeholderData: keepPreviousData,
+  });
+
+  const [memberSearch, setMemberSearch] = useState("");
+
+  const { data: members, isFetching: isFetchingMembers } = useQuery({
+    queryKey: memberSearch ? memberKeys.search(memberSearch) : memberKeys.all,
+    queryFn: () => membersApi.getAll(memberSearch || undefined),
     placeholderData: keepPreviousData,
   });
 
@@ -62,9 +84,13 @@ export function useTeamFacade(): TeamFacade {
   );
 
   return {
-    teams: data ?? [],
+    teams: teams ?? [],
     isPending,
     isFetching,
     addTeam,
+    memberSearch,
+    setMemberSearch,
+    members: members ?? [],
+    isFetchingMembers,
   };
 }

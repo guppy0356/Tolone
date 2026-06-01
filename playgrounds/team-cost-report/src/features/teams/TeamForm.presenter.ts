@@ -1,11 +1,18 @@
-import { useCallback, useState } from "react";
-import type { Member } from "../members/Members.api";
+import { useCallback, useMemo, useState } from "react";
+import type { Member } from "./Members.api";
 import type { CreateTeamInput } from "./Team.api";
-import type { PickedMember } from "./TeamMemberPicker.presenter";
+
+export interface PickedMember {
+  memberId: string;
+  name: string;
+  hourlyRate: number;
+}
 
 export interface TeamFormPresenterProps {
   addTeam: (input: CreateTeamInput) => Promise<void>;
   onSaved?: () => void;
+  members: Member[];
+  setMemberSearch: (q: string) => void;
 }
 
 export interface TeamFormPresenter {
@@ -18,15 +25,22 @@ export interface TeamFormPresenter {
   canSubmit: boolean;
   submitting: boolean;
   handleSubmit: () => Promise<void>;
+  candidates: Member[];
+  isPickerOpen: boolean;
+  openPicker: () => void;
+  closePicker: () => void;
 }
 
 export function useTeamFormPresenter({
   addTeam,
   onSaved,
+  members,
+  setMemberSearch,
 }: TeamFormPresenterProps): TeamFormPresenter {
   const [teamName, setTeamName] = useState("");
   const [picked, setPicked] = useState<PickedMember[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
 
   const addMember = useCallback((member: Member) => {
     setPicked((prev) =>
@@ -45,6 +59,25 @@ export function useTeamFormPresenter({
       prev.map((p) => (p.memberId === memberId ? { ...p, hourlyRate } : p)),
     );
   }, []);
+
+  const pickedIds = useMemo(
+    () => new Set(picked.map((p) => p.memberId)),
+    [picked],
+  );
+
+  const candidates = useMemo(
+    () => members.filter((m) => !pickedIds.has(m.id)),
+    [members, pickedIds],
+  );
+
+  const openPicker = useCallback(() => {
+    setIsPickerOpen(true);
+  }, []);
+
+  const closePicker = useCallback(() => {
+    setIsPickerOpen(false);
+    setMemberSearch("");
+  }, [setMemberSearch]);
 
   const canSubmit =
     teamName.trim().length > 0 &&
@@ -81,5 +114,9 @@ export function useTeamFormPresenter({
     canSubmit,
     submitting,
     handleSubmit,
+    candidates,
+    isPickerOpen,
+    openPicker,
+    closePicker,
   };
 }

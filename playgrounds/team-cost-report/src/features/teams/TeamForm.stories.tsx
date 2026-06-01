@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   expect,
@@ -7,18 +8,45 @@ import {
   waitFor,
   within,
 } from "storybook/test";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  keepPreviousData,
+  useQuery,
+} from "@tanstack/react-query";
 import {
   createRootRoute,
   createRoute,
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
+import { membersApi } from "./Members.api";
+import type { TeamFacade } from "./Team.facade";
 import { TeamFormComponent } from "./TeamForm.component";
+
+type HarnessProps = Pick<TeamFacade, "addTeam">;
+
+function TeamFormHarness({ addTeam }: HarnessProps) {
+  const [memberSearch, setMemberSearch] = useState("");
+  const { data, isFetching } = useQuery({
+    queryKey: memberSearch ? ["members", { q: memberSearch }] : ["members"],
+    queryFn: () => membersApi.getAll(memberSearch || undefined),
+    placeholderData: keepPreviousData,
+  });
+  return (
+    <TeamFormComponent
+      addTeam={addTeam}
+      memberSearch={memberSearch}
+      setMemberSearch={setMemberSearch}
+      members={data ?? []}
+      isFetchingMembers={isFetching}
+    />
+  );
+}
 
 const meta = {
   title: "features/TeamForm",
-  component: TeamFormComponent,
+  component: TeamFormHarness,
   args: {
     addTeam: fn(),
   },
@@ -44,7 +72,7 @@ const meta = {
       return <RouterProvider router={router} />;
     },
   ],
-} satisfies Meta<typeof TeamFormComponent>;
+} satisfies Meta<typeof TeamFormHarness>;
 
 export default meta;
 

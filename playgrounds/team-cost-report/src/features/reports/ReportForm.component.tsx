@@ -1,9 +1,8 @@
 import type { ReportFacade } from "./Report.facade";
-import type { TeamFacade } from "../teams/Team.facade";
 import { useReportFormPresenter } from "./ReportForm.presenter";
 
 interface ReportFormComponentProps {
-  teams: TeamFacade["teams"];
+  teams: ReportFacade["teams"];
   addReport: ReportFacade["addReport"];
   onSaved: (reportId: string) => void;
 }

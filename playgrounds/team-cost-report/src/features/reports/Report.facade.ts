@@ -5,6 +5,7 @@ import {
   useQueryClient,
   keepPreviousData,
 } from "@tanstack/react-query";
+import { teamApi, type Team } from "../teams/Team.api";
 import {
   reportApi,
   type ReportSummary,
@@ -13,6 +14,7 @@ import {
 
 export interface ReportFacade {
   reports: ReportSummary[];
+  teams: Team[];
   isPending: boolean;
   isFetching: boolean;
   addReport: (input: CreateReportInput) => Promise<ReportSummary>;
@@ -23,12 +25,22 @@ const reportKeys = {
   detail: (id: string) => ["reports", id] as const,
 };
 
+const teamKeys = {
+  all: ["teams"] as const,
+};
+
 export function useReportFacade(): ReportFacade {
   const queryClient = useQueryClient();
 
   const { data, isPending, isFetching } = useQuery({
     queryKey: reportKeys.all,
     queryFn: reportApi.getAll,
+    placeholderData: keepPreviousData,
+  });
+
+  const { data: teams } = useQuery({
+    queryKey: teamKeys.all,
+    queryFn: teamApi.getAll,
     placeholderData: keepPreviousData,
   });
 
@@ -63,6 +75,7 @@ export function useReportFacade(): ReportFacade {
 
   return {
     reports: data ?? [],
+    teams: teams ?? [],
     isPending,
     isFetching,
     addReport,

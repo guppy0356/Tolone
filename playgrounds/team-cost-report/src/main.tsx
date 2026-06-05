@@ -10,29 +10,16 @@ import {
   redirect,
   useParams,
 } from "@tanstack/react-router";
-import { useTeamFacade } from "./features/teams/Team.facade";
 import { TeamListContainer } from "./features/teams/TeamList.container";
 import { TeamFormContainer } from "./features/teams/TeamForm.container";
-import { useReportFacade } from "./features/reports/Report.facade";
 import { useReportDetailFacade } from "./features/reports/ReportDetail.facade";
 import { ReportListContainer } from "./features/reports/ReportList.container";
-import { ReportFormComponent } from "./features/reports/ReportForm.component";
+import { ReportFormContainer } from "./features/reports/ReportForm.container";
 import { ReportDetailComponent } from "./features/reports/ReportDetail.component";
 import { NavComponent } from "./features/nav/Nav.component";
 import "./app.css";
 
 const queryClient = new QueryClient();
-
-function ReportFormContainer() {
-  const teamFacade = useTeamFacade();
-  const reportFacade = useReportFacade();
-  return (
-    <ReportFormComponent
-      teams={teamFacade.teams}
-      addReport={reportFacade.addReport}
-    />
-  );
-}
 
 function ReportDetailContainer() {
   const { reportId } = useParams({ from: "/reports/$reportId" });

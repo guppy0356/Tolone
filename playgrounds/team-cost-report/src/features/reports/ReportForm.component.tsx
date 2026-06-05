@@ -1,23 +1,18 @@
-import { memo } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import type { ReportFacade } from "./Report.facade";
 import type { TeamFacade } from "../teams/Team.facade";
 import { useReportFormPresenter } from "./ReportForm.presenter";
 
-export interface ReportFormProps {
+interface ReportFormComponentProps {
   teams: TeamFacade["teams"];
   addReport: ReportFacade["addReport"];
-}
-
-interface ReportFormViewProps extends ReportFormProps {
   onSaved: (reportId: string) => void;
 }
 
-const ReportFormView = memo(function ReportFormView({
+export function ReportFormComponent({
   teams,
   addReport,
   onSaved,
-}: ReportFormViewProps) {
+}: ReportFormComponentProps) {
   const {
     reportName,
     setReportName,
@@ -111,18 +106,5 @@ const ReportFormView = memo(function ReportFormView({
         </button>
       </div>
     </form>
-  );
-});
-
-export function ReportFormComponent({ teams, addReport }: ReportFormProps) {
-  const navigate = useNavigate();
-  return (
-    <ReportFormView
-      teams={teams}
-      addReport={addReport}
-      onSaved={(reportId) =>
-        navigate({ to: "/reports/$reportId", params: { reportId } })
-      }
-    />
   );
 }

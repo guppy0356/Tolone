@@ -15,18 +15,13 @@ import { TeamListContainer } from "./features/teams/TeamList.container";
 import { TeamFormContainer } from "./features/teams/TeamForm.container";
 import { useReportFacade } from "./features/reports/Report.facade";
 import { useReportDetailFacade } from "./features/reports/ReportDetail.facade";
-import { ReportListComponent } from "./features/reports/ReportList.component";
+import { ReportListContainer } from "./features/reports/ReportList.container";
 import { ReportFormComponent } from "./features/reports/ReportForm.component";
 import { ReportDetailComponent } from "./features/reports/ReportDetail.component";
 import { NavComponent } from "./features/nav/Nav.component";
 import "./app.css";
 
 const queryClient = new QueryClient();
-
-function ReportListContainer() {
-  const facade = useReportFacade();
-  return <ReportListComponent {...facade} />;
-}
 
 function ReportFormContainer() {
   const teamFacade = useTeamFacade();

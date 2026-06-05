@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, fn, within } from "storybook/test";
+import { expect, within } from "storybook/test";
 import {
   createRootRoute,
   createRoute,
@@ -30,7 +30,6 @@ const meta = {
     reports: baseReports,
     isPending: false,
     isFetching: false,
-    addReport: fn(),
   },
   decorators: [
     (Story) => {

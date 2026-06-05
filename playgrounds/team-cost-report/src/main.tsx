@@ -8,24 +8,16 @@ import {
   Outlet,
   RouterProvider,
   redirect,
-  useParams,
 } from "@tanstack/react-router";
 import { TeamListContainer } from "./features/teams/TeamList.container";
 import { TeamFormContainer } from "./features/teams/TeamForm.container";
-import { useReportDetailFacade } from "./features/reports/ReportDetail.facade";
 import { ReportListContainer } from "./features/reports/ReportList.container";
 import { ReportFormContainer } from "./features/reports/ReportForm.container";
-import { ReportDetailComponent } from "./features/reports/ReportDetail.component";
+import { ReportDetailContainer } from "./features/reports/ReportDetail.container";
 import { NavComponent } from "./features/nav/Nav.component";
 import "./app.css";
 
 const queryClient = new QueryClient();
-
-function ReportDetailContainer() {
-  const { reportId } = useParams({ from: "/reports/$reportId" });
-  const facade = useReportDetailFacade({ reportId });
-  return <ReportDetailComponent {...facade} />;
-}
 
 const rootRoute = createRootRoute({
   component: () => (

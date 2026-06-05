@@ -1,16 +1,50 @@
 import { memo } from "react";
-import type { ReportDetail } from "./Report.api";
 import type { ReportDetailFacade } from "./ReportDetail.facade";
 import { useReportDetailPresenter } from "./ReportDetail.presenter";
 import { ReportChart } from "./ReportChart";
 
-interface ReportDetailViewProps {
-  detail: ReportDetail;
+export function ReportDetailComponent({
+  detail,
+  isPending,
+  isFetching,
+  isNotFound,
+}: ReportDetailFacade) {
+  if (isNotFound) {
+    return (
+      <div className="p-6">
+        <p className="rounded border border-dashed border-gray-300 p-6 text-center text-gray-500">
+          Report not found.
+        </p>
+      </div>
+    );
+  }
+
+  if (isPending || !detail) {
+    return <ReportDetailSkeleton />;
+  }
+
+  return (
+    <div className={`transition-opacity ${isFetching ? "opacity-50" : ""}`}>
+      <ReportDetailView detail={detail} />
+    </div>
+  );
+}
+
+function ReportDetailSkeleton() {
+  return (
+    <div className="space-y-4 p-6">
+      <div className="h-8 w-40 animate-pulse rounded bg-gray-200" />
+      <div className="h-24 animate-pulse rounded bg-gray-200" />
+      <div className="h-80 animate-pulse rounded bg-gray-200" />
+    </div>
+  );
 }
 
 const ReportDetailView = memo(function ReportDetailView({
   detail,
-}: ReportDetailViewProps) {
+}: {
+  detail: NonNullable<ReportDetailFacade["detail"]>;
+}) {
   const { teamNames, colors, formattedTotal } = useReportDetailPresenter({
     detail,
   });
@@ -79,40 +113,3 @@ const ReportDetailView = memo(function ReportDetailView({
     </div>
   );
 });
-
-export function ReportDetailSkeleton() {
-  return (
-    <div className="space-y-4 p-6">
-      <div className="h-8 w-40 animate-pulse rounded bg-gray-200" />
-      <div className="h-24 animate-pulse rounded bg-gray-200" />
-      <div className="h-80 animate-pulse rounded bg-gray-200" />
-    </div>
-  );
-}
-
-export function ReportDetailComponent({
-  detail,
-  isPending,
-  isFetching,
-  isNotFound,
-}: ReportDetailFacade) {
-  if (isNotFound) {
-    return (
-      <div className="p-6">
-        <p className="rounded border border-dashed border-gray-300 p-6 text-center text-gray-500">
-          Report not found.
-        </p>
-      </div>
-    );
-  }
-
-  if (isPending || !detail) {
-    return <ReportDetailSkeleton />;
-  }
-
-  return (
-    <div className={`transition-opacity ${isFetching ? "opacity-50" : ""}`}>
-      <ReportDetailView detail={detail} />
-    </div>
-  );
-}

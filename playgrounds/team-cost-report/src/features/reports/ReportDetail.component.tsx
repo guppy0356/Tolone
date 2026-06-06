@@ -25,7 +25,7 @@ export function ReportDetailComponent({
 
   return (
     <div className={`transition-opacity ${isFetching ? "opacity-50" : ""}`}>
-      <ReportDetailView detail={detail} />
+      <ReportDetail detail={detail} />
     </div>
   );
 }
@@ -40,7 +40,7 @@ function ReportDetailSkeleton() {
   );
 }
 
-const ReportDetailView = memo(function ReportDetailView({
+const ReportDetail = memo(function ReportDetail({
   detail,
 }: {
   detail: NonNullable<ReportDetailFacade["detail"]>;

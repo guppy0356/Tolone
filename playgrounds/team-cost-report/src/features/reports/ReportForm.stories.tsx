@@ -31,7 +31,6 @@ const meta = {
   args: {
     teams: sampleTeams,
     addReport: fn(),
-    onSaved: fn(),
   },
   decorators: [
     (Story) => {

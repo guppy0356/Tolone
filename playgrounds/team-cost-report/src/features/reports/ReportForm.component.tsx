@@ -1,17 +1,14 @@
+import { useNavigate } from "@tanstack/react-router";
 import type { ReportFacade } from "./Report.facade";
 import { useReportFormPresenter } from "./ReportForm.presenter";
 
-interface ReportFormComponentProps {
-  teams: ReportFacade["teams"];
-  addReport: ReportFacade["addReport"];
-  onSaved: (reportId: string) => void;
-}
+type ReportFormComponentProps = Pick<ReportFacade, "teams" | "addReport">;
 
 export function ReportFormComponent({
   teams,
   addReport,
-  onSaved,
 }: ReportFormComponentProps) {
+  const navigate = useNavigate();
   const {
     reportName,
     setReportName,
@@ -23,7 +20,8 @@ export function ReportFormComponent({
     handleSubmit,
   } = useReportFormPresenter({
     addReport,
-    onSaved: (r) => onSaved(r.id),
+    onSaved: (r) =>
+      navigate({ to: "/reports/$reportId", params: { reportId: r.id } }),
   });
 
   return (

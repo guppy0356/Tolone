@@ -16,7 +16,7 @@ catalog:
   '@storybook/addon-vitest': ^10.4.2
   '@storybook/react-vite': ^10.4.2
   tailwindcss: ^4.3.0
-  vite-plugin-checker: ^0.13.0
+  vite-plugin-checker: ^0.14.1
   vitest: ^4.1.7
   '@vitest/browser': ^4.1.7
   '@vitest/browser-playwright': ^4.1.7

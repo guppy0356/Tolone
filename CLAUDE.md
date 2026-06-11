@@ -31,27 +31,30 @@ No linter is configured. Tests run as Storybook play functions via `@storybook/a
 
 ## Architecture
 
-This is a pnpm monorepo for experimenting with a **4-layer architecture** (API → Facade → Presenter → Component). Each playground in `playgrounds/` implements features using this architecture. The full specification lives in @docs/architecture.md — always read it before implementing features.
+This is a pnpm monorepo for experimenting with a **Container + Presentational Component** architecture. Each playground in `playgrounds/` implements features using this architecture. The full specification lives in @docs/architecture.md — always read it before implementing features.
 
-### Layer flow: API → Facade → Presenter → Component
+### Layers: API → Facade → Container → Component → Presenter
 
 | Layer | File | Form | Responsibility |
 |---|---|---|---|
 | API | `{Feature}.api.ts` | Plain object of functions | HTTP calls via `ky` + type definitions |
-| Facade | `{Feature}.facade.ts` | React hook | Server state via TanStack Query (`useQuery` + `keepPreviousData` + `useMutation`) |
-| Presenter | `{Feature}.presenter.ts` | React hook | Local UI state + derived display values, delegates to Facade actions |
-| Component | `{Feature}.component.tsx` | Plain component | Loading UI (`isPending` / `isFetching`) + delegation to View |
-| View | `{Feature}.component.tsx` (same file) | `memo` component | Rendering only (content props, no loading flags) |
+| Facade | `{Feature}.facade.ts` | React hook | Server state via TanStack Query (`useQuery` + `useMutation`); may also hold facade-scoped `useState` for query params |
+| Container | `{Feature}.container.tsx` | React component | Wires Facade to Component. Calls Facade hook + app-shell read hooks (e.g. `useParams`); destructures only fields the Component uses |
+| Component | `{Feature}.component.tsx` | React component (Presentational) | Renders UI; handles loading UI (`isPending` skeleton / `isFetching` opacity); calls Presenter for local state; calls app-shell action hooks (e.g. `useNavigate`) bound to user interactions |
+| Presenter | `{Feature}.presenter.ts` | React hook | Local UI state + derived display values; called inside Component; receives Facade actions as props (does not call Facade directly) |
 
 ### Wiring rules
 
-- **Container** (e.g. `main.tsx`) calls Facade hook, spreads return as props to Component
-- **Component** (outer, no `memo`) receives Facade props, handles `isPending` (skeleton) and `isFetching` (opacity), passes only **content props** (data + actions) to View
-- **View** (inner, `memo`) receives content props (no `isPending` / `isFetching`), calls Presenter hook internally, renders from **both** content props and Presenter return
-- View **never** imports Presenter from outside — Presenter is always called inside View
-- **Presenter returns only what it creates** — no pass-through of Facade data. View accesses content data directly from its own props
-- Presenter props are **guaranteed non-undefined** — Component handles `undefined` / loading before rendering View
-- All hook return types use **explicit named interfaces** (no `ReturnType<typeof ...>`)
+- **Container** is the only place that calls the Facade hook. It destructures only the fields the Component uses and passes them as individual props (no `{...facade}` spread).
+- **Container** owns app-shell read hooks that supply inputs to the Facade — e.g. `useParams({ from: ... })` for detail pages where the URL param drives a facade query.
+- **Component** accepts `Pick<{Feature}Facade, ...>` shaped props — narrowed to only what it renders/uses. Define an ad-hoc interface when extra non-Facade props are needed (e.g. `onSaved` for form completion callbacks).
+- **Component** handles `isPending` (renders Skeleton) and `isFetching` (opacity overlay).
+- **Component** contains private sub-components (defined in the same file, not exported) for the memo-able body and for the Skeleton. Private memo'd bodies keep cache benefit across `isFetching` toggles; private Skeletons stay li-granular for list pages.
+- **Component** owns app-shell action hooks triggered by user interaction — e.g. `useNavigate()` is called inside the Component when the form completes; the resulting callback is passed to the Presenter as `onSaved`.
+- **Component** calls the Presenter hook internally. Never receives Presenter output from outside.
+- **Presenter returns only what it creates** (local state, derived values, handlers). Facade data the Component needs is accessed from the Component's own props, not re-exported via Presenter.
+- **Presenter** receives Facade actions as props — Presenter does not call the Facade hook directly.
+- All hook return types use **explicit named interfaces** (no `ReturnType<typeof ...>`).
 
 ### Feature file structure
 
@@ -59,8 +62,9 @@ This is a pnpm monorepo for experimenting with a **4-layer architecture** (API �
 src/features/{feature-name}/
 ├── {Feature}.api.ts
 ├── {Feature}.facade.ts
+├── {Feature}.container.tsx     ← wires Facade to Component
 ├── {Feature}.presenter.ts
-├── {Feature}.component.tsx
+├── {Feature}.component.tsx     ← Component + private memo'd body + private Skeleton
 └── {Feature}.stories.tsx
 ```
 
@@ -80,7 +84,8 @@ Typical commit sequence:
 5. Presenter layer → commit
 6. MSW handlers → commit
 7. Component + stories (run `pnpm test` before committing) → commit
-8. Wire in main.tsx → commit
+8. Container layer → commit
+9. Wire in main.tsx → commit
 
 ## Future Work
 

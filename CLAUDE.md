@@ -56,6 +56,16 @@ This is a pnpm monorepo for experimenting with a **Container + Presentational Co
 - **Presenter** receives Facade actions as props — Presenter does not call the Facade hook directly.
 - All hook return types use **explicit named interfaces** (no `ReturnType<typeof ...>`).
 
+### Conventions
+
+- **1 page = 1 facade** — each page (route) uses exactly one Facade hook, called from its Container. The Facade may grow to cover everything the page needs (a "god" facade). Other pages that share the same Facade may incur unused queries; the simplicity of single-facade wiring outweighs that cost.
+- **Facade-scoped state** — when the Facade needs a query parameter the UI mutates (e.g. search keyword, filter), hold it as `useState` inside the Facade. The Facade exposes both the value and the setter; the Component drives them through the same controlled-state pair.
+- **Routing hooks split**:
+  - `useParams` (read URL → drives a Facade query) → called in **Container**
+  - `useNavigate` (action triggered by user interaction) → called in **Component**
+- **Pick over spread** — never spread the Facade onto the Component (`<Component {...facade} />`). Always destructure in the Container and pass each prop individually. The Component's prop type is `Pick<{Feature}Facade, ...>` listing exactly the fields it uses, optionally intersected with ad-hoc props like `onSaved`.
+- **No View suffix** — the Component file contains the exported Component plus private sub-components (memo'd body, Skeleton). There is no separate "View" layer or `{Feature}View` symbol.
+
 ### Feature file structure
 
 ```

@@ -125,6 +125,19 @@ function TodoListSkeleton() {
 
 ---
 
+## Conventions
+
+- **1 page = 1 facade** — each page (route) uses exactly one Facade hook, called from its Container. The Facade may grow to cover everything the page needs (a "god" facade). Other pages that share the same Facade may incur unused queries; the simplicity of single-facade wiring outweighs that cost.
+- **Facade-scoped state** — when the Facade needs a query parameter the UI mutates (e.g. search keyword, filter), hold it as `useState` inside the Facade. The Facade exposes both the value and the setter; the Component drives them through the same controlled-state pair.
+- **Routing hooks split**:
+  - `useParams` (read URL → drives a Facade query) → called in **Container**
+  - `useNavigate` (action triggered by user interaction) → called in **Component**
+- **Pick over spread** — never spread the Facade onto the Component (`<Component {...facade} />`). Always destructure in the Container and pass each prop individually. The Component's prop type is `Pick<{Feature}Facade, ...>` listing exactly the fields it uses, optionally intersected with ad-hoc props like `onSaved`.
+- **Cross-feature facade access** — pages that need data from another feature may pull it into their own Facade rather than calling two Facades from the Container. The dependency is one-directional (the page-feature depends on the data-feature, not vice versa) and the duplicated `useQuery` shares the TanStack Query cache by `queryKey`.
+- **No View suffix** — the Component file contains the exported Component plus private sub-components (memo'd body, Skeleton). There is no separate "View" layer or `{Feature}View` symbol.
+
+---
+
 ## Layer Details
 
 ### 1. API Layer (`{Feature}.api.ts`)
@@ -171,6 +184,7 @@ export const todoApi = {
 - Return action functions + data + loading states
 - Define query keys as a constant object for reuse
 - Use optimistic updates (`onMutate` / `onError` / `onSettled`) for instant UI feedback
+- **Facade-scoped state**: when a query parameter is driven by the UI (e.g. a search keyword bound to an input), hold it as `useState` inside the Facade and include both the value and the setter on the returned interface. The Facade becomes the source of truth for its own query inputs.
 
 ```ts
 // Todo.facade.ts
@@ -250,7 +264,56 @@ export function useTodoFacade(): TodoFacade {
 }
 ```
 
-### 3. Presenter Layer (`{Feature}.presenter.ts`)
+### 3. Container Layer (`{Feature}.container.tsx`)
+
+**Responsibility**: Wire the Facade to the Component. Resolve app-shell inputs (URL params) before calling the Facade.
+
+**Rules**:
+- Calls the Facade hook (the only layer that does)
+- Calls app-shell read hooks needed to drive the Facade — typically `useParams({ from: ... })` for detail pages where a URL segment becomes a Facade input
+- Destructures only the fields the Component uses (never spreads `{...facade}`)
+- Passes each field as an individual prop to the Component
+- No design, no JSX beyond the single Component render — the Container is pure wiring
+
+```tsx
+// Todo.container.tsx — list page
+import { useTodoFacade } from "./Todo.facade";
+import { TodoComponent } from "./Todo.component";
+
+export function TodoContainer() {
+  const { todos, isPending, isFetching, addTodo } = useTodoFacade();
+  return (
+    <TodoComponent
+      todos={todos}
+      isPending={isPending}
+      isFetching={isFetching}
+      addTodo={addTodo}
+    />
+  );
+}
+```
+
+```tsx
+// TodoDetail.container.tsx — detail page with URL param
+import { useParams } from "@tanstack/react-router";
+import { useTodoDetailFacade } from "./TodoDetail.facade";
+import { TodoDetailComponent } from "./TodoDetail.component";
+
+export function TodoDetailContainer() {
+  const { todoId } = useParams({ from: "/todos/$todoId" });
+  const { detail, isPending, isFetching, isNotFound } = useTodoDetailFacade({ todoId });
+  return (
+    <TodoDetailComponent
+      detail={detail}
+      isPending={isPending}
+      isFetching={isFetching}
+      isNotFound={isNotFound}
+    />
+  );
+}
+```
+
+### 4. Presenter Layer (`{Feature}.presenter.ts`)
 
 **Responsibility**: Local UI state management + derived display values
 
@@ -299,7 +362,7 @@ export function useTodoPresenter({
 }
 ```
 
-### 4. Component Layer (`{Feature}.component.tsx`)
+### 5. Component Layer (`{Feature}.component.tsx`)
 
 **Responsibility**: Presentational rendering + loading UI + delegating to the Presenter
 

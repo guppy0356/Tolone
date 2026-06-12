@@ -134,6 +134,12 @@ function TodoListSkeleton() {
   - `useNavigate` (action triggered by user interaction) → called in **Component**
 - **Pick over spread** — never spread the Facade onto the Component (`<Component {...facade} />`). Always destructure in the Container and pass each prop individually. The Component's prop type is `Pick<{Feature}Facade, ...>` listing exactly the fields it uses, optionally intersected with ad-hoc props like `onSaved`.
 - **Cross-feature facade access** — pages that need data from another feature may pull it into their own Facade rather than calling two Facades from the Container. The dependency is one-directional (the page-feature depends on the data-feature, not vice versa) and the duplicated `useQuery` shares the TanStack Query cache by `queryKey`.
+- **Sub-component handling** — When the Component needs internal structure beyond the memo'd body and Skeleton, two decisions arise: where to place it (placement) and whether to apply `memo` (optimization). The two are independent.
+  - *Placement:*
+    - Simple JSX fragments (small, no own state, no own props contract) → private in the same `{Feature}.component.tsx`
+    - Larger pieces (own props contract, own behavior, worth testing in isolation with stories) → separate `{Sub}.component.tsx`
+    - When in doubt, start in the same file; extract when JSX grows or stories are needed.
+  - *memo:* Apply `memo` to any sub-component that receives reference-stable props. The exported Component is not memo'd because it receives loading flags (`isFetching`) that change on every background refetch.
 - **No View suffix** — the Component file contains the exported Component plus private sub-components (memo'd body, Skeleton). There is no separate "View" layer or `{Feature}View` symbol.
 
 ---

@@ -1,7 +1,7 @@
 import { memo } from "react";
 import type { ReportDetailFacade } from "./ReportDetail.facade";
 import { useReportDetailPresenter } from "./ReportDetail.presenter";
-import { ReportChart } from "./ReportChart";
+import { ReportChart } from "./ReportChart.component";
 
 export function ReportDetailComponent({
   detail,

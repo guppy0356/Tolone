@@ -33,7 +33,7 @@ export function useSidebarFacade(): SidebarFacade {
 
   const logout = useCallback(async () => {
     await logoutMutation.mutateAsync();
-  }, [logoutMutation]);
+  }, [logoutMutation.mutateAsync]);
 
   return {
     books: data ?? [],

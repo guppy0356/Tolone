@@ -98,21 +98,21 @@ export function usePatFacade(): PatFacade {
     async (input: CreatePatInput) => {
       await addMutation.mutateAsync(input);
     },
-    [addMutation],
+    [addMutation.mutateAsync],
   );
 
   const updatePat = useCallback(
     async (id: string, input: UpdatePatInput) => {
       await updateMutation.mutateAsync({ id, input });
     },
-    [updateMutation],
+    [updateMutation.mutateAsync],
   );
 
   const deletePat = useCallback(
     async (id: string) => {
       await deleteMutation.mutateAsync(id);
     },
-    [deleteMutation],
+    [deleteMutation.mutateAsync],
   );
 
   return {

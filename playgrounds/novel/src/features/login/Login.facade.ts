@@ -21,7 +21,7 @@ export function useLoginFacade(): LoginFacade {
     async (input: LoginInput) => {
       await mutation.mutateAsync(input);
     },
-    [mutation],
+    [mutation.mutateAsync],
   );
 
   return {

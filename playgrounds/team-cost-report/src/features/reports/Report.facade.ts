@@ -70,7 +70,7 @@ export function useReportFacade(): ReportFacade {
 
   const addReport = useCallback(
     (input: CreateReportInput) => addMutation.mutateAsync(input),
-    [addMutation],
+    [addMutation.mutateAsync],
   );
 
   return {

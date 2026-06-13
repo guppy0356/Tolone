@@ -90,11 +90,11 @@ export function useBookReaderFacade(bookId: string): BookReaderFacade {
 
   const goNext = useCallback(async () => {
     await nextMutation.mutateAsync();
-  }, [nextMutation]);
+  }, [nextMutation.mutateAsync]);
 
   const goPrev = useCallback(async () => {
     await prevMutation.mutateAsync();
-  }, [prevMutation]);
+  }, [prevMutation.mutateAsync]);
 
   return {
     book,

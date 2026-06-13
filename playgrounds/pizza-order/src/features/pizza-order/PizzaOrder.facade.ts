@@ -48,7 +48,7 @@ export function usePizzaOrderFacade(): PizzaOrderFacade {
     async (input: PizzaOrderInput) => {
       await mutation.mutateAsync(input);
     },
-    [mutation],
+    [mutation.mutateAsync],
   );
 
   return {

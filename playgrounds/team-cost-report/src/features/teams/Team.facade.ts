@@ -80,7 +80,7 @@ export function useTeamFacade(): TeamFacade {
     async (input: CreateTeamInput) => {
       await addMutation.mutateAsync(input);
     },
-    [addMutation],
+    [addMutation.mutateAsync],
   );
 
   return {

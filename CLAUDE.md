@@ -31,7 +31,17 @@ No linter is configured. Tests run as Storybook play functions via `@storybook/a
 
 ## Architecture
 
-This is a pnpm monorepo for experimenting with a **Container + Presentational Component** architecture. Each playground in `playgrounds/` implements features using this architecture. The full specification lives in @docs/architecture.md — always read it before implementing features.
+This is a pnpm monorepo for experimenting with a **Container + Presentational Component** architecture. Each playground in `playgrounds/` implements features using this architecture. The full specification lives in [docs/architecture.md](docs/architecture.md) — always read it before implementing features.
+
+<!--
+Intentionally a plain markdown link, NOT an `@docs/architecture.md` import.
+An `@path` import expands the whole file into context at the start of *every*
+session (https://code.claude.com/docs/en/memory#import-additional-files),
+which defeats the point of keeping the spec as an on-demand reference: it only
+matters when implementing a feature, at which point you read it via the link.
+Keep this a plain link.
+-->
+
 
 ### Layers: API → Queries → Facade → Container → Component → Presenter
 
@@ -44,40 +54,9 @@ This is a pnpm monorepo for experimenting with a **Container + Presentational Co
 | Component | `{Feature}.component.tsx` | React component (Presentational) | Renders UI; handles loading UI (`isPending` skeleton / `isFetching` opacity); calls Presenter for local state; calls app-shell action hooks (e.g. `useNavigate`) bound to user interactions |
 | Presenter | `{Feature}.presenter.ts` | React hook | Local UI state + derived display values; called inside Component; receives Facade actions as props (does not call Facade directly) |
 
-### Wiring rules
+### Wiring rules & conventions
 
-- **Container** is the only place that calls the Facade hook. It destructures only the fields the Component uses and passes them as individual props (no `{...facade}` spread).
-- **Container** owns app-shell read hooks that supply inputs to the Facade — e.g. `useParams({ from: ... })` for detail pages where the URL param drives a facade query.
-- **Component** accepts `Pick<{Feature}Facade, ...>` shaped props — narrowed to only what it renders/uses. Define an ad-hoc interface when extra non-Facade props are needed (e.g. `onSaved` for form completion callbacks).
-- **Component** handles `isPending` (renders Skeleton) and `isFetching` (opacity overlay).
-- **Component** contains private sub-components (defined in the same file, not exported) for the memo-able body and for the Skeleton. Private memo'd bodies keep cache benefit across `isFetching` toggles; private Skeletons stay li-granular for list pages.
-- **Component** owns app-shell action hooks triggered by user interaction — e.g. `useNavigate()` is called inside the Component when the form completes; the resulting callback is passed to the Presenter as `onSaved`.
-- **Component** calls the Presenter hook internally. Never receives Presenter output from outside.
-- **Presenter returns only what it creates** (local state, derived values, handlers). Facade data the Component needs is accessed from the Component's own props, not re-exported via Presenter.
-- **Presenter** receives Facade actions as props — Presenter does not call the Facade hook directly.
-- All hook return types use **explicit named interfaces** (no `ReturnType<typeof ...>`).
-
-### Conventions
-
-- **1 page = 1 dedicated facade** — each page (route) has its own Facade. It covers everything *that page* needs (a within-page "god" facade) but is **not shared across pages** — a list page and its create-form page get separate Facades, so neither fires the other's queries. Cross-page data sharing happens at the cache level: two Facades calling `useQuery` with the same `queryKey` deduplicate via TanStack Query's global keyed cache.
-- **Query definitions in the Queries layer** — keys + `queryFn` + shared options live in `{Feature}.queries.ts` via `queryOptions()`, in a hierarchical factory (`all` / `list` / `detail`). Facades and story harnesses consume them (`useQuery(featureQueries.list())`); no hand-written keys. Nest keys so list invalidation doesn't refetch open details.
-- **Cross-feature data** — import the other feature's Queries factory and call `useQuery(otherFeatureQueries.list())`; cache is shared by `queryKey`.
-- **Loading flags follow query count** — single-query facade → plain `isPending` / `isFetching`; multi-query facade → resource-named flags (`isReportsPending`, `isTeamsPending`).
-- **Domain contract, not view model** — keep the OpenAPI contract domain-shaped; do view-specific transforms (chart rows, label mapping) in the Presenter.
-- **Stable mutation dependency** — `useCallback` deps use `mutation.mutateAsync`, not the mutation object.
-- **Optimistic updates only when observed** — skip them when the page navigates away on success; never fabricate fields the Facade lacks.
-- **Facade-scoped state** — when the Facade needs a *query parameter* the UI mutates (e.g. search keyword), hold it as `useState` inside the Facade and expose value + setter. Pure UI state (e.g. dropdown open/closed) stays in the Presenter.
-- **Routing hooks split**:
-  - `useParams` (read URL → drives a Facade query) → called in **Container**
-  - `useNavigate` (action triggered by user interaction) → called in **Component**
-- **Pick over spread** — never spread the Facade onto the Component (`<Component {...facade} />`). Always destructure in the Container and pass each prop individually. The Component's prop type is `Pick<{Feature}Facade, ...>` listing exactly the fields it uses, optionally intersected with ad-hoc props like `onSaved`.
-- **Sub-component handling** — When the Component needs internal structure beyond the memo'd body and Skeleton, two decisions arise: where to place it (placement) and whether to apply `memo` (optimization). The two are independent.
-  - *Placement:*
-    - Simple JSX fragments (small, no own state, no own props contract) → private in the same `{Feature}.component.tsx`
-    - Larger pieces (own props contract, own behavior, worth testing in isolation with stories) → separate `{Sub}.component.tsx`
-    - When in doubt, start in the same file; extract when JSX grows or stories are needed.
-  - *memo:* Apply `memo` to any sub-component that receives reference-stable props. The exported Component is not memo'd because it receives loading flags (`isFetching`) that change on every background refetch.
-- **No View suffix** — the Component file contains the exported Component plus private sub-components (memo'd body, Skeleton). There is no separate "View" layer or `{Feature}View` symbol.
+The detailed wiring rules (Container/Component/Presenter responsibilities, routing-hook placement, Pick-over-spread) and conventions (1 page = 1 facade, Queries-layer keys, loading-flag naming, optimistic-update policy, sub-component placement/memo, no View suffix) are **not duplicated here** — they live in [docs/architecture.md](docs/architecture.md), the single source of truth. Read it before implementing a feature.
 
 ### Feature file structure
 

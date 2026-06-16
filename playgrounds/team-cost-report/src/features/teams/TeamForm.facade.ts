@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { memberQueries } from "./Members.queries";
 import type { Member } from "./Members.api";
 import { teamQueries } from "./Team.queries";
-import { teamApi, type Team, type CreateTeamInput } from "./Team.api";
+import { teamApi, type CreateTeamInput } from "./Team.api";
 
 export interface TeamFormFacade {
   addTeam: (input: CreateTeamInput) => Promise<void>;
@@ -23,31 +23,14 @@ export function useTeamFormFacade(): TeamFormFacade {
   );
 
   // The teams list lives in another page's facade; its cache is keyed, so this
-  // mutation updates/invalidates it directly without subscribing.
+  // mutation invalidates it directly without subscribing. No optimistic update:
+  // the form navigates to the list on save, so it never observes the optimistic
+  // state, and the facade lacks member names (only ids), so it can't build a
+  // faithful row anyway.
   const teamsKey = teamQueries.list().queryKey;
 
   const addMutation = useMutation({
     mutationFn: (input: CreateTeamInput) => teamApi.create(input),
-    onMutate: async (input) => {
-      await queryClient.cancelQueries({ queryKey: teamsKey });
-      const previous = queryClient.getQueryData<Team[]>(teamsKey);
-      queryClient.setQueryData<Team[]>(teamsKey, (old) => [
-        ...(old ?? []),
-        {
-          id: crypto.randomUUID(),
-          name: input.name,
-          members: input.members.map((m) => ({
-            memberId: m.memberId,
-            name: "",
-            hourlyRate: m.hourlyRate,
-          })),
-        },
-      ]);
-      return { previous };
-    },
-    onError: (_err, _input, context) => {
-      queryClient.setQueryData(teamsKey, context?.previous);
-    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: teamsKey });
     },

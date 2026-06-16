@@ -2,10 +2,26 @@ import { useNavigate } from "@tanstack/react-router";
 import type { ReportFacade } from "./Report.facade";
 import { useReportFormPresenter } from "./ReportForm.presenter";
 
-type ReportFormComponentProps = Pick<ReportFacade, "teams" | "addReport">;
+type ReportFormComponentProps = Pick<
+  ReportFacade,
+  "teams" | "isTeamsPending" | "addReport"
+>;
+
+function TeamsSkeleton() {
+  return (
+    <ul className="space-y-1">
+      {[0, 1, 2].map((i) => (
+        <li key={i} className="rounded border border-gray-200 px-3 py-2">
+          <div className="h-5 w-40 animate-pulse rounded bg-gray-200" />
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export function ReportFormComponent({
   teams,
+  isTeamsPending,
   addReport,
 }: ReportFormComponentProps) {
   const navigate = useNavigate();
@@ -57,7 +73,9 @@ export function ReportFormComponent({
         <legend className="mb-2 text-sm font-medium text-gray-700">
           Teams ({selectedTeamIds.length} selected)
         </legend>
-        {teams.length === 0 ? (
+        {isTeamsPending ? (
+          <TeamsSkeleton />
+        ) : teams.length === 0 ? (
           <p className="rounded border border-dashed border-gray-300 p-4 text-sm text-gray-500">
             No teams available. Create one first.
           </p>

@@ -30,6 +30,7 @@ const meta = {
   component: ReportFormComponent,
   args: {
     teams: sampleTeams,
+    isTeamsPending: false,
     addReport: fn(),
   },
   decorators: [
@@ -98,5 +99,16 @@ export const Empty: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText(/No teams available/)).toBeInTheDocument();
+  },
+};
+
+export const TeamsLoading: Story = {
+  args: { teams: [], isTeamsPending: true },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(
+      canvasElement.querySelectorAll(".animate-pulse").length,
+    ).toBeGreaterThan(0);
+    await expect(canvas.queryByText(/No teams available/)).toBeNull();
   },
 };

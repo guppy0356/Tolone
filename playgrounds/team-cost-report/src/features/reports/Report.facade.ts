@@ -12,8 +12,9 @@ import {
 export interface ReportFacade {
   reports: ReportSummary[];
   teams: Team[];
-  isPending: boolean;
-  isFetching: boolean;
+  isReportsPending: boolean;
+  isReportsFetching: boolean;
+  isTeamsPending: boolean;
   addReport: (input: CreateReportInput) => Promise<ReportSummary>;
 }
 
@@ -21,9 +22,15 @@ export function useReportFacade(): ReportFacade {
   const queryClient = useQueryClient();
 
   const reportsQuery = reportQueries.list();
-  const { data, isPending, isFetching } = useQuery(reportsQuery);
+  const {
+    data,
+    isPending: isReportsPending,
+    isFetching: isReportsFetching,
+  } = useQuery(reportsQuery);
 
-  const { data: teams } = useQuery(teamQueries.list());
+  const { data: teams, isPending: isTeamsPending } = useQuery(
+    teamQueries.list(),
+  );
 
   const addMutation = useMutation({
     mutationFn: (input: CreateReportInput) => reportApi.create(input),
@@ -59,8 +66,9 @@ export function useReportFacade(): ReportFacade {
   return {
     reports: data ?? [],
     teams: teams ?? [],
-    isPending,
-    isFetching,
+    isReportsPending,
+    isReportsFetching,
+    isTeamsPending,
     addReport,
   };
 }

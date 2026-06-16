@@ -59,13 +59,15 @@ function ReportListSkeleton() {
 
 export function ReportListComponent({
   reports,
-  isPending,
-  isFetching,
-}: Pick<ReportFacade, "reports" | "isPending" | "isFetching">) {
+  isReportsPending,
+  isReportsFetching,
+}: Pick<ReportFacade, "reports" | "isReportsPending" | "isReportsFetching">) {
   const { rows } = useReportListPresenter({ reports });
 
   return (
-    <div className={`transition-opacity ${isFetching ? "opacity-50" : ""}`}>
+    <div
+      className={`transition-opacity ${isReportsFetching ? "opacity-50" : ""}`}
+    >
       <div className="p-6">
         <header className="mb-4 flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Reports</h1>
@@ -76,7 +78,7 @@ export function ReportListComponent({
             New report
           </Link>
         </header>
-        {isPending ? <ReportListSkeleton /> : <ReportList rows={rows} />}
+        {isReportsPending ? <ReportListSkeleton /> : <ReportList rows={rows} />}
       </div>
     </div>
   );

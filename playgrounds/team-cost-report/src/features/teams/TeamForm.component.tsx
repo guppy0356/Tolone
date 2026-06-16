@@ -1,11 +1,11 @@
 import { useNavigate } from "@tanstack/react-router";
-import type { TeamFacade } from "./Team.facade";
+import type { TeamFormFacade } from "./TeamForm.facade";
 import { useTeamFormPresenter } from "./TeamForm.presenter";
 import { TeamMemberList } from "./TeamMemberList.component";
 import { TeamMemberPicker } from "./TeamMemberPicker.component";
 
 type TeamFormComponentProps = Pick<
-  TeamFacade,
+  TeamFormFacade,
   | "addTeam"
   | "memberSearch"
   | "setMemberSearch"

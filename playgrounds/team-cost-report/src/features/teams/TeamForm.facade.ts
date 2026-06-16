@@ -5,10 +5,7 @@ import type { Member } from "./Members.api";
 import { teamQueries } from "./Team.queries";
 import { teamApi, type Team, type CreateTeamInput } from "./Team.api";
 
-export interface TeamFacade {
-  teams: Team[];
-  isPending: boolean;
-  isFetching: boolean;
+export interface TeamFormFacade {
   addTeam: (input: CreateTeamInput) => Promise<void>;
   memberSearch: string;
   setMemberSearch: (q: string) => void;
@@ -16,15 +13,8 @@ export interface TeamFacade {
   isFetchingMembers: boolean;
 }
 
-export function useTeamFacade(): TeamFacade {
+export function useTeamFormFacade(): TeamFormFacade {
   const queryClient = useQueryClient();
-
-  const teamsQuery = teamQueries.list();
-  const {
-    data: teams,
-    isPending,
-    isFetching,
-  } = useQuery(teamsQuery);
 
   const [memberSearch, setMemberSearch] = useState("");
 
@@ -32,12 +22,16 @@ export function useTeamFacade(): TeamFacade {
     memberQueries.list(memberSearch || undefined),
   );
 
+  // The teams list lives in another page's facade; its cache is keyed, so this
+  // mutation updates/invalidates it directly without subscribing.
+  const teamsKey = teamQueries.list().queryKey;
+
   const addMutation = useMutation({
     mutationFn: (input: CreateTeamInput) => teamApi.create(input),
     onMutate: async (input) => {
-      await queryClient.cancelQueries({ queryKey: teamsQuery.queryKey });
-      const previous = queryClient.getQueryData<Team[]>(teamsQuery.queryKey);
-      queryClient.setQueryData<Team[]>(teamsQuery.queryKey, (old) => [
+      await queryClient.cancelQueries({ queryKey: teamsKey });
+      const previous = queryClient.getQueryData<Team[]>(teamsKey);
+      queryClient.setQueryData<Team[]>(teamsKey, (old) => [
         ...(old ?? []),
         {
           id: crypto.randomUUID(),
@@ -52,10 +46,10 @@ export function useTeamFacade(): TeamFacade {
       return { previous };
     },
     onError: (_err, _input, context) => {
-      queryClient.setQueryData(teamsQuery.queryKey, context?.previous);
+      queryClient.setQueryData(teamsKey, context?.previous);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: teamsQuery.queryKey });
+      queryClient.invalidateQueries({ queryKey: teamsKey });
     },
   });
 
@@ -67,9 +61,6 @@ export function useTeamFacade(): TeamFacade {
   );
 
   return {
-    teams: teams ?? [],
-    isPending,
-    isFetching,
     addTeam,
     memberSearch,
     setMemberSearch,

@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Link } from "@tanstack/react-router";
-import type { TeamFacade } from "./Team.facade";
+import type { TeamListFacade } from "./TeamList.facade";
 import {
   useTeamListPresenter,
   type TeamListRow,
@@ -53,7 +53,7 @@ export function TeamListComponent({
   teams,
   isPending,
   isFetching,
-}: Pick<TeamFacade, "teams" | "isPending" | "isFetching">) {
+}: Pick<TeamListFacade, "teams" | "isPending" | "isFetching">) {
   const { rows } = useTeamListPresenter({ teams });
 
   return (

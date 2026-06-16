@@ -21,10 +21,10 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { membersApi } from "./Members.api";
-import type { TeamFacade } from "./Team.facade";
+import type { TeamFormFacade } from "./TeamForm.facade";
 import { TeamFormComponent } from "./TeamForm.component";
 
-type HarnessProps = Pick<TeamFacade, "addTeam">;
+type HarnessProps = Pick<TeamFormFacade, "addTeam">;
 
 function TeamFormHarness({ addTeam }: HarnessProps) {
   const [memberSearch, setMemberSearch] = useState("");

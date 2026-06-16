@@ -1,4 +1,4 @@
-import { useTeamFacade } from "./Team.facade";
+import { useTeamFormFacade } from "./TeamForm.facade";
 import { TeamFormComponent } from "./TeamForm.component";
 
 export function TeamFormContainer() {
@@ -8,7 +8,7 @@ export function TeamFormContainer() {
     setMemberSearch,
     members,
     isFetchingMembers,
-  } = useTeamFacade();
+  } = useTeamFormFacade();
   return (
     <TeamFormComponent
       addTeam={addTeam}

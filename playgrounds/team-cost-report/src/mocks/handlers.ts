@@ -5,7 +5,7 @@ import type { paths, components } from "../types/openapi";
 type Member = components["schemas"]["Member"];
 type Team = components["schemas"]["Team"];
 type ReportSummary = components["schemas"]["ReportSummary"];
-type MonthlyPaymentRow = { month: string } & Record<string, number | string>;
+type MonthlyPayment = components["schemas"]["MonthlyPayment"];
 
 const http = createOpenApiHttp<paths>();
 
@@ -174,33 +174,29 @@ export const handlers = [
     // ISO YYYY-MM sorts lexicographically — relies on the seed/runtime format.
     const months = [...monthSet].sort();
 
+    // teamId -> month -> amount
     const payment: Record<string, Record<string, number>> = {};
-    for (const team of selectedTeams) payment[team.name] = {};
+    for (const team of selectedTeams) payment[team.id] = {};
 
     for (const log of workLogs) {
       const team = memberToTeam.get(log.memberId);
       if (!team) continue;
       const tm = team.members.find((m) => m.memberId === log.memberId);
       if (!tm) continue;
-      payment[team.name][log.month] =
-        (payment[team.name][log.month] ?? 0) + log.hours * tm.hourlyRate;
+      payment[team.id][log.month] =
+        (payment[team.id][log.month] ?? 0) + log.hours * tm.hourlyRate;
     }
 
-    const monthly: MonthlyPaymentRow[] = months.map((month) => {
-      const row: Record<string, number | string> = { month };
-      for (const team of selectedTeams) {
-        row[team.name] = payment[team.name][month] ?? 0;
-      }
-      return row as MonthlyPaymentRow;
-    });
+    const monthly: MonthlyPayment[] = months.map((month) => ({
+      month,
+      payments: selectedTeams.map((team) => ({
+        teamId: team.id,
+        amount: payment[team.id][month] ?? 0,
+      })),
+    }));
 
     const totalPayment = monthly.reduce(
-      (sum, row) =>
-        sum +
-        selectedTeams.reduce(
-          (s, t) => s + ((row[t.name] as number | undefined) ?? 0),
-          0,
-        ),
+      (sum, row) => sum + row.payments.reduce((s, p) => s + p.amount, 0),
       0,
     );
 

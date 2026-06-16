@@ -180,17 +180,27 @@ components:
           items:
             type: string
 
-    MonthlyPaymentRow:
+    TeamPayment:
       type: object
-      required: [month]
-      description: |
-        Recharts-ready row. `month` (ISO YYYY-MM) plus one numeric key per
-        team name; the team-name keys are dynamic so they aren't enumerated
-        in the schema — see MonthlyPaymentRow type alias in Report.api.ts.
+      required: [teamId, amount]
+      properties:
+        teamId:
+          type: string
+        amount:
+          type: number
+
+    MonthlyPayment:
+      type: object
+      required: [month, payments]
+      description: Aggregated team payments for one ISO month (YYYY-MM).
       properties:
         month:
           type: string
           description: ISO month, e.g. "2026-01"
+        payments:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeamPayment"
 
     ReportDetail:
       type: object
@@ -208,6 +218,6 @@ components:
           type: number
         monthly:
           type: array
-          description: Recharts-ready rows. Each row has `month` + one numeric key per team name.
+          description: Per-month aggregated payments, keyed by team.
           items:
-            $ref: "#/components/schemas/MonthlyPaymentRow"
+            $ref: "#/components/schemas/MonthlyPayment"

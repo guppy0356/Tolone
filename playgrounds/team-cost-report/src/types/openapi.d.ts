@@ -105,22 +105,23 @@ export interface components {
             name: string;
             teamIds: string[];
         };
-        /**
-         * @description Recharts-ready row. `month` (ISO YYYY-MM) plus one numeric key per
-         *     team name; the team-name keys are dynamic so they aren't enumerated
-         *     in the schema — see MonthlyPaymentRow type alias in Report.api.ts.
-         */
-        MonthlyPaymentRow: {
+        TeamPayment: {
+            teamId: string;
+            amount: number;
+        };
+        /** @description Aggregated team payments for one ISO month (YYYY-MM). */
+        MonthlyPayment: {
             /** @description ISO month, e.g. "2026-01" */
             month: string;
+            payments: components["schemas"]["TeamPayment"][];
         };
         ReportDetail: {
             id: string;
             name: string;
             teams: components["schemas"]["Team"][];
             totalPayment: number;
-            /** @description Recharts-ready rows. Each row has `month` + one numeric key per team name. */
-            monthly: components["schemas"]["MonthlyPaymentRow"][];
+            /** @description Per-month aggregated payments, keyed by team. */
+            monthly: components["schemas"]["MonthlyPayment"][];
         };
     };
     responses: never;

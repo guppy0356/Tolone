@@ -45,11 +45,11 @@ const ReportDetail = memo(function ReportDetail({
 }: {
   detail: NonNullable<ReportDetailFacade["detail"]>;
 }) {
-  const { teamNames, colors, formattedTotal } = useReportDetailPresenter({
+  const { chartData, series, formattedTotal } = useReportDetailPresenter({
     detail,
   });
 
-  const hasData = detail.monthly.length > 0 && teamNames.length > 0;
+  const hasData = chartData.length > 0 && series.length > 0;
 
   return (
     <div className="space-y-6 p-6">
@@ -74,11 +74,7 @@ const ReportDetail = memo(function ReportDetail({
           Monthly payment by team
         </h2>
         {hasData ? (
-          <ReportChart
-            monthly={detail.monthly}
-            teamNames={teamNames}
-            colors={colors}
-          />
+          <ReportChart chartData={chartData} series={series} />
         ) : (
           <p className="py-8 text-center text-sm text-gray-500">
             No data to display.
@@ -98,7 +94,7 @@ const ReportDetail = memo(function ReportDetail({
                 <span
                   aria-hidden
                   className="inline-block h-3 w-3 rounded"
-                  style={{ backgroundColor: colors[i % colors.length] }}
+                  style={{ backgroundColor: series[i]?.color }}
                 />
                 <span className="font-medium text-gray-800">{team.name}</span>
               </div>

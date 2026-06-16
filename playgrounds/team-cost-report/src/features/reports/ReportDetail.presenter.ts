@@ -5,9 +5,20 @@ export interface ReportDetailPresenterProps {
   detail: ReportDetail;
 }
 
+export interface ChartSeries {
+  teamId: string;
+  name: string;
+  color: string;
+}
+
+// Recharts row: `month` plus one numeric key per team id. This dynamic-key
+// shape is a display concern, so it lives here (derived) rather than in the
+// API contract.
+export type ChartRow = { month: string } & Record<string, number | string>;
+
 export interface ReportDetailPresenter {
-  teamNames: string[];
-  colors: string[];
+  chartData: ChartRow[];
+  series: ChartSeries[];
   formattedTotal: string;
 }
 
@@ -29,14 +40,24 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
 export function useReportDetailPresenter({
   detail,
 }: ReportDetailPresenterProps): ReportDetailPresenter {
-  const teamNames = useMemo(
-    () => detail.teams.map((t) => t.name),
+  const series = useMemo<ChartSeries[]>(
+    () =>
+      detail.teams.map((t, i) => ({
+        teamId: t.id,
+        name: t.name,
+        color: PALETTE[i % PALETTE.length],
+      })),
     [detail.teams],
   );
 
-  const colors = useMemo(
-    () => teamNames.map((_, i) => PALETTE[i % PALETTE.length]),
-    [teamNames],
+  const chartData = useMemo<ChartRow[]>(
+    () =>
+      detail.monthly.map((m) => {
+        const row: ChartRow = { month: m.month };
+        for (const p of m.payments) row[p.teamId] = p.amount;
+        return row;
+      }),
+    [detail.monthly],
   );
 
   const formattedTotal = useMemo(
@@ -44,5 +65,5 @@ export function useReportDetailPresenter({
     [detail.totalPayment],
   );
 
-  return { teamNames, colors, formattedTotal };
+  return { chartData, series, formattedTotal };
 }

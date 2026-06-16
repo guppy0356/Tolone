@@ -9,12 +9,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { MonthlyPaymentRow } from "./Report.api";
+import type { ChartRow, ChartSeries } from "./ReportDetail.presenter";
 
 export interface ReportChartProps {
-  monthly: MonthlyPaymentRow[];
-  teamNames: string[];
-  colors: string[];
+  chartData: ChartRow[];
+  series: ChartSeries[];
 }
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
@@ -31,13 +30,12 @@ const compactCurrencyFormatter = new Intl.NumberFormat("en-US", {
 });
 
 export const ReportChart = memo(function ReportChart({
-  monthly,
-  teamNames,
-  colors,
+  chartData,
+  series,
 }: ReportChartProps) {
   return (
     <ResponsiveContainer width="100%" height={360}>
-      <BarChart data={monthly}>
+      <BarChart data={chartData}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="month" />
         <YAxis
@@ -47,12 +45,13 @@ export const ReportChart = memo(function ReportChart({
           formatter={(value) => currencyFormatter.format(Number(value))}
         />
         <Legend />
-        {teamNames.map((name, i) => (
+        {series.map((s) => (
           <Bar
-            key={name}
-            dataKey={name}
+            key={s.teamId}
+            dataKey={s.teamId}
+            name={s.name}
             stackId="payment"
-            fill={colors[i % colors.length]}
+            fill={s.color}
           />
         ))}
       </BarChart>

@@ -20,8 +20,20 @@ const baseDetail: NonNullable<ReportDetailFacade["detail"]> = {
   ],
   totalPayment: 12345,
   monthly: [
-    { month: "2026-01", Platform: 5000, Mobile: 3000 },
-    { month: "2026-02", Platform: 2500, Mobile: 1845 },
+    {
+      month: "2026-01",
+      payments: [
+        { teamId: "t1", amount: 5000 },
+        { teamId: "t2", amount: 3000 },
+      ],
+    },
+    {
+      month: "2026-02",
+      payments: [
+        { teamId: "t1", amount: 2500 },
+        { teamId: "t2", amount: 1845 },
+      ],
+    },
   ],
 };
 

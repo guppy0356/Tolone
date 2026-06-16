@@ -20,10 +20,10 @@ export interface ReportFacade {
 export function useReportFacade(): ReportFacade {
   const queryClient = useQueryClient();
 
-  const reportsQuery = reportQueries.all();
+  const reportsQuery = reportQueries.list();
   const { data, isPending, isFetching } = useQuery(reportsQuery);
 
-  const { data: teams } = useQuery(teamQueries.all());
+  const { data: teams } = useQuery(teamQueries.list());
 
   const addMutation = useMutation({
     mutationFn: (input: CreateReportInput) => reportApi.create(input),

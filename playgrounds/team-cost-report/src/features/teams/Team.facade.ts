@@ -19,7 +19,7 @@ export interface TeamFacade {
 export function useTeamFacade(): TeamFacade {
   const queryClient = useQueryClient();
 
-  const teamsQuery = teamQueries.all();
+  const teamsQuery = teamQueries.list();
   const {
     data: teams,
     isPending,

@@ -2,7 +2,7 @@ import { queryOptions, keepPreviousData } from "@tanstack/react-query";
 import { teamApi } from "./Team.api";
 
 export const teamQueries = {
-  all: () =>
+  list: () =>
     queryOptions({
       queryKey: ["teams"],
       queryFn: teamApi.getAll,

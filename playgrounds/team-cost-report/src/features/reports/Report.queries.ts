@@ -2,7 +2,7 @@ import { queryOptions, keepPreviousData } from "@tanstack/react-query";
 import { reportApi } from "./Report.api";
 
 export const reportQueries = {
-  all: () =>
+  list: () =>
     queryOptions({
       queryKey: ["reports"],
       queryFn: reportApi.getAll,

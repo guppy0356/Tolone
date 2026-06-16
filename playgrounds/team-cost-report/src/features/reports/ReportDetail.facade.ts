@@ -1,5 +1,6 @@
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { reportApi, type ReportDetail } from "./Report.api";
+import { useQuery } from "@tanstack/react-query";
+import { reportQueries } from "./Report.queries";
+import type { ReportDetail } from "./Report.api";
 
 export interface ReportDetailFacadeProps {
   reportId: string;
@@ -15,12 +16,9 @@ export interface ReportDetailFacade {
 export function useReportDetailFacade({
   reportId,
 }: ReportDetailFacadeProps): ReportDetailFacade {
-  const { data, isPending, isFetching, error } = useQuery({
-    queryKey: ["reports", reportId],
-    queryFn: () => reportApi.getDetail(reportId),
-    placeholderData: keepPreviousData,
-    retry: false,
-  });
+  const { data, isPending, isFetching, error } = useQuery(
+    reportQueries.detail(reportId),
+  );
 
   const isNotFound =
     !!error &&

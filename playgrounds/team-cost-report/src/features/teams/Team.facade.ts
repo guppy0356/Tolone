@@ -1,11 +1,8 @@
 import { useCallback, useState } from "react";
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  keepPreviousData,
-} from "@tanstack/react-query";
-import { membersApi, type Member } from "./Members.api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { memberQueries } from "./Members.queries";
+import type { Member } from "./Members.api";
+import { teamQueries } from "./Team.queries";
 import { teamApi, type Team, type CreateTeamInput } from "./Team.api";
 
 export interface TeamFacade {
@@ -19,42 +16,28 @@ export interface TeamFacade {
   isFetchingMembers: boolean;
 }
 
-const teamKeys = {
-  all: ["teams"] as const,
-};
-
-const memberKeys = {
-  all: ["members"] as const,
-  search: (q: string) => [...memberKeys.all, { q }] as const,
-};
-
 export function useTeamFacade(): TeamFacade {
   const queryClient = useQueryClient();
 
+  const teamsQuery = teamQueries.all();
   const {
     data: teams,
     isPending,
     isFetching,
-  } = useQuery({
-    queryKey: teamKeys.all,
-    queryFn: teamApi.getAll,
-    placeholderData: keepPreviousData,
-  });
+  } = useQuery(teamsQuery);
 
   const [memberSearch, setMemberSearch] = useState("");
 
-  const { data: members, isFetching: isFetchingMembers } = useQuery({
-    queryKey: memberSearch ? memberKeys.search(memberSearch) : memberKeys.all,
-    queryFn: () => membersApi.getAll(memberSearch || undefined),
-    placeholderData: keepPreviousData,
-  });
+  const { data: members, isFetching: isFetchingMembers } = useQuery(
+    memberQueries.list(memberSearch || undefined),
+  );
 
   const addMutation = useMutation({
     mutationFn: (input: CreateTeamInput) => teamApi.create(input),
     onMutate: async (input) => {
-      await queryClient.cancelQueries({ queryKey: teamKeys.all });
-      const previous = queryClient.getQueryData<Team[]>(teamKeys.all);
-      queryClient.setQueryData<Team[]>(teamKeys.all, (old) => [
+      await queryClient.cancelQueries({ queryKey: teamsQuery.queryKey });
+      const previous = queryClient.getQueryData<Team[]>(teamsQuery.queryKey);
+      queryClient.setQueryData<Team[]>(teamsQuery.queryKey, (old) => [
         ...(old ?? []),
         {
           id: crypto.randomUUID(),
@@ -69,10 +52,10 @@ export function useTeamFacade(): TeamFacade {
       return { previous };
     },
     onError: (_err, _input, context) => {
-      queryClient.setQueryData(teamKeys.all, context?.previous);
+      queryClient.setQueryData(teamsQuery.queryKey, context?.previous);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: teamKeys.all });
+      queryClient.invalidateQueries({ queryKey: teamsQuery.queryKey });
     },
   });
 

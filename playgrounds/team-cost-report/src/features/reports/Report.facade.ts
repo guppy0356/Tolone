@@ -1,11 +1,8 @@
 import { useCallback } from "react";
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  keepPreviousData,
-} from "@tanstack/react-query";
-import { teamApi, type Team } from "../teams/Team.api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { teamQueries } from "../teams/Team.queries";
+import type { Team } from "../teams/Team.api";
+import { reportQueries } from "./Report.queries";
 import {
   reportApi,
   type ReportSummary,
@@ -20,36 +17,22 @@ export interface ReportFacade {
   addReport: (input: CreateReportInput) => Promise<ReportSummary>;
 }
 
-const reportKeys = {
-  all: ["reports"] as const,
-  detail: (id: string) => ["reports", id] as const,
-};
-
-const teamKeys = {
-  all: ["teams"] as const,
-};
-
 export function useReportFacade(): ReportFacade {
   const queryClient = useQueryClient();
 
-  const { data, isPending, isFetching } = useQuery({
-    queryKey: reportKeys.all,
-    queryFn: reportApi.getAll,
-    placeholderData: keepPreviousData,
-  });
+  const reportsQuery = reportQueries.all();
+  const { data, isPending, isFetching } = useQuery(reportsQuery);
 
-  const { data: teams } = useQuery({
-    queryKey: teamKeys.all,
-    queryFn: teamApi.getAll,
-    placeholderData: keepPreviousData,
-  });
+  const { data: teams } = useQuery(teamQueries.all());
 
   const addMutation = useMutation({
     mutationFn: (input: CreateReportInput) => reportApi.create(input),
     onMutate: async (input) => {
-      await queryClient.cancelQueries({ queryKey: reportKeys.all });
-      const previous = queryClient.getQueryData<ReportSummary[]>(reportKeys.all);
-      queryClient.setQueryData<ReportSummary[]>(reportKeys.all, (old) => [
+      await queryClient.cancelQueries({ queryKey: reportsQuery.queryKey });
+      const previous = queryClient.getQueryData<ReportSummary[]>(
+        reportsQuery.queryKey,
+      );
+      queryClient.setQueryData<ReportSummary[]>(reportsQuery.queryKey, (old) => [
         ...(old ?? []),
         {
           id: crypto.randomUUID(),
@@ -61,10 +44,10 @@ export function useReportFacade(): ReportFacade {
       return { previous };
     },
     onError: (_err, _input, context) => {
-      queryClient.setQueryData(reportKeys.all, context?.previous);
+      queryClient.setQueryData(reportsQuery.queryKey, context?.previous);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: reportKeys.all });
+      queryClient.invalidateQueries({ queryKey: reportsQuery.queryKey });
     },
   });
 

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { HTTPError } from "ky";
 import { reportQueries } from "./Report.queries";
 import type { ReportDetail } from "./Report.api";
 
@@ -21,10 +22,7 @@ export function useReportDetailFacade({
   );
 
   const isNotFound =
-    !!error &&
-    typeof error === "object" &&
-    "response" in error &&
-    (error as { response?: { status?: number } }).response?.status === 404;
+    error instanceof HTTPError && error.response.status === 404;
 
   return {
     detail: data,

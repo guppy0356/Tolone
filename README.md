@@ -1,19 +1,19 @@
 # Tolone
 
-A pnpm monorepo for experimenting with the Facade + Presenter pattern in React.
+A pnpm monorepo for experimenting with the Container + Presentational Component pattern in React.
 
 ## Project Structure
 
 ```
 .
 ├── docs/
-│   └── architecture.md       # Detailed 4-layer architecture guide
+│   └── architecture.md       # Full architecture guide (6 layers)
 ├── packages/
 │   └── tailwind/             # Shared TailwindCSS package
 ├── playgrounds/
-│   ├── todo/                 # Todo app (reference implementation)
-│   ├── family-todo/          # Family todo app (multi-user, cookie auth)
-│   └── blog/                 # Blog app (react-hook-form + zod)
+│   ├── todo/                 # Todo app (single-page example)
+│   ├── team-cost-report/     # Multi-page app (reference for the current architecture)
+│   └── …                     # One app per experiment (blog, family-todo, novel, pat, …)
 └── scripts/
     └── new-playground.mjs    # Playground scaffold script
 ```
@@ -96,18 +96,20 @@ pnpm test
 
 ## Architecture
 
-Uses a 4-layer architecture. See [docs/architecture.md](./docs/architecture.md) for full details.
+Container + Presentational Component architecture. See [docs/architecture.md](./docs/architecture.md) for full details.
 
 ```
-API → Facade → Presenter → Component
+API → Queries → Facade → Container → Component → Presenter
 ```
 
 | Layer | File | Responsibility |
 |---|---|---|
 | API | `{Feature}.api.ts` | HTTP calls + type definitions |
-| Facade | `{Feature}.facade.ts` | Server state management |
-| Presenter | `{Feature}.presenter.ts` | Local UI state |
-| Component | `{Feature}.component.tsx` | Rendering only |
+| Queries | `{Feature}.queries.ts` | Query definitions (`queryOptions()` factory) |
+| Facade | `{Feature}.facade.ts` | Server state (TanStack Query); one dedicated facade per page |
+| Container | `{Feature}.container.tsx` | Wires Facade to Component |
+| Component | `{Feature}.component.tsx` | Presentational rendering + loading UI |
+| Presenter | `{Feature}.presenter.ts` | Local UI state + view-model transforms |
 
 Features are placed under `src/features/{feature-name}/`.
 
@@ -153,5 +155,5 @@ Then proceed in the confirmed order, one package at a time:
 - vite-plugin-checker (dev server type checking)
 - ky (HTTP client)
 - react-hook-form + zod (form validation, blog playground)
-- Vitest + Testing Library
+- Vitest (browser-mode via @storybook/addon-vitest; no Testing Library / jsdom)
 - Storybook 10 + Playwright (component catalog; play-function tests run in Chromium via `@storybook/addon-vitest`)

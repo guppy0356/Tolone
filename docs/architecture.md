@@ -7,16 +7,17 @@ Reference document for Claude when implementing features.
 ## Container + Presentational Component Architecture
 
 ```
-API → Facade → Container → Component → Presenter
+API → Queries → Facade → Container → Component → Presenter
 ```
 
 | Layer | File | Responsibility | Form |
 |---|---|---|---|
-| API | `{Feature}.api.ts` | HTTP communication + types (from OpenAPI) | Plain function object |
-| Facade | `{Feature}.facade.ts` | Server state (TanStack Query: useQuery + useMutation); may also hold facade-scoped `useState` for query params | React hook |
+| API | `{Feature}.api.ts` | HTTP communication + types (from OpenAPI). No query keys — those live in the Queries layer | Plain function object |
+| Queries | `{Feature}.queries.ts` | Query definitions via TanStack Query `queryOptions()` — query key + query function + shared options, co-located in a hierarchical factory | Plain object of factory functions |
+| Facade | `{Feature}.facade.ts` | Server state: `useQuery(featureQueries.x())` + `useMutation`; may hold facade-scoped `useState` for query params. **One dedicated Facade per page** | React hook |
 | Container | `{Feature}.container.tsx` | Wires Facade to Component. Calls Facade + app-shell read hooks (e.g. `useParams`); destructures only fields the Component uses | React component |
 | Component | `{Feature}.component.tsx` | Presentational rendering; loading UI (`isPending` skeleton / `isFetching` opacity); calls Presenter; may call app-shell action hooks (e.g. `useNavigate`) bound to user interactions | React component |
-| Presenter | `{Feature}.presenter.ts` | Local UI state + derived display values; called inside Component; receives Facade actions as props | React hook |
+| Presenter | `{Feature}.presenter.ts` | Local UI state + derived display values (incl. view-model transforms from the domain contract); called inside Component; receives Facade actions as props | React hook |
 
 ### Data Flow
 
@@ -46,6 +47,7 @@ The Presenter does **not** call the Facade hook directly — it receives Facade 
 ```
 src/features/{feature-name}/
 ├── {Feature}.api.ts
+├── {Feature}.queries.ts
 ├── {Feature}.facade.ts
 ├── {Feature}.container.tsx
 ├── {Feature}.presenter.ts
@@ -127,13 +129,16 @@ function TodoListSkeleton() {
 
 ## Conventions
 
-- **1 page = 1 facade** — each page (route) uses exactly one Facade hook, called from its Container. The Facade may grow to cover everything the page needs (a "god" facade). Other pages that share the same Facade may incur unused queries; the simplicity of single-facade wiring outweighs that cost.
-- **Facade-scoped state** — when the Facade needs a query parameter the UI mutates (e.g. search keyword, filter), hold it as `useState` inside the Facade. The Facade exposes both the value and the setter; the Component drives them through the same controlled-state pair.
+- **1 page = 1 dedicated facade** — each page (route) has its own Facade, called from its Container. The Facade covers everything *that page* needs (a within-page "god" facade) and is **not shared across pages** — a list page and a create-form page for the same feature get separate Facades, so neither fires the other's queries. Data needed by multiple pages is shared at the **cache** level: two Facades calling `useQuery` with the same `queryKey` deduplicate through TanStack Query's global keyed cache. Sharing is a property of the cache, not of a shared Facade hook.
+- **Facade-scoped state** — when the Facade needs a *query parameter* the UI mutates (e.g. search keyword, filter), hold it as `useState` inside the Facade. The Facade exposes both the value and the setter; the Component drives them through the same controlled-state pair. This applies to inputs that reach the server — not to pure UI state (e.g. whether a dropdown is open), which stays in the Presenter.
+- **Loading flags follow query count** — name loading flags after the resource only when a Facade exposes more than one query. A single-query Facade returns plain `isPending` / `isFetching`; a Facade with two or more queries returns resource-named flags (`isReportsPending`, `isTeamsPending`) so each consumer knows which resource it waits on.
+- **Domain contract, not view model** — the API contract (OpenAPI schema) carries clean domain data. Shaping it for a specific view (e.g. a chart's row format, team-name-keyed columns) is the Presenter's job, not the contract's. Keep the schema statically typed and transform in the Presenter.
+- **Stable mutation dependency** — when wrapping a mutation in `useCallback`, depend on `mutation.mutateAsync` (a stable reference), never the mutation object (a new reference each render, which would defeat the `memo` that keeps the private body's props reference-stable).
 - **Routing hooks split**:
   - `useParams` (read URL → drives a Facade query) → called in **Container**
   - `useNavigate` (action triggered by user interaction) → called in **Component**
 - **Pick over spread** — never spread the Facade onto the Component (`<Component {...facade} />`). Always destructure in the Container and pass each prop individually. The Component's prop type is `Pick<{Feature}Facade, ...>` listing exactly the fields it uses, optionally intersected with ad-hoc props like `onSaved`.
-- **Cross-feature facade access** — pages that need data from another feature may pull it into their own Facade rather than calling two Facades from the Container. The dependency is one-directional (the page-feature depends on the data-feature, not vice versa) and the duplicated `useQuery` shares the TanStack Query cache by `queryKey`.
+- **Cross-feature data access** — when a Facade needs another feature's data, import that feature's Queries factory and call `useQuery(otherFeatureQueries.list())` directly. The dependency is one-directional (the page-feature depends on the data-feature, not vice versa); cache is shared by `queryKey` through the same factory definition, so the two call sites cannot drift.
 - **Sub-component handling** — When the Component needs internal structure beyond the memo'd body and Skeleton, two decisions arise: where to place it (placement) and whether to apply `memo` (optimization). The two are independent.
   - *Placement:*
     - Simple JSX fragments (small, no own state, no own props contract) → private in the same `{Feature}.component.tsx`
@@ -156,6 +161,7 @@ function TodoListSkeleton() {
 - Types are derived from the OpenAPI schema via `openapi-typescript` generated types
 - Re-export types as named aliases for use by other layers
 - No error handling (delegate to the caller)
+- No query keys or TanStack Query options — those live in the Queries layer
 
 ```ts
 // Todo.api.ts
@@ -176,31 +182,63 @@ export const todoApi = {
 };
 ```
 
-### 2. Facade Layer (`{Feature}.facade.ts`)
+### 2. Queries Layer (`{Feature}.queries.ts`)
+
+**Responsibility**: Query definitions — co-locate the query key, query function, and shared options in one reusable, hierarchical factory.
+
+**Rules**:
+- Define each query with TanStack Query's `queryOptions()` so the key, `queryFn`, and shared options travel together as one typed definition. `queryOptions()` is a runtime pass-through; its value is the compile-time check — it validates the option shape at the definition site and tags the key with the data type
+- The `queryFn` references the API layer's functions; the Queries layer imports the API layer, never the reverse
+- Use a hierarchical key factory: an `all()` root key plus nested `list()` / `detail(id)` definitions (`[...all(), "list"]`, `[...all(), "detail", id]`). This lets `invalidateQueries(all())` wipe everything while keeping list and detail independently invalidatable
+- Put **shared** options in the definition (`staleTime`, `placeholderData`, `retry`). Leave **consumer-specific** options (`enabled`, and anything `useSuspenseQuery` omits) at the call site in the Facade
+- No React, no hooks — a plain object of factory functions
+
+```ts
+// Todo.queries.ts
+import { queryOptions, keepPreviousData } from "@tanstack/react-query";
+import { todoApi } from "./Todo.api";
+
+export const todoQueries = {
+  all: () => ["todos"] as const,
+  list: () =>
+    queryOptions({
+      queryKey: [...todoQueries.all(), "list"],
+      queryFn: todoApi.getAll,
+      placeholderData: keepPreviousData,
+    }),
+  detail: (id: string) =>
+    queryOptions({
+      queryKey: [...todoQueries.all(), "detail", id],
+      queryFn: () => todoApi.getDetail(id),
+      retry: false,
+    }),
+};
+```
+
+The same definition is consumed everywhere — `useQuery(todoQueries.list())`, `queryClient.invalidateQueries({ queryKey: todoQueries.list().queryKey })`, `prefetchQuery(todoQueries.detail(id))` — so the key and its data type never drift across call sites.
+
+### 3. Facade Layer (`{Feature}.facade.ts`)
 
 **Responsibility**: Server state management (fetching and mutating data)
 
 **Rules**:
-- Use `useQuery` + `keepPreviousData` + `useMutation` + `useQueryClient` from TanStack Query
-- Call the API layer via query/mutation functions
-- Export `isPending` (initial load, `data` is `undefined`) and `isFetching` (background refetch, stale data still available) — the Component uses these for loading UI
+- One dedicated Facade per page (not shared across pages)
+- Consume the Queries layer: `useQuery(featureQueries.list())`. Pass consumer-specific options (`enabled`, etc.) at this call site
+- Mutations use `useMutation` + `useQueryClient`; read the cache key from the same factory (`featureQueries.list().queryKey`) so it never drifts
+- Export `isPending` (initial load, `data` is `undefined`) and `isFetching` (background refetch, stale data still available) — the Component uses these for loading UI. Name them per resource only when the Facade has more than one query (see Conventions)
 - `data` may be `undefined` before the first successful fetch — use `data ?? []` or similar defaults
 - No UI logic (forms, validation, etc.)
 - Export an explicit interface for the return type
 - Return action functions + data + loading states
-- Define query keys as a constant object for reuse
-- Use optimistic updates (`onMutate` / `onError` / `onSettled`) for instant UI feedback
-- **Facade-scoped state**: when a query parameter is driven by the UI (e.g. a search keyword bound to an input), hold it as `useState` inside the Facade and include both the value and the setter on the returned interface. The Facade becomes the source of truth for its own query inputs.
+- When wrapping a mutation in `useCallback`, depend on `mutation.mutateAsync` (stable), not the mutation object
+- Optimistic updates (`onMutate` / `onError` / `onSettled`) are for instant UI feedback — add them only when the user actually observes the cache update. If the page navigates away on success (e.g. a create form), skip the optimistic write and just invalidate; never fabricate fields the Facade does not have
+- **Facade-scoped state**: when a query parameter is driven by the UI (e.g. a search keyword bound to an input), hold it as `useState` inside the Facade and include both the value and the setter on the returned interface. The Facade becomes the source of truth for its own query inputs
 
 ```ts
 // Todo.facade.ts
 import { useCallback } from "react";
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  keepPreviousData,
-} from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { todoQueries } from "./Todo.queries";
 import { todoApi, type Todo, type CreateTodoInput } from "./Todo.api";
 
 export interface TodoFacade {
@@ -212,39 +250,32 @@ export interface TodoFacade {
   deleteTodo: (id: string) => Promise<void>;
 }
 
-const todoKeys = {
-  all: ["todos"] as const,
-};
-
 export function useTodoFacade(): TodoFacade {
   const queryClient = useQueryClient();
 
-  const { data, isPending, isFetching } = useQuery({
-    queryKey: todoKeys.all,
-    queryFn: todoApi.getAll,
-    placeholderData: keepPreviousData,
-  });
+  const listQuery = todoQueries.list();
+  const { data, isPending, isFetching } = useQuery(listQuery);
 
-  // Optimistic update pattern:
+  // Optimistic update pattern (used here because the list stays on screen):
   //   onMutate  — cancel queries, snapshot previous, update cache optimistically
   //   onError   — rollback to snapshot
   //   onSettled — invalidate to refetch from server
   const addMutation = useMutation({
     mutationFn: (input: CreateTodoInput) => todoApi.create(input),
     onMutate: async (input) => {
-      await queryClient.cancelQueries({ queryKey: todoKeys.all });
-      const previous = queryClient.getQueryData<Todo[]>(todoKeys.all);
-      queryClient.setQueryData<Todo[]>(todoKeys.all, (old) => [
+      await queryClient.cancelQueries({ queryKey: listQuery.queryKey });
+      const previous = queryClient.getQueryData<Todo[]>(listQuery.queryKey);
+      queryClient.setQueryData<Todo[]>(listQuery.queryKey, (old) => [
         ...(old ?? []),
         { id: crypto.randomUUID(), title: input.title, completed: false },
       ]);
       return { previous };
     },
     onError: (_err, _input, context) => {
-      queryClient.setQueryData(todoKeys.all, context?.previous);
+      queryClient.setQueryData(listQuery.queryKey, context?.previous);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: todoKeys.all });
+      queryClient.invalidateQueries({ queryKey: listQuery.queryKey });
     },
   });
 
@@ -270,7 +301,7 @@ export function useTodoFacade(): TodoFacade {
 }
 ```
 
-### 3. Container Layer (`{Feature}.container.tsx`)
+### 4. Container Layer (`{Feature}.container.tsx`)
 
 **Responsibility**: Wire the Facade to the Component. Resolve app-shell inputs (URL params) before calling the Facade.
 
@@ -319,7 +350,7 @@ export function TodoDetailContainer() {
 }
 ```
 
-### 4. Presenter Layer (`{Feature}.presenter.ts`)
+### 5. Presenter Layer (`{Feature}.presenter.ts`)
 
 **Responsibility**: Local UI state management + derived display values
 
@@ -328,6 +359,7 @@ export function TodoDetailContainer() {
 - Props are **guaranteed non-undefined** — the Component handles the `undefined` / loading case before rendering the private memo'd body, which calls the Presenter
 - Manage form input values, validation, UI toggles, etc.
 - Derive display values from Facade data (e.g. merging server-returned options with current selections)
+- Transform the domain contract into view-specific shapes here (e.g. pivot domain rows into a chart's dynamic-key format, map ids to display labels). The view model is a Presenter concern, never part of the API contract
 - May have no `useState` when its job is purely derivation + handler wrapping
 - **No direct Facade call** — receive Facade actions as props
 - **No pass-through**: return only what the Presenter creates (local state, derived values, handlers). Facade data the Component or its private body needs is accessed directly from props, not re-exported through the Presenter
@@ -368,7 +400,7 @@ export function useTodoPresenter({
 }
 ```
 
-### 5. Component Layer (`{Feature}.component.tsx`)
+### 6. Component Layer (`{Feature}.component.tsx`)
 
 **Responsibility**: Presentational rendering + loading UI + delegating to the Presenter
 
@@ -702,6 +734,7 @@ export const SubmitsNewTodo: Story = {
 - ❌ Storying the Container, Facade, Presenter, or API — they are non-UI or pure wiring
 - ❌ Importing `vi`, `vitest`, `@testing-library/react`, or `@testing-library/jest-dom` inside a story — they are not in scope and break the browser-mode runner
 - ❌ Creating a `*.test.tsx` file under `src/features/` — the test entry point is the story file
+- ❌ Hand-writing a query key / `queryFn` in a story harness — consume the Queries factory (`useQuery(featureQueries.list())`) so the test exercises the same wiring as production
 
 ### Browser-mode caveats
 
@@ -734,8 +767,9 @@ Each playground defines its API contract in `src/openapi.yaml`. Types are genera
 **Flow:**
 ```
 src/openapi.yaml → openapi-typescript → src/types/openapi.d.ts
-                                        ├── Todo.api.ts (import types)
-                                        └── handlers.ts (openapi-msw: type-safe responses)
+                                        ├── Todo.api.ts      (import types)
+                                        ├── Todo.queries.ts  (queryOptions over the api fns)
+                                        └── handlers.ts      (openapi-msw: type-safe responses)
 ```
 
 **Commands:**
@@ -756,10 +790,11 @@ Commit after each step. Do not batch multiple steps into one commit.
 2. Run `pnpm generate:api` to generate types → **commit**
 3. Create `src/features/{feature-name}/` directory
 4. `{Feature}.api.ts` — import generated types + API function object → **commit**
-5. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (useQuery + keepPreviousData + useMutation) → **commit**
-6. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook + `{Feature}Presenter` interface → **commit**
-7. `{Feature}.component.tsx` — exported `{Feature}Component` (Pick-narrowed Facade props) + private memo'd body + private Skeleton
-8. `{Feature}.stories.tsx` — visual states (`Default` / `Empty` / `Skeleton`) + `play`-function interaction stories with Pick-narrowed args; run `pnpm test` to verify → **commit** (Component + stories together)
-9. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
-10. `{Feature}.container.tsx` — `{Feature}Container` calls Facade, destructures needed fields, passes to Component → **commit**
-11. Wire the feature in `main.tsx` (add route; import `{Feature}Container`) → **commit**
+5. `{Feature}.queries.ts` — `{Feature}Queries` `queryOptions()` factory (`all` / `list` / `detail`) over the API functions → **commit**
+6. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (one dedicated facade per page; `useQuery(featureQueries.x())` + `useMutation`) → **commit**
+7. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook + `{Feature}Presenter` interface → **commit**
+8. `{Feature}.component.tsx` — exported `{Feature}Component` (Pick-narrowed Facade props) + private memo'd body + private Skeleton
+9. `{Feature}.stories.tsx` — visual states (`Default` / `Empty` / `Skeleton`) + `play`-function interaction stories with Pick-narrowed args; a story harness needing data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key; run `pnpm test` to verify → **commit** (Component + stories together)
+10. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
+11. `{Feature}.container.tsx` — `{Feature}Container` calls Facade, destructures needed fields, passes to Component → **commit**
+12. Wire the feature in `main.tsx` (add route; import `{Feature}Container`) → **commit**

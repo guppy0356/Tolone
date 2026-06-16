@@ -33,12 +33,13 @@ No linter is configured. Tests run as Storybook play functions via `@storybook/a
 
 This is a pnpm monorepo for experimenting with a **Container + Presentational Component** architecture. Each playground in `playgrounds/` implements features using this architecture. The full specification lives in @docs/architecture.md — always read it before implementing features.
 
-### Layers: API → Facade → Container → Component → Presenter
+### Layers: API → Queries → Facade → Container → Component → Presenter
 
 | Layer | File | Form | Responsibility |
 |---|---|---|---|
-| API | `{Feature}.api.ts` | Plain object of functions | HTTP calls via `ky` + type definitions |
-| Facade | `{Feature}.facade.ts` | React hook | Server state via TanStack Query (`useQuery` + `useMutation`); may also hold facade-scoped `useState` for query params |
+| API | `{Feature}.api.ts` | Plain object of functions | HTTP calls via `ky` + type definitions. No query keys |
+| Queries | `{Feature}.queries.ts` | Plain object of factory functions | Query definitions via `queryOptions()` — key + queryFn + shared options, hierarchical (`all` / `list` / `detail`) |
+| Facade | `{Feature}.facade.ts` | React hook | Server state: `useQuery(featureQueries.x())` + `useMutation`; may hold facade-scoped `useState` for query params. One dedicated facade per page |
 | Container | `{Feature}.container.tsx` | React component | Wires Facade to Component. Calls Facade hook + app-shell read hooks (e.g. `useParams`); destructures only fields the Component uses |
 | Component | `{Feature}.component.tsx` | React component (Presentational) | Renders UI; handles loading UI (`isPending` skeleton / `isFetching` opacity); calls Presenter for local state; calls app-shell action hooks (e.g. `useNavigate`) bound to user interactions |
 | Presenter | `{Feature}.presenter.ts` | React hook | Local UI state + derived display values; called inside Component; receives Facade actions as props (does not call Facade directly) |
@@ -58,8 +59,14 @@ This is a pnpm monorepo for experimenting with a **Container + Presentational Co
 
 ### Conventions
 
-- **1 page = 1 facade** — each page (route) uses exactly one Facade hook, called from its Container. The Facade may grow to cover everything the page needs (a "god" facade). Other pages that share the same Facade may incur unused queries; the simplicity of single-facade wiring outweighs that cost.
-- **Facade-scoped state** — when the Facade needs a query parameter the UI mutates (e.g. search keyword, filter), hold it as `useState` inside the Facade. The Facade exposes both the value and the setter; the Component drives them through the same controlled-state pair.
+- **1 page = 1 dedicated facade** — each page (route) has its own Facade. It covers everything *that page* needs (a within-page "god" facade) but is **not shared across pages** — a list page and its create-form page get separate Facades, so neither fires the other's queries. Cross-page data sharing happens at the cache level: two Facades calling `useQuery` with the same `queryKey` deduplicate via TanStack Query's global keyed cache.
+- **Query definitions in the Queries layer** — keys + `queryFn` + shared options live in `{Feature}.queries.ts` via `queryOptions()`, in a hierarchical factory (`all` / `list` / `detail`). Facades and story harnesses consume them (`useQuery(featureQueries.list())`); no hand-written keys. Nest keys so list invalidation doesn't refetch open details.
+- **Cross-feature data** — import the other feature's Queries factory and call `useQuery(otherFeatureQueries.list())`; cache is shared by `queryKey`.
+- **Loading flags follow query count** — single-query facade → plain `isPending` / `isFetching`; multi-query facade → resource-named flags (`isReportsPending`, `isTeamsPending`).
+- **Domain contract, not view model** — keep the OpenAPI contract domain-shaped; do view-specific transforms (chart rows, label mapping) in the Presenter.
+- **Stable mutation dependency** — `useCallback` deps use `mutation.mutateAsync`, not the mutation object.
+- **Optimistic updates only when observed** — skip them when the page navigates away on success; never fabricate fields the Facade lacks.
+- **Facade-scoped state** — when the Facade needs a *query parameter* the UI mutates (e.g. search keyword), hold it as `useState` inside the Facade and expose value + setter. Pure UI state (e.g. dropdown open/closed) stays in the Presenter.
 - **Routing hooks split**:
   - `useParams` (read URL → drives a Facade query) → called in **Container**
   - `useNavigate` (action triggered by user interaction) → called in **Component**
@@ -77,6 +84,7 @@ This is a pnpm monorepo for experimenting with a **Container + Presentational Co
 ```
 src/features/{feature-name}/
 ├── {Feature}.api.ts
+├── {Feature}.queries.ts        ← queryOptions factory (all / list / detail)
 ├── {Feature}.facade.ts
 ├── {Feature}.container.tsx     ← wires Facade to Component
 ├── {Feature}.presenter.ts
@@ -86,7 +94,7 @@ src/features/{feature-name}/
 
 ### Testing approach
 
-Stories double as tests. Visual states (`Default`, `Empty`, `Skeleton`) and interaction tests (`play` functions) live in the same `{Feature}.stories.tsx` file, with Facade-shaped props mocked via `fn()` from `storybook/test`. Running `pnpm test` executes every story in browser-mode Vitest, so the same file is both the documentation and the test suite. See [docs/architecture.md](./docs/architecture.md#writing-tests) for the full convention.
+Stories double as tests. Visual states (`Default`, `Empty`, `Skeleton`) and interaction tests (`play` functions) live in the same `{Feature}.stories.tsx` file, with Facade-shaped props mocked via `fn()` from `storybook/test`. Running `pnpm test` executes every story in browser-mode Vitest, so the same file is both the documentation and the test suite. A story harness that needs live data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key, so the test exercises production wiring. See [docs/architecture.md](./docs/architecture.md#writing-tests) for the full convention.
 
 ## Commit Strategy
 
@@ -96,12 +104,13 @@ Typical commit sequence:
 1. Scaffold + openapi.yaml → commit
 2. generate:api (type generation) → commit
 3. API layer → commit
-4. Facade layer → commit
-5. Presenter layer → commit
-6. MSW handlers → commit
-7. Component + stories (run `pnpm test` before committing) → commit
-8. Container layer → commit
-9. Wire in main.tsx → commit
+4. Queries layer → commit
+5. Facade layer → commit
+6. Presenter layer → commit
+7. MSW handlers → commit
+8. Component + stories (run `pnpm test` before committing) → commit
+9. Container layer → commit
+10. Wire in main.tsx → commit
 
 ## Future Work
 

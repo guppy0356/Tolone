@@ -1,13 +1,9 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
-import {
-  QueryClient,
-  QueryClientProvider,
-  keepPreviousData,
-  useQuery,
-} from "@tanstack/react-query";
-import { membersApi, type Member } from "./Members.api";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import type { Member } from "./Members.api";
+import { memberQueries } from "./Members.queries";
 import { TeamMemberPicker } from "./TeamMemberPicker.component";
 
 interface HarnessProps {
@@ -17,11 +13,7 @@ interface HarnessProps {
 
 function TeamMemberPickerHarness({ onAdd, onClose }: HarnessProps) {
   const [query, setQuery] = useState("");
-  const { data, isFetching } = useQuery({
-    queryKey: query ? ["members", { q: query }] : ["members"],
-    queryFn: () => membersApi.getAll(query || undefined),
-    placeholderData: keepPreviousData,
-  });
+  const { data, isFetching } = useQuery(memberQueries.list(query || undefined));
   return (
     <TeamMemberPicker
       open={true}

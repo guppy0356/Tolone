@@ -8,19 +8,14 @@ import {
   waitFor,
   within,
 } from "storybook/test";
-import {
-  QueryClient,
-  QueryClientProvider,
-  keepPreviousData,
-  useQuery,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import {
   createRootRoute,
   createRoute,
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { membersApi } from "./Members.api";
+import { memberQueries } from "./Members.queries";
 import type { TeamFormFacade } from "./TeamForm.facade";
 import { TeamFormComponent } from "./TeamForm.component";
 
@@ -28,11 +23,9 @@ type HarnessProps = Pick<TeamFormFacade, "addTeam">;
 
 function TeamFormHarness({ addTeam }: HarnessProps) {
   const [memberSearch, setMemberSearch] = useState("");
-  const { data, isFetching } = useQuery({
-    queryKey: memberSearch ? ["members", { q: memberSearch }] : ["members"],
-    queryFn: () => membersApi.getAll(memberSearch || undefined),
-    placeholderData: keepPreviousData,
-  });
+  const { data, isFetching } = useQuery(
+    memberQueries.list(memberSearch || undefined),
+  );
   return (
     <TeamFormComponent
       addTeam={addTeam}

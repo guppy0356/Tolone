@@ -9,37 +9,27 @@ import {
   type CreateReportInput,
 } from "./Report.api";
 
-export interface ReportFacade {
-  reports: ReportSummary[];
+export interface ReportFormFacade {
   teams: Team[];
-  isReportsPending: boolean;
-  isReportsFetching: boolean;
-  isTeamsPending: boolean;
+  isPending: boolean;
   addReport: (input: CreateReportInput) => Promise<ReportSummary>;
 }
 
-export function useReportFacade(): ReportFacade {
+export function useReportFormFacade(): ReportFormFacade {
   const queryClient = useQueryClient();
 
-  const reportsQuery = reportQueries.list();
-  const {
-    data,
-    isPending: isReportsPending,
-    isFetching: isReportsFetching,
-  } = useQuery(reportsQuery);
+  const { data: teams, isPending } = useQuery(teamQueries.list());
 
-  const { data: teams, isPending: isTeamsPending } = useQuery(
-    teamQueries.list(),
-  );
+  // The reports list lives in another page's facade, but its cache is keyed,
+  // so this mutation updates/invalidates it directly without subscribing.
+  const reportsKey = reportQueries.list().queryKey;
 
   const addMutation = useMutation({
     mutationFn: (input: CreateReportInput) => reportApi.create(input),
     onMutate: async (input) => {
-      await queryClient.cancelQueries({ queryKey: reportsQuery.queryKey });
-      const previous = queryClient.getQueryData<ReportSummary[]>(
-        reportsQuery.queryKey,
-      );
-      queryClient.setQueryData<ReportSummary[]>(reportsQuery.queryKey, (old) => [
+      await queryClient.cancelQueries({ queryKey: reportsKey });
+      const previous = queryClient.getQueryData<ReportSummary[]>(reportsKey);
+      queryClient.setQueryData<ReportSummary[]>(reportsKey, (old) => [
         ...(old ?? []),
         {
           id: crypto.randomUUID(),
@@ -51,10 +41,10 @@ export function useReportFacade(): ReportFacade {
       return { previous };
     },
     onError: (_err, _input, context) => {
-      queryClient.setQueryData(reportsQuery.queryKey, context?.previous);
+      queryClient.setQueryData(reportsKey, context?.previous);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: reportsQuery.queryKey });
+      queryClient.invalidateQueries({ queryKey: reportsKey });
     },
   });
 
@@ -63,12 +53,5 @@ export function useReportFacade(): ReportFacade {
     [addMutation.mutateAsync],
   );
 
-  return {
-    reports: data ?? [],
-    teams: teams ?? [],
-    isReportsPending,
-    isReportsFetching,
-    isTeamsPending,
-    addReport,
-  };
+  return { teams: teams ?? [], isPending, addReport };
 }

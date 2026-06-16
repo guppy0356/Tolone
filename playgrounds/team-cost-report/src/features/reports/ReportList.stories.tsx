@@ -28,8 +28,8 @@ const meta = {
   component: ReportListComponent,
   args: {
     reports: baseReports,
-    isReportsPending: false,
-    isReportsFetching: false,
+    isPending: false,
+    isFetching: false,
   },
   decorators: [
     (Story) => {
@@ -74,7 +74,7 @@ export const LinksToDetail: Story = {
 };
 
 export const Skeleton: Story = {
-  args: { isReportsPending: true, reports: [] },
+  args: { isPending: true, reports: [] },
   play: async ({ canvasElement }) => {
     await expect(
       canvasElement.querySelectorAll(".animate-pulse").length,

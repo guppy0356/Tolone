@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Link } from "@tanstack/react-router";
-import type { ReportFacade } from "./Report.facade";
+import type { ReportListFacade } from "./ReportList.facade";
 import {
   useReportListPresenter,
   type ReportListRow,
@@ -59,15 +59,13 @@ function ReportListSkeleton() {
 
 export function ReportListComponent({
   reports,
-  isReportsPending,
-  isReportsFetching,
-}: Pick<ReportFacade, "reports" | "isReportsPending" | "isReportsFetching">) {
+  isPending,
+  isFetching,
+}: Pick<ReportListFacade, "reports" | "isPending" | "isFetching">) {
   const { rows } = useReportListPresenter({ reports });
 
   return (
-    <div
-      className={`transition-opacity ${isReportsFetching ? "opacity-50" : ""}`}
-    >
+    <div className={`transition-opacity ${isFetching ? "opacity-50" : ""}`}>
       <div className="p-6">
         <header className="mb-4 flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Reports</h1>
@@ -78,7 +76,7 @@ export function ReportListComponent({
             New report
           </Link>
         </header>
-        {isReportsPending ? <ReportListSkeleton /> : <ReportList rows={rows} />}
+        {isPending ? <ReportListSkeleton /> : <ReportList rows={rows} />}
       </div>
     </div>
   );

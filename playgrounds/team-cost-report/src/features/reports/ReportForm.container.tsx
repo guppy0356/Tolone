@@ -1,13 +1,9 @@
-import { useReportFacade } from "./Report.facade";
+import { useReportFormFacade } from "./ReportForm.facade";
 import { ReportFormComponent } from "./ReportForm.component";
 
 export function ReportFormContainer() {
-  const { teams, isTeamsPending, addReport } = useReportFacade();
+  const { teams, isPending, addReport } = useReportFormFacade();
   return (
-    <ReportFormComponent
-      teams={teams}
-      isTeamsPending={isTeamsPending}
-      addReport={addReport}
-    />
+    <ReportFormComponent teams={teams} isPending={isPending} addReport={addReport} />
   );
 }

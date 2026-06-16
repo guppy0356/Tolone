@@ -1,13 +1,13 @@
-import { useReportFacade } from "./Report.facade";
+import { useReportListFacade } from "./ReportList.facade";
 import { ReportListComponent } from "./ReportList.component";
 
 export function ReportListContainer() {
-  const { reports, isReportsPending, isReportsFetching } = useReportFacade();
+  const { reports, isPending, isFetching } = useReportListFacade();
   return (
     <ReportListComponent
       reports={reports}
-      isReportsPending={isReportsPending}
-      isReportsFetching={isReportsFetching}
+      isPending={isPending}
+      isFetching={isFetching}
     />
   );
 }

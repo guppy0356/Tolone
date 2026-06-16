@@ -30,7 +30,7 @@ const meta = {
   component: ReportFormComponent,
   args: {
     teams: sampleTeams,
-    isTeamsPending: false,
+    isPending: false,
     addReport: fn(),
   },
   decorators: [
@@ -103,7 +103,7 @@ export const Empty: Story = {
 };
 
 export const TeamsLoading: Story = {
-  args: { teams: [], isTeamsPending: true },
+  args: { teams: [], isPending: true },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(

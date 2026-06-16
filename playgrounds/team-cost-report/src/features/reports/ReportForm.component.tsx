@@ -1,10 +1,10 @@
 import { useNavigate } from "@tanstack/react-router";
-import type { ReportFacade } from "./Report.facade";
+import type { ReportFormFacade } from "./ReportForm.facade";
 import { useReportFormPresenter } from "./ReportForm.presenter";
 
 type ReportFormComponentProps = Pick<
-  ReportFacade,
-  "teams" | "isTeamsPending" | "addReport"
+  ReportFormFacade,
+  "teams" | "isPending" | "addReport"
 >;
 
 function TeamsSkeleton() {
@@ -21,7 +21,7 @@ function TeamsSkeleton() {
 
 export function ReportFormComponent({
   teams,
-  isTeamsPending,
+  isPending,
   addReport,
 }: ReportFormComponentProps) {
   const navigate = useNavigate();
@@ -73,7 +73,7 @@ export function ReportFormComponent({
         <legend className="mb-2 text-sm font-medium text-gray-700">
           Teams ({selectedTeamIds.length} selected)
         </legend>
-        {isTeamsPending ? (
+        {isPending ? (
           <TeamsSkeleton />
         ) : teams.length === 0 ? (
           <p className="rounded border border-dashed border-gray-300 p-4 text-sm text-gray-500">

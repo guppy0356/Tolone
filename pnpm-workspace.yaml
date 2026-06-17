@@ -27,7 +27,3 @@ onlyBuiltDependencies:
   - msw
 
 minimumReleaseAge: 10080
-
-minimumReleaseAgeExclude:
-  - storybook
-  - '@storybook/*'

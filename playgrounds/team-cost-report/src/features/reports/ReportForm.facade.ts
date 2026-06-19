@@ -20,29 +20,14 @@ export function useReportFormFacade(): ReportFormFacade {
 
   const { data: teams, isPending } = useQuery(teamQueries.list());
 
-  // The reports list lives in another page's facade, but its cache is keyed,
-  // so this mutation updates/invalidates it directly without subscribing.
+  // The reports list lives in another page's facade; its cache is keyed, so this
+  // mutation invalidates it directly without subscribing. No optimistic update:
+  // the form navigates to the new report's detail on save, so it never observes
+  // the optimistic state, and onSettled refetches anyway.
   const reportsKey = reportQueries.list().queryKey;
 
   const addMutation = useMutation({
     mutationFn: (input: CreateReportInput) => reportApi.create(input),
-    onMutate: async (input) => {
-      await queryClient.cancelQueries({ queryKey: reportsKey });
-      const previous = queryClient.getQueryData<ReportSummary[]>(reportsKey);
-      queryClient.setQueryData<ReportSummary[]>(reportsKey, (old) => [
-        ...(old ?? []),
-        {
-          id: crypto.randomUUID(),
-          name: input.name,
-          teamIds: input.teamIds,
-          createdAt: new Date().toISOString(),
-        },
-      ]);
-      return { previous };
-    },
-    onError: (_err, _input, context) => {
-      queryClient.setQueryData(reportsKey, context?.previous);
-    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: reportsKey });
     },

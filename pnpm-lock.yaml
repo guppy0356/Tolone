@@ -110,10 +110,10 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
+        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
       '@storybook/react-vite':
         specifier: 'catalog:'
-        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
+        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.0(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -121,11 +121,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tailwind
       '@types/react':
-        specifier: ^19.2.15
-        version: 19.2.15
+        specifier: ^19.2.17
+        version: 19.2.17
       '@types/react-dom':
         specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.15)
+        version: 19.2.3(@types/react@19.2.17)
       '@vitejs/plugin-react':
         specifier: ^6.0.2
         version: 6.0.2(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -146,7 +146,7 @@ importers:
         version: 1.60.0
       storybook:
         specifier: 'catalog:'
-        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.0
@@ -195,10 +195,10 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
+        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
       '@storybook/react-vite':
         specifier: 'catalog:'
-        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
+        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.0(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -206,11 +206,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tailwind
       '@types/react':
-        specifier: ^19.2.15
-        version: 19.2.15
+        specifier: ^19.2.17
+        version: 19.2.17
       '@types/react-dom':
         specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.15)
+        version: 19.2.3(@types/react@19.2.17)
       '@vitejs/plugin-react':
         specifier: ^6.0.2
         version: 6.0.2(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -231,7 +231,7 @@ importers:
         version: 1.60.0
       storybook:
         specifier: 'catalog:'
-        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.0
@@ -271,10 +271,10 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
+        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
       '@storybook/react-vite':
         specifier: 'catalog:'
-        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
+        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.0(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -282,11 +282,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tailwind
       '@types/react':
-        specifier: ^19.2.15
-        version: 19.2.15
+        specifier: ^19.2.17
+        version: 19.2.17
       '@types/react-dom':
         specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.15)
+        version: 19.2.3(@types/react@19.2.17)
       '@vitejs/plugin-react':
         specifier: ^6.0.2
         version: 6.0.2(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -307,7 +307,7 @@ importers:
         version: 1.60.0
       storybook:
         specifier: 'catalog:'
-        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.0
@@ -347,10 +347,10 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
+        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
       '@storybook/react-vite':
         specifier: 'catalog:'
-        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
+        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.0(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -358,11 +358,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tailwind
       '@types/react':
-        specifier: ^19.2.15
-        version: 19.2.15
+        specifier: ^19.2.17
+        version: 19.2.17
       '@types/react-dom':
         specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.15)
+        version: 19.2.3(@types/react@19.2.17)
       '@vitejs/plugin-react':
         specifier: ^6.0.2
         version: 6.0.2(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -383,7 +383,7 @@ importers:
         version: 1.60.0
       storybook:
         specifier: 'catalog:'
-        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.0
@@ -423,10 +423,10 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
+        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
       '@storybook/react-vite':
         specifier: 'catalog:'
-        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
+        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.0(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -434,11 +434,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tailwind
       '@types/react':
-        specifier: ^19.2.15
-        version: 19.2.15
+        specifier: ^19.2.17
+        version: 19.2.17
       '@types/react-dom':
         specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.15)
+        version: 19.2.3(@types/react@19.2.17)
       '@vitejs/plugin-react':
         specifier: ^6.0.2
         version: 6.0.2(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -459,7 +459,7 @@ importers:
         version: 1.60.0
       storybook:
         specifier: 'catalog:'
-        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.0
@@ -499,10 +499,10 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
+        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
       '@storybook/react-vite':
         specifier: 'catalog:'
-        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
+        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.0(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -510,11 +510,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tailwind
       '@types/react':
-        specifier: ^19.2.15
-        version: 19.2.15
+        specifier: ^19.2.17
+        version: 19.2.17
       '@types/react-dom':
         specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.15)
+        version: 19.2.3(@types/react@19.2.17)
       '@vitejs/plugin-react':
         specifier: ^6.0.2
         version: 6.0.2(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -535,7 +535,7 @@ importers:
         version: 1.60.0
       storybook:
         specifier: 'catalog:'
-        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.0
@@ -575,10 +575,10 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
+        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
       '@storybook/react-vite':
         specifier: 'catalog:'
-        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
+        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.0(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -586,11 +586,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tailwind
       '@types/react':
-        specifier: ^19.2.15
-        version: 19.2.15
+        specifier: ^19.2.17
+        version: 19.2.17
       '@types/react-dom':
         specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.15)
+        version: 19.2.3(@types/react@19.2.17)
       '@vitejs/plugin-react':
         specifier: ^6.0.2
         version: 6.0.2(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -611,7 +611,7 @@ importers:
         version: 1.60.0
       storybook:
         specifier: 'catalog:'
-        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.0
@@ -650,14 +650,14 @@ importers:
         version: 19.2.7(react@19.2.7)
       recharts:
         specifier: ^3.8.1
-        version: 3.8.1(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react-is@17.0.2)(react@19.2.7)(redux@5.0.1)
+        version: 3.8.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react-is@17.0.2)(react@19.2.7)(redux@5.0.1)
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
+        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
       '@storybook/react-vite':
         specifier: 'catalog:'
-        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
+        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.0(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -665,11 +665,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tailwind
       '@types/react':
-        specifier: ^19.2.15
-        version: 19.2.15
+        specifier: ^19.2.17
+        version: 19.2.17
       '@types/react-dom':
         specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.15)
+        version: 19.2.3(@types/react@19.2.17)
       '@vitejs/plugin-react':
         specifier: ^6.0.2
         version: 6.0.2(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -690,7 +690,7 @@ importers:
         version: 1.60.0
       storybook:
         specifier: 'catalog:'
-        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.0
@@ -727,10 +727,10 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
+        version: 10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)
       '@storybook/react-vite':
         specifier: 'catalog:'
-        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
+        version: 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.0(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -738,11 +738,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tailwind
       '@types/react':
-        specifier: ^19.2.15
-        version: 19.2.15
+        specifier: ^19.2.17
+        version: 19.2.17
       '@types/react-dom':
         specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.15)
+        version: 19.2.3(@types/react@19.2.17)
       '@vitejs/plugin-react':
         specifier: ^6.0.2
         version: 6.0.2(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
@@ -766,7 +766,7 @@ importers:
         version: 1.60.0
       storybook:
         specifier: 'catalog:'
-        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.0
@@ -892,8 +892,8 @@ packages:
       '@csstools/css-parser-algorithms': ^4.0.0
       '@csstools/css-tokenizer': ^4.0.0
 
-  '@csstools/css-color-parser@4.1.1':
-    resolution: {integrity: sha512-eZ5XOtyhK+mggRafYUWzA0tvaYOFgdY8AkgQiCJF9qNAePnUo/zmsqqYubBBb3sQ8uNUaSKTY9s9klfRaAXL0g==}
+  '@csstools/css-color-parser@4.1.3':
+    resolution: {integrity: sha512-DOgvIPkikIOixQRlD4YF31VN6fLLUTdrzhfRbis8vm0kMTgIbEPX0Ip/YX9fOeV9iywAS4sUUbTclpan7yYP8Q==}
     engines: {node: '>=20.19.0'}
     peerDependencies:
       '@csstools/css-parser-algorithms': ^4.0.0
@@ -905,8 +905,8 @@ packages:
     peerDependencies:
       '@csstools/css-tokenizer': ^4.0.0
 
-  '@csstools/css-syntax-patches-for-csstree@1.1.4':
-    resolution: {integrity: sha512-wgsqt92b7C7tQhIdPNxj0n9zuUbQlvAuI1exyzeNrOKOi62SD7ren8zqszmpVREjAOqg8cD2FqYhQfAuKjk4sw==}
+  '@csstools/css-syntax-patches-for-csstree@1.1.5':
+    resolution: {integrity: sha512-oNjBvzLq2GPZtJphCjLqXow/cHySHSgtxvKZb7OqSZ/xHgw6NWNhfad+6AB9cLeVm6eA9d/qMll3JdEHjy6M+A==}
     peerDependencies:
       css-tree: ^3.2.1
     peerDependenciesMeta:
@@ -1995,8 +1995,8 @@ packages:
     peerDependencies:
       '@types/react': ^19.2.0
 
-  '@types/react@19.2.15':
-    resolution: {integrity: sha512-eRwcGNHve+E8qtEQSSRl6urh+rFop4v8gm6O8rGv25CodbvFdLjA1vVQ1KkiFE0w0UPOnb8tDiFKL5lp0rtY5Q==}
+  '@types/react@19.2.17':
+    resolution: {integrity: sha512-MXfmqaVPEVgkBT/aY0aGCkRWWtByiYQXo3xdQ8r5RzuFrPiRn8Gar2tQdXSUQ2GKV3bkXckek89V8wQBY2Q/Aw==}
 
   '@types/resolve@1.20.6':
     resolution: {integrity: sha512-A4STmOXPhMUtHH+S6ymgE2GiBSMqf4oTvcQZMcHzokuTLVYzXTB8ttjcgxOVaAp2lGwEdzZ0J+cRbbeevQj1UQ==}
@@ -3070,8 +3070,8 @@ packages:
   undici-types@7.19.2:
     resolution: {integrity: sha512-qYVnV5OEm2AW8cJMCpdV20CDyaN3g0AjDlOGf1OW4iaDEx8MwdtChUp4zu4H0VP3nDRF/8RKWH+IPp9uW0YGZg==}
 
-  undici@7.27.0:
-    resolution: {integrity: sha512-+t2Z/GwkZQDtu00813aP66ygViGtPHKhhoFZpQKpKrE+9jIgES+Zw+mFNaDWOVRKiuJjuqKHzD3B1sfGg8+ZOQ==}
+  undici@7.27.2:
+    resolution: {integrity: sha512-uZsKNuzQxDMUY6M3pIMvy5tvlGmtq8XJ2oLAkfRKGNu+1VQAIvLy2xIVG5ATZl5wDXl/tddByAWCizRbOme+TA==}
     engines: {node: '>=20.18.1'}
 
   unicorn-magic@0.3.0:
@@ -3297,7 +3297,7 @@ snapshots:
     dependencies:
       '@asamuzakjp/generational-cache': 1.0.1
       '@csstools/css-calc': 3.2.1(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)
-      '@csstools/css-color-parser': 4.1.1(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)
+      '@csstools/css-color-parser': 4.1.3(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)
       '@csstools/css-parser-algorithms': 4.0.0(@csstools/css-tokenizer@4.0.0)
       '@csstools/css-tokenizer': 4.0.0
     optional: true
@@ -3435,7 +3435,7 @@ snapshots:
       '@csstools/css-tokenizer': 4.0.0
     optional: true
 
-  '@csstools/css-color-parser@4.1.1(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)':
+  '@csstools/css-color-parser@4.1.3(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)':
     dependencies:
       '@csstools/color-helpers': 6.0.2
       '@csstools/css-calc': 3.2.1(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)
@@ -3448,7 +3448,7 @@ snapshots:
       '@csstools/css-tokenizer': 4.0.0
     optional: true
 
-  '@csstools/css-syntax-patches-for-csstree@1.1.4(css-tree@3.2.1)':
+  '@csstools/css-syntax-patches-for-csstree@1.1.5(css-tree@3.2.1)':
     optionalDependencies:
       css-tree: 3.2.1
     optional: true
@@ -3815,7 +3815,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@reduxjs/toolkit@2.11.2(react-redux@9.2.0(@types/react@19.2.15)(react@19.2.7)(redux@5.0.1))(react@19.2.7)':
+  '@reduxjs/toolkit@2.11.2(react-redux@9.2.0(@types/react@19.2.17)(react@19.2.7)(redux@5.0.1))(react@19.2.7)':
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@standard-schema/utils': 0.3.0
@@ -3825,7 +3825,7 @@ snapshots:
       reselect: 5.1.1
     optionalDependencies:
       react: 19.2.7
-      react-redux: 9.2.0(@types/react@19.2.15)(react@19.2.7)(redux@5.0.1)
+      react-redux: 9.2.0(@types/react@19.2.17)(react@19.2.7)(redux@5.0.1)
 
   '@rolldown/binding-android-arm64@1.0.2':
     optional: true
@@ -3965,11 +3965,11 @@ snapshots:
 
   '@standard-schema/utils@0.3.0': {}
 
-  '@storybook/addon-vitest@10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)':
+  '@storybook/addon-vitest@10.4.4(@vitest/browser-playwright@4.1.8)(@vitest/browser@4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8))(@vitest/runner@4.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.8)':
     dependencies:
       '@storybook/global': 5.0.0
       '@storybook/icons': 2.0.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      storybook: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      storybook: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
     optionalDependencies:
       '@vitest/browser': 4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8)
       '@vitest/browser-playwright': 4.1.8(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.60.0)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))(vitest@4.1.8)
@@ -3979,10 +3979,10 @@ snapshots:
       - react
       - react-dom
 
-  '@storybook/builder-vite@10.4.4(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))':
+  '@storybook/builder-vite@10.4.4(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))':
     dependencies:
-      '@storybook/csf-plugin': 10.4.4(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
-      storybook: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@storybook/csf-plugin': 10.4.4(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
+      storybook: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       ts-dedent: 2.2.0
       vite: 8.0.14(@types/node@25.6.0)(jiti@2.6.1)
     transitivePeerDependencies:
@@ -3990,9 +3990,9 @@ snapshots:
       - rollup
       - webpack
 
-  '@storybook/csf-plugin@10.4.4(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))':
+  '@storybook/csf-plugin@10.4.4(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))':
     dependencies:
-      storybook: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      storybook: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       unplugin: 2.3.11
     optionalDependencies:
       rollup: 4.60.3
@@ -4005,28 +4005,28 @@ snapshots:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
 
-  '@storybook/react-dom-shim@10.4.4(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))':
+  '@storybook/react-dom-shim@10.4.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))':
     dependencies:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
-      storybook: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      storybook: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
     optionalDependencies:
-      '@types/react': 19.2.15
-      '@types/react-dom': 19.2.3(@types/react@19.2.15)
+      '@types/react': 19.2.17
+      '@types/react-dom': 19.2.3(@types/react@19.2.17)
 
-  '@storybook/react-vite@10.4.4(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))':
+  '@storybook/react-vite@10.4.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))':
     dependencies:
       '@joshwooding/vite-plugin-react-docgen-typescript': 0.7.0(typescript@6.0.3)(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
       '@rollup/pluginutils': 5.3.0(rollup@4.60.3)
-      '@storybook/builder-vite': 10.4.4(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
-      '@storybook/react': 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)
+      '@storybook/builder-vite': 10.4.4(rollup@4.60.3)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.14(@types/node@25.6.0)(jiti@2.6.1))
+      '@storybook/react': 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)
       empathic: 2.0.0
       magic-string: 0.30.21
       react: 19.2.7
       react-docgen: 8.0.3
       react-dom: 19.2.7(react@19.2.7)
       resolve: 1.22.12
-      storybook: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      storybook: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       tsconfig-paths: 4.2.0
       vite: 8.0.14(@types/node@25.6.0)(jiti@2.6.1)
     transitivePeerDependencies:
@@ -4038,18 +4038,18 @@ snapshots:
       - typescript
       - webpack
 
-  '@storybook/react@10.4.4(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)':
+  '@storybook/react@10.4.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)':
     dependencies:
       '@storybook/global': 5.0.0
-      '@storybook/react-dom-shim': 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
+      '@storybook/react-dom-shim': 10.4.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
       react: 19.2.7
       react-docgen: 8.0.3
       react-docgen-typescript: 2.4.0(typescript@6.0.3)
       react-dom: 19.2.7(react@19.2.7)
-      storybook: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      storybook: 10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
     optionalDependencies:
-      '@types/react': 19.2.15
-      '@types/react-dom': 19.2.3(@types/react@19.2.15)
+      '@types/react': 19.2.17
+      '@types/react-dom': 19.2.3(@types/react@19.2.17)
       typescript: 6.0.3
     transitivePeerDependencies:
       - supports-color
@@ -4247,11 +4247,11 @@ snapshots:
     dependencies:
       undici-types: 7.19.2
 
-  '@types/react-dom@19.2.3(@types/react@19.2.15)':
+  '@types/react-dom@19.2.3(@types/react@19.2.17)':
     dependencies:
-      '@types/react': 19.2.15
+      '@types/react': 19.2.17
 
-  '@types/react@19.2.15':
+  '@types/react@19.2.17':
     dependencies:
       csstype: 3.2.3
 
@@ -4733,7 +4733,7 @@ snapshots:
       '@asamuzakjp/css-color': 5.1.11
       '@asamuzakjp/dom-selector': 7.1.1
       '@bramus/specificity': 2.4.2
-      '@csstools/css-syntax-patches-for-csstree': 1.1.4(css-tree@3.2.1)
+      '@csstools/css-syntax-patches-for-csstree': 1.1.5(css-tree@3.2.1)
       '@exodus/bytes': 1.15.1
       css-tree: 3.2.1
       data-urls: 7.0.0
@@ -4745,7 +4745,7 @@ snapshots:
       saxes: 6.0.0
       symbol-tree: 3.2.4
       tough-cookie: 6.0.1
-      undici: 7.27.0
+      undici: 7.27.2
       w3c-xmlserializer: 5.0.0
       webidl-conversions: 8.0.1
       whatwg-mimetype: 5.0.0
@@ -5052,13 +5052,13 @@ snapshots:
 
   react-is@17.0.2: {}
 
-  react-redux@9.2.0(@types/react@19.2.15)(react@19.2.7)(redux@5.0.1):
+  react-redux@9.2.0(@types/react@19.2.17)(react@19.2.7)(redux@5.0.1):
     dependencies:
       '@types/use-sync-external-store': 0.0.6
       react: 19.2.7
       use-sync-external-store: 1.6.0(react@19.2.7)
     optionalDependencies:
-      '@types/react': 19.2.15
+      '@types/react': 19.2.17
       redux: 5.0.1
 
   react@19.2.7: {}
@@ -5073,9 +5073,9 @@ snapshots:
       tiny-invariant: 1.3.3
       tslib: 2.8.1
 
-  recharts@3.8.1(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react-is@17.0.2)(react@19.2.7)(redux@5.0.1):
+  recharts@3.8.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react-is@17.0.2)(react@19.2.7)(redux@5.0.1):
     dependencies:
-      '@reduxjs/toolkit': 2.11.2(react-redux@9.2.0(@types/react@19.2.15)(react@19.2.7)(redux@5.0.1))(react@19.2.7)
+      '@reduxjs/toolkit': 2.11.2(react-redux@9.2.0(@types/react@19.2.17)(react@19.2.7)(redux@5.0.1))(react@19.2.7)
       clsx: 2.1.1
       decimal.js-light: 2.5.1
       es-toolkit: 1.46.1
@@ -5084,7 +5084,7 @@ snapshots:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
       react-is: 17.0.2
-      react-redux: 9.2.0(@types/react@19.2.15)(react@19.2.7)(redux@5.0.1)
+      react-redux: 9.2.0(@types/react@19.2.17)(react@19.2.7)(redux@5.0.1)
       reselect: 5.1.1
       tiny-invariant: 1.3.3
       use-sync-external-store: 1.6.0(react@19.2.7)
@@ -5217,7 +5217,7 @@ snapshots:
 
   std-env@4.1.0: {}
 
-  storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
+  storybook@10.4.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
     dependencies:
       '@storybook/global': 5.0.0
       '@storybook/icons': 2.0.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -5235,7 +5235,7 @@ snapshots:
       use-sync-external-store: 1.6.0(react@19.2.7)
       ws: 8.20.0
     optionalDependencies:
-      '@types/react': 19.2.15
+      '@types/react': 19.2.17
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -5332,7 +5332,7 @@ snapshots:
 
   undici-types@7.19.2: {}
 
-  undici@7.27.0:
+  undici@7.27.2:
     optional: true
 
   unicorn-magic@0.3.0: {}

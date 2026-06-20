@@ -44,86 +44,49 @@ The Presenter does **not** call the Facade hook directly — it receives Facade 
 
 ### File Placement
 
+A feature folder holds two kinds of files: a **shared cache layer** (`{Resource}.api.ts` + `{Resource}.queries.ts`, one pair per resource) and a **page triad per route** (facade / container / presenter / component / stories). The cache layer is shared by every page; the triad is not (1 page = 1 facade). Optional `{Sub}.component.tsx` files hold extracted sub-components with their own stories.
+
 ```
 src/features/{feature-name}/
-├── {Feature}.api.ts
-├── {Feature}.queries.ts
-├── {Feature}.facade.ts
-├── {Feature}.container.tsx
-├── {Feature}.presenter.ts
-├── {Feature}.component.tsx
-└── {Feature}.stories.tsx
+├── {Resource}.api.ts          ← shared cache layer (one pair per resource)
+├── {Resource}.queries.ts      ← queryOptions factory, consumed by every page
+├── {Page}.facade.ts           ← one dedicated facade per page/route
+├── {Page}.container.tsx
+├── {Page}.presenter.ts
+├── {Page}.component.tsx
+├── {Page}.stories.tsx
+└── {Sub}.component.tsx         ← optional extracted sub-component (+ its stories)
 ```
+
+One feature can have several pages over the same resource — a list, a detail, and a create form share one `{Resource}.api.ts` / `{Resource}.queries.ts` but each get their own triad — and a page may read more than one resource (e.g. a form that consumes both `Team` and `Members`).
 
 ---
 
 ## Type Patterns
 
-Use **explicit interfaces** for hook props and return types instead of `ReturnType<typeof ...>`.
+Hook props and return types are **explicit named interfaces**, never `ReturnType<typeof ...>` — the interface is each layer's published contract. The Facade exports its return shape; the Presenter takes Facade actions as Props and returns **only what it creates** (no pass-through of Facade data).
 
 ```ts
-// Facade — export the return type as a named interface
+// Facade — return type is a named interface
 export interface TodoFacade {
   todos: Todo[];
   isPending: boolean;
   isFetching: boolean;
   addTodo: (input: CreateTodoInput) => Promise<void>;
 }
-export function useTodoFacade(): TodoFacade { ... }  // internally uses useQuery + useMutation
 
-// Presenter — receives Facade actions as props, returns ONLY what it creates (no pass-through)
+// Presenter — Props in, created-here values out (no Facade pass-through)
+export interface TodoPresenterProps {
+  addTodo: TodoFacade["addTodo"];
+}
 export interface TodoPresenter {
   newTitle: string;
   setNewTitle: (value: string) => void;
   handleSubmit: () => Promise<void>;
 }
-export function useTodoPresenter(props: { addTodo: TodoFacade["addTodo"] }): TodoPresenter { ... }
-
-// Container — calls Facade, destructures needed fields, passes to Component
-export function TodoContainer() {
-  const { todos, isPending, isFetching, addTodo } = useTodoFacade();
-  return (
-    <TodoComponent
-      todos={todos}
-      isPending={isPending}
-      isFetching={isFetching}
-      addTodo={addTodo}
-    />
-  );
-}
-
-// Component (Presentational) — Pick-narrowed Facade props; renders private body and Skeleton
-export function TodoComponent({
-  todos,
-  isPending,
-  isFetching,
-  addTodo,
-}: Pick<TodoFacade, "todos" | "isPending" | "isFetching" | "addTodo">) {
-  if (isPending) return <TodoListSkeleton />;
-  return (
-    <div className={isFetching ? "opacity-50" : ""}>
-      <TodoList todos={todos} addTodo={addTodo} />
-    </div>
-  );
-}
-
-// Private memo'd body — only reference-stable props; calls Presenter internally
-const TodoList = memo(function TodoList({
-  todos,
-  addTodo,
-}: {
-  todos: Todo[];
-  addTodo: TodoFacade["addTodo"];
-}) {
-  const { newTitle, setNewTitle, handleSubmit } = useTodoPresenter({ addTodo });
-  return ...;
-});
-
-// Private Skeleton — li-granular for list pages
-function TodoListSkeleton() {
-  return ...;
-}
 ```
+
+Each layer's full worked example lives once, in the Layer Details sections below — the Container / Component / Presenter wiring is not repeated here.
 
 ---
 
@@ -146,6 +109,7 @@ function TodoListSkeleton() {
     - When in doubt, start in the same file; extract when JSX grows or stories are needed.
   - *memo:* Apply `memo` to any sub-component that receives reference-stable props. The exported Component is not memo'd because it receives loading flags (`isFetching`) that change on every background refetch.
 - **No View suffix** — the Component file contains the exported Component plus private sub-components (memo'd body, Skeleton). There is no separate "View" layer or `{Feature}View` symbol.
+- **Mutation side effects** — after a mutation, reconcile the caches it made stale. Reach for an **optimistic update** only when the user *observes* the mutated cache (the list stays on screen); when the page navigates away on success, **invalidate only** and never fabricate fields the facade lacks. Which caches to touch per operation (create / update / delete) is tabled in the Facade Layer section.
 
 ---
 
@@ -301,6 +265,59 @@ export function useTodoFacade(): TodoFacade {
 }
 ```
 
+The Todo facade above is the **optimistic** pattern — the list stays on screen, so the user observes the cache write. When the form **navigates away on success**, use the contrasting pattern: invalidate only, no optimistic write.
+
+```ts
+// ReportForm.facade.ts — create form that redirects to the new report's detail
+export interface ReportFormFacade {
+  teams: Team[];
+  isPending: boolean;
+  addReport: (input: CreateReportInput) => Promise<ReportSummary>;
+}
+
+export function useReportFormFacade(): ReportFormFacade {
+  const queryClient = useQueryClient();
+  const { data: teams, isPending } = useQuery(teamQueries.list());
+
+  // The reports list lives on another page; its cache is keyed, so this
+  // mutation invalidates it directly without subscribing. No optimistic
+  // update: the form navigates to the new report's detail on save, so the
+  // list is never on screen — nobody observes the optimistic state, and the
+  // facade has no server-assigned id/createdAt to write without fabricating.
+  const reportsKey = reportQueries.list().queryKey;
+
+  const addMutation = useMutation({
+    mutationFn: (input: CreateReportInput) => reportApi.create(input),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: reportsKey });
+    },
+  });
+
+  // Returns the created report so the Component can navigate to its detail.
+  const addReport = useCallback(
+    (input: CreateReportInput) => addMutation.mutateAsync(input),
+    [addMutation.mutateAsync],
+  );
+
+  return { teams: teams ?? [], isPending, addReport };
+}
+```
+
+**Which pattern?** Optimistic only when the user *observes* the mutated cache. List stays on screen → optimistic (Todo). Form redirects → invalidate only (ReportForm). Never fabricate fields the facade lacks just to satisfy the optimistic shape.
+
+#### After-mutation invalidation
+
+A mutation makes every cache that mirrors the changed data wrong. Invalidate (mark stale + refetch — the data is *not* removed) exactly those, scoped through the key hierarchy from the Queries layer.
+
+| Operation | Reconcile | Notes |
+|---|---|---|
+| create | `list().queryKey` | the new id has no detail cache yet |
+| update(id) | `list().queryKey` + `detail(id).queryKey` | two calls; or `setQueryData(detail(id).queryKey, response)` to skip the detail refetch using the authoritative payload |
+| delete(id) | `list().queryKey` + **`removeQueries(detail(id).queryKey)`** | invalidating the detail would refetch a deleted resource → 404 |
+
+- **Prefix matching** — `invalidateQueries({ queryKey })` matches every query whose key *starts with* the given key. `list` (`["x", "list"]`) and `detail` (`["x", "detail", id]`) are siblings: neither is the other's prefix, so hitting *both* with one key is only possible via `all()` (`["x"]`), which also catches every other cached detail.
+- **Screen-dependent skip** — invalidate the list only when a field the list actually renders changed. The decision boundary is what the **Presenter reads**: if the list endpoint omits the changed field (a projection), or the Presenter never reads it, skip the list. (With `staleTime: 0` the list refetches on remount anyway, so skipping only saves a fetch when the list is active or `staleTime > 0`.)
+
 ### 4. Container Layer (`{Feature}.container.tsx`)
 
 **Responsibility**: Wire the Facade to the Component. Resolve app-shell inputs (URL params) before calling the Facade.
@@ -412,11 +429,12 @@ The Component file contains three parts: the exported **Component** (handles loa
 - Handles `isFetching` → wraps in opacity overlay
 - Calls app-shell action hooks (e.g. `useNavigate()`) and wraps them as callbacks for the Presenter
 - Not wrapped with `memo` (it receives `isFetching` which changes frequently)
+- **List page with a persistent header** (most list pages keep their title/"New" button while loading): render the header unconditionally and swap only the list region — `{isPending ? <Skeleton /> : <Body rows={rows} />}`. The Presenter is then called *here*, in the exported Component, so its derived `rows` are available outside the `isPending` branch; the private body receives the finished `rows` as a prop. The Todo example below early-returns the whole Skeleton instead — valid only when there is no persistent header to keep on screen.
 
 **Private memo'd body rules**:
 - Wrapped with `memo`
 - Receives only the props it needs to render — never `isFetching` or `isPending`
-- Calls the Presenter hook internally
+- Calls the Presenter hook internally — *except* on the list-page-with-header pattern above, where the exported Component calls the Presenter and passes the derived `rows` in
 - Renders using **both** props and Presenter return values
 - No business logic — only JSX and CSS classes
 
@@ -513,25 +531,7 @@ export function TodoComponent({
 
 ## Wiring a Feature Together
 
-The Container lives in its own file (`{Feature}.container.tsx`). It calls the Facade, destructures only the fields the Component uses, and passes them as individual props. `main.tsx` imports the Container and wires it to a route.
-
-```tsx
-// src/features/todo/Todo.container.tsx
-import { useTodoFacade } from "./Todo.facade";
-import { TodoComponent } from "./Todo.component";
-
-export function TodoContainer() {
-  const { todos, isPending, isFetching, addTodo } = useTodoFacade();
-  return (
-    <TodoComponent
-      todos={todos}
-      isPending={isPending}
-      isFetching={isFetching}
-      addTodo={addTodo}
-    />
-  );
-}
-```
+Each Container (defined in its own `{Feature}.container.tsx` — see the Container Layer section) is mounted on a route in `main.tsx`, which also provides the `QueryClient`. Containers that read a URL param do so with `useParams`, shown in the Container Layer section and not repeated here.
 
 ```tsx
 // main.tsx
@@ -560,28 +560,6 @@ const router = createRouter({ routeTree });
 <QueryClientProvider client={queryClient}>
   <RouterProvider router={router} />
 </QueryClientProvider>
-```
-
-For detail pages that need a URL parameter, the Container calls `useParams` and supplies the parameter to the Facade:
-
-```tsx
-// src/features/todo/TodoDetail.container.tsx
-import { useParams } from "@tanstack/react-router";
-import { useTodoDetailFacade } from "./TodoDetail.facade";
-import { TodoDetailComponent } from "./TodoDetail.component";
-
-export function TodoDetailContainer() {
-  const { todoId } = useParams({ from: "/todos/$todoId" });
-  const { detail, isPending, isFetching, isNotFound } = useTodoDetailFacade({ todoId });
-  return (
-    <TodoDetailComponent
-      detail={detail}
-      isPending={isPending}
-      isFetching={isFetching}
-      isNotFound={isNotFound}
-    />
-  );
-}
 ```
 
 ---
@@ -791,7 +769,7 @@ Commit after each step. Do not batch multiple steps into one commit.
 3. Create `src/features/{feature-name}/` directory
 4. `{Feature}.api.ts` — import generated types + API function object → **commit**
 5. `{Feature}.queries.ts` — `{Feature}Queries` `queryOptions()` factory (`all` / `list` / `detail`) over the API functions → **commit**
-6. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (one dedicated facade per page; `useQuery(featureQueries.x())` + `useMutation`) → **commit**
+6. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (one dedicated facade per page; `useQuery(featureQueries.x())` + `useMutation`; pick the mutation side-effect pattern — optimistic vs invalidate-only — per the Facade Layer section) → **commit**
 7. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook + `{Feature}Presenter` interface → **commit**
 8. `{Feature}.component.tsx` — exported `{Feature}Component` (Pick-narrowed Facade props) + private memo'd body + private Skeleton
 9. `{Feature}.stories.tsx` — visual states (`Default` / `Empty` / `Skeleton`) + `play`-function interaction stories with Pick-narrowed args; a story harness needing data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key; run `pnpm test` to verify → **commit** (Component + stories together)

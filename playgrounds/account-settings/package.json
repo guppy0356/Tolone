@@ -20,7 +20,7 @@
     "openapi-msw": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "react-hook-form": "^7.77.0",
+    "react-hook-form": "^7.79.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

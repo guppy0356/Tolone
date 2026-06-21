@@ -29,7 +29,7 @@ Container
   → passes them as individual props (no spread)
 
 Component (Presentational)
-  → receives individual Facade fields + ad-hoc props
+  → receives individual Facade fields
   → handles isPending (Skeleton) and isFetching (opacity overlay)
   → contains private memo'd body for cache stability across isFetching toggles
   → contains private Skeleton (li-granular for list pages)
@@ -100,7 +100,7 @@ Each layer's full worked example lives once, in the Layer Details sections below
 - **Routing hooks split**:
   - `useParams` (read URL → drives a Facade query) → called in **Container**
   - `useNavigate` (action triggered by user interaction) → called in **Component**
-- **No spread** — the Container destructures the Facade and passes each field as an individual prop; never `<Component {...facade} />`. Discrete props keep the wiring visible, and the Component's destructured parameters already document what it consumes. Type the Component as its `{Feature}Facade` interface, intersected with ad-hoc props (`onSaved`) when present. Use `Pick<{Feature}Facade, ...>` only when the Component renders a strict subset of its Facade — as the Todo example below does (4 of its 6 fields). Under 1 page = 1 facade the Facade usually holds exactly what its page needs, so the interface is the common case and `Pick` the exception.
+- **No spread** — the Container destructures the Facade and passes each field as an individual prop; never `<Component {...facade} />`. Discrete props keep the wiring visible, and the Component's destructured parameters already document what it consumes. Type the Component as its `{Feature}Facade` interface. Use `Pick<{Feature}Facade, ...>` only when the Component renders a strict subset of its Facade — as the Todo example below does (4 of its 6 fields). Under 1 page = 1 facade the Facade usually holds exactly what its page needs, so the interface is the common case and `Pick` the exception.
 - **Cross-feature data access** — when a Facade needs another feature's data, import that feature's Queries factory and call `useQuery(otherFeatureQueries.list())` directly. The dependency is one-directional (the page-feature depends on the data-feature, not vice versa); cache is shared by `queryKey` through the same factory definition, so the two call sites cannot drift.
 - **Sub-component handling** — When the Component needs internal structure beyond the memo'd body and Skeleton, two decisions arise: where to place it (placement) and whether to apply `memo` (optimization). The two are independent.
   - *Placement:*

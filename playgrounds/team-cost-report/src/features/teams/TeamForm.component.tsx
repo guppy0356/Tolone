@@ -10,7 +10,7 @@ type TeamFormComponentProps = Pick<
   | "memberSearch"
   | "setMemberSearch"
   | "members"
-  | "isFetchingMembers"
+  | "isFetching"
 >;
 
 export function TeamFormComponent({
@@ -18,7 +18,7 @@ export function TeamFormComponent({
   memberSearch,
   setMemberSearch,
   members,
-  isFetchingMembers,
+  isFetching,
 }: TeamFormComponentProps) {
   const navigate = useNavigate();
   const {
@@ -90,7 +90,7 @@ export function TeamFormComponent({
           query={memberSearch}
           setQuery={setMemberSearch}
           candidates={candidates}
-          isSearching={isFetchingMembers}
+          isSearching={isFetching}
           onAdd={addMember}
           onClose={closePicker}
         />

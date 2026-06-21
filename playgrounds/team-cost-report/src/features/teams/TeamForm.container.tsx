@@ -7,7 +7,7 @@ export function TeamFormContainer() {
     memberSearch,
     setMemberSearch,
     members,
-    isFetchingMembers,
+    isFetching,
   } = useTeamFormFacade();
   return (
     <TeamFormComponent
@@ -15,7 +15,7 @@ export function TeamFormContainer() {
       memberSearch={memberSearch}
       setMemberSearch={setMemberSearch}
       members={members}
-      isFetchingMembers={isFetchingMembers}
+      isFetching={isFetching}
     />
   );
 }

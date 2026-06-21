@@ -10,7 +10,7 @@ export interface TeamFormFacade {
   memberSearch: string;
   setMemberSearch: (q: string) => void;
   members: Member[];
-  isFetchingMembers: boolean;
+  isFetching: boolean;
 }
 
 export function useTeamFormFacade(): TeamFormFacade {
@@ -18,7 +18,7 @@ export function useTeamFormFacade(): TeamFormFacade {
 
   const [memberSearch, setMemberSearch] = useState("");
 
-  const { data: members, isFetching: isFetchingMembers } = useQuery(
+  const { data: members, isFetching } = useQuery(
     memberQueries.list(memberSearch || undefined),
   );
 
@@ -48,6 +48,6 @@ export function useTeamFormFacade(): TeamFormFacade {
     memberSearch,
     setMemberSearch,
     members: members ?? [],
-    isFetchingMembers,
+    isFetching,
   };
 }

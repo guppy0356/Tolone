@@ -32,7 +32,7 @@ function TeamFormHarness({ addTeam }: HarnessProps) {
       memberSearch={memberSearch}
       setMemberSearch={setMemberSearch}
       members={data ?? []}
-      isFetchingMembers={isFetching}
+      isFetching={isFetching}
     />
   );
 }

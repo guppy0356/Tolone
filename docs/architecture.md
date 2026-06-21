@@ -429,14 +429,17 @@ The Component file contains three parts: the exported **Component** (handles loa
 - Handles `isFetching` → wraps in opacity overlay
 - Calls app-shell action hooks (e.g. `useNavigate()`) and wraps them as callbacks for the Presenter
 - Not wrapped with `memo` (it receives `isFetching` which changes frequently)
-- **List page with a persistent header** (most list pages keep their title/"New" button while loading): render the header unconditionally and swap only the list region — `{isPending ? <Skeleton /> : <Body rows={rows} />}`. The Presenter is then called *here*, in the exported Component, so its derived `rows` are available outside the `isPending` branch; the private body receives the finished `rows` as a prop. The Todo example below early-returns the whole Skeleton instead — valid only when there is no persistent header to keep on screen.
 
 **Private memo'd body rules**:
 - Wrapped with `memo`
 - Receives only the props it needs to render — never `isFetching` or `isPending`
-- Calls the Presenter hook internally — *except* on the list-page-with-header pattern above, where the exported Component calls the Presenter and passes the derived `rows` in
-- Renders using **both** props and Presenter return values
+- May call the Presenter to derive from domain data, or be a pure view over a finished view-model — see *Where the Presenter is called*
 - No business logic — only JSX and CSS classes
+
+**Where the Presenter is called** — the Presenter lives in whichever component renders its output:
+- **Body is fully view-model-driven** → derive in the exported Component and pass the view-model into a pure memo body (`ReportList` / `TeamList` take `rows`).
+- **Body also needs raw domain** → pass the domain into the body and call the Presenter there (`ReportDetail` takes `detail`: derives chart data *and* reads `detail.teams`).
+- **Presenter holds local state** (form inputs, toggles) → call it in the exported Component / form, so the state is not reset by a loading toggle or skipped by `memo` (`ReportForm` / `TeamForm`).
 
 **Private Skeleton rules**:
 - No props

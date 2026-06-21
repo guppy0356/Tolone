@@ -53,7 +53,7 @@ export function TeamListComponent({
   teams,
   isPending,
   isFetching,
-}: Pick<TeamListFacade, "teams" | "isPending" | "isFetching">) {
+}: TeamListFacade) {
   const { rows } = useTeamListPresenter({ teams });
 
   return (

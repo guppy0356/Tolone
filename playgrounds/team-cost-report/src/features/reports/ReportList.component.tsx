@@ -61,7 +61,7 @@ export function ReportListComponent({
   reports,
   isPending,
   isFetching,
-}: Pick<ReportListFacade, "reports" | "isPending" | "isFetching">) {
+}: ReportListFacade) {
   const { rows } = useReportListPresenter({ reports });
 
   return (

@@ -8,10 +8,7 @@ export function ReportDetailComponent({
   isPending,
   isFetching,
   isNotFound,
-}: Pick<
-  ReportDetailFacade,
-  "detail" | "isPending" | "isFetching" | "isNotFound"
->) {
+}: ReportDetailFacade) {
   if (isNotFound) {
     return (
       <div className="p-6">

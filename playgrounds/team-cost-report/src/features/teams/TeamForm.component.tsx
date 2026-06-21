@@ -4,22 +4,13 @@ import { useTeamFormPresenter } from "./TeamForm.presenter";
 import { TeamMemberList } from "./TeamMemberList.component";
 import { TeamMemberPicker } from "./TeamMemberPicker.component";
 
-type TeamFormComponentProps = Pick<
-  TeamFormFacade,
-  | "addTeam"
-  | "memberSearch"
-  | "setMemberSearch"
-  | "members"
-  | "isFetching"
->;
-
 export function TeamFormComponent({
   addTeam,
   memberSearch,
   setMemberSearch,
   members,
   isFetching,
-}: TeamFormComponentProps) {
+}: TeamFormFacade) {
   const navigate = useNavigate();
   const {
     teamName,

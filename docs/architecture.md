@@ -29,7 +29,7 @@ Container
   → passes them as individual props (no spread)
 
 Component (Presentational)
-  → receives Pick-narrowed Facade fields + ad-hoc props
+  → receives individual Facade fields + ad-hoc props
   → handles isPending (Skeleton) and isFetching (opacity overlay)
   → contains private memo'd body for cache stability across isFetching toggles
   → contains private Skeleton (li-granular for list pages)
@@ -100,7 +100,7 @@ Each layer's full worked example lives once, in the Layer Details sections below
 - **Routing hooks split**:
   - `useParams` (read URL → drives a Facade query) → called in **Container**
   - `useNavigate` (action triggered by user interaction) → called in **Component**
-- **Pick over spread** — never spread the Facade onto the Component (`<Component {...facade} />`). Always destructure in the Container and pass each prop individually. The Component's prop type is `Pick<{Feature}Facade, ...>` listing exactly the fields it uses, optionally intersected with ad-hoc props like `onSaved`. Write the `Pick` even when it currently lists every field: although the type then equals the interface, the `Pick` pins the Component to what it consumes — a field added to the Facade later does not leak in as a required prop (adopting one is a deliberate edit) — and keeps every Component's prop type uniform.
+- **No spread** — the Container destructures the Facade and passes each field as an individual prop; never `<Component {...facade} />`. Discrete props keep the wiring visible, and the Component's destructured parameters already document what it consumes. Type the Component as its `{Feature}Facade` interface, intersected with ad-hoc props (`onSaved`) when present. Use `Pick<{Feature}Facade, ...>` only when the Component renders a strict subset of its Facade — as the Todo example below does (4 of its 6 fields). Under 1 page = 1 facade the Facade usually holds exactly what its page needs, so the interface is the common case and `Pick` the exception.
 - **Cross-feature data access** — when a Facade needs another feature's data, import that feature's Queries factory and call `useQuery(otherFeatureQueries.list())` directly. The dependency is one-directional (the page-feature depends on the data-feature, not vice versa); cache is shared by `queryKey` through the same factory definition, so the two call sites cannot drift.
 - **Sub-component handling** — When the Component needs internal structure beyond the memo'd body and Skeleton, two decisions arise: where to place it (placement) and whether to apply `memo` (optimization). The two are independent.
   - *Placement:*
@@ -424,7 +424,7 @@ export function useTodoPresenter({
 The Component file contains three parts: the exported **Component** (handles loading and delegation), a **private memo'd body** (the actual rendered content), and a **private Skeleton** (the loading placeholder). The private body keeps `memo` effective — it only receives reference-stable props.
 
 **Exported Component rules**:
-- Accepts `Pick<{Feature}Facade, ...>` shaped props — narrowed to only what it renders/uses
+- Accepts the Facade fields it renders as individual props — typed as `{Feature}Facade`, or `Pick<{Feature}Facade, ...>` when it renders a strict subset
 - Handles `isPending` → renders the private Skeleton
 - Handles `isFetching` → wraps in opacity overlay
 - Calls app-shell action hooks (e.g. `useNavigate()`) and wraps them as callbacks for the Presenter
@@ -711,7 +711,7 @@ export const SubmitsNewTodo: Story = {
 
 ### Anti-patterns
 
-- ❌ Calling the Facade hook directly from a story — pass Pick-narrowed Facade fields as args instead, or use a story-local hook (see [`storybook: Harness を廃止して Story-local state へ移行する検討`](https://github.com/guppy0356/Tolone/issues/5)) for controlled state pairs
+- ❌ Calling the Facade hook directly from a story — pass the Component's Facade props as args instead, or use a story-local hook (see [`storybook: Harness を廃止して Story-local state へ移行する検討`](https://github.com/guppy0356/Tolone/issues/5)) for controlled state pairs
 - ❌ Storying the Container, Facade, Presenter, or API — they are non-UI or pure wiring
 - ❌ Importing `vi`, `vitest`, `@testing-library/react`, or `@testing-library/jest-dom` inside a story — they are not in scope and break the browser-mode runner
 - ❌ Creating a `*.test.tsx` file under `src/features/` — the test entry point is the story file
@@ -774,7 +774,7 @@ Commit after each step. Do not batch multiple steps into one commit.
 5. `{Feature}.queries.ts` — `{Feature}Queries` `queryOptions()` factory (`all` / `list` / `detail`) over the API functions → **commit**
 6. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (one dedicated facade per page; `useQuery(featureQueries.x())` + `useMutation`; pick the mutation side-effect pattern — optimistic vs invalidate-only — per the Facade Layer section) → **commit**
 7. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook + `{Feature}Presenter` interface → **commit**
-8. `{Feature}.component.tsx` — exported `{Feature}Component` (Pick-narrowed Facade props) + private memo'd body + private Skeleton
+8. `{Feature}.component.tsx` — exported `{Feature}Component` (Facade-typed props) + private memo'd body + private Skeleton
 9. `{Feature}.stories.tsx` — visual states (`Default` / `Empty` / `Skeleton`) + `play`-function interaction stories with Pick-narrowed args; a story harness needing data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key; run `pnpm test` to verify → **commit** (Component + stories together)
 10. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
 11. `{Feature}.container.tsx` — `{Feature}Container` calls Facade, destructures needed fields, passes to Component → **commit**

@@ -2,11 +2,6 @@ import { useNavigate } from "@tanstack/react-router";
 import type { ReportFormFacade } from "./ReportForm.facade";
 import { useReportFormPresenter } from "./ReportForm.presenter";
 
-type ReportFormComponentProps = Pick<
-  ReportFormFacade,
-  "teams" | "isPending" | "addReport"
->;
-
 function TeamsSkeleton() {
   return (
     <ul className="space-y-1">
@@ -23,7 +18,7 @@ export function ReportFormComponent({
   teams,
   isPending,
   addReport,
-}: ReportFormComponentProps) {
+}: ReportFormFacade) {
   const navigate = useNavigate();
   const {
     reportName,

@@ -195,6 +195,7 @@ The same definition is consumed everywhere — `useQuery(todoQueries.list())`, `
 - Mutations use `useMutation` + `useQueryClient`; read the cache key from the same factory (`featureQueries.list().queryKey`) so it never drifts
 - Export the loading flags the page actually renders — `isPending` (initial load, `data` is `undefined`) for a Skeleton, `isFetching` (background refetch, stale data still available) for an opacity or inline indicator. A page that shows only one exports only that one: a navigate-away form needs no background overlay (`isPending` alone), and a search picker shows `isFetching` only, which already covers the initial load. Name them per resource only when the Facade has more than one query (see Conventions)
 - `data` may be `undefined` before the first successful fetch — use `data ?? []` or similar defaults
+- Map HTTP errors to domain flags here (the API layer does no error handling): read ky's `HTTPError` directly — `error instanceof HTTPError && error.response.status === 404` → `isNotFound` — rather than wrapping it in a custom error type. ky is the project-wide client, so reading its standard error is the idiomatic approach, not a leak to abstract away
 - No UI logic (forms, validation, etc.)
 - Export an explicit interface for the return type
 - Return action functions + data + loading states

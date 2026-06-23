@@ -15,7 +15,7 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { memberQueries } from "./Members.queries";
+import { memberQueries } from "./Member.queries";
 import type { TeamFormFacade } from "./TeamForm.facade";
 import { TeamFormComponent } from "./TeamForm.component";
 

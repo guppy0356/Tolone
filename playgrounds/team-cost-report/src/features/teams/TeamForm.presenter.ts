@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import type { Member } from "./Members.api";
+import type { Member } from "./Member.api";
 import type { CreateTeamInput } from "./Team.api";
 
 export interface PickedMember {

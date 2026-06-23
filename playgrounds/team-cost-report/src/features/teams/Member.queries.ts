@@ -1,5 +1,5 @@
 import { queryOptions, keepPreviousData } from "@tanstack/react-query";
-import { membersApi } from "./Members.api";
+import { memberApi } from "./Member.api";
 
 export const memberQueries = {
   all: () => ["members"] as const,
@@ -8,7 +8,7 @@ export const memberQueries = {
       queryKey: q
         ? [...memberQueries.all(), "list", { q }]
         : [...memberQueries.all(), "list"],
-      queryFn: () => membersApi.getAll(q),
+      queryFn: () => memberApi.getAll(q),
       placeholderData: keepPreviousData,
     }),
 };

@@ -58,7 +58,9 @@ src/features/{feature-name}/
 └── {Sub}.component.tsx         ← optional extracted sub-component (+ stories when practical)
 ```
 
-One feature can have several pages over the same resource — a list, a detail, and a create form share one `{Resource}.api.ts` / `{Resource}.queries.ts` but each get their own triad — and a page may read more than one resource (e.g. a form that consumes both `Team` and `Members`).
+One feature can have several pages over the same resource — a list, a detail, and a create form share one `{Resource}.api.ts` / `{Resource}.queries.ts` but each get their own triad — and a page may read more than one resource (e.g. a form that consumes both `Team` and `Member`).
+
+`{Resource}` is **singular**, shared across the resource's files and symbols — `Member.api.ts` / `memberApi` / `memberQueries` / type `Member` — even though the endpoint (`/members`) and `getAll` return a collection. (`{Page}` is singular-based too: `ReportDetail`, `TeamForm`.)
 
 App-shell chrome lives **outside** the triad. Navigation, the page layout, and route redirects are not a feature: a chrome-only component like `nav/Nav.component.tsx` has no facade / presenter / container and no stories, and the layout shell plus redirects live in `main.tsx`'s root route.
 

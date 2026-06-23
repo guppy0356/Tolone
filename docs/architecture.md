@@ -431,7 +431,7 @@ The Component file contains three parts: the exported **Component** (handles loa
 **Exported Component rules**:
 - Accepts the Facade fields it renders as individual props — typed as `{Feature}Facade`, or `Pick<{Feature}Facade, ...>` when it renders a strict subset
 - Handles `isPending` → renders the private Skeleton
-- Handles `isFetching` → wraps in opacity overlay
+- Handles `isFetching` → wraps the rendered content in an opacity overlay, gated on `isFetching && !isPending` so the initial-load Skeleton (when both flags are true) is never dimmed — the overlay is for background refetches of content already on screen. (Early-return Skeletons like the Todo example don't reach the wrapper while `isPending`, so the gate only matters for list pages that keep their header and branch inside the wrapper.)
 - Calls app-shell action hooks (e.g. `useNavigate()`) and wraps them as callbacks for the Presenter
 - Not wrapped with `memo` (it receives `isFetching` which changes frequently)
 

@@ -734,7 +734,7 @@ Each playground has a shared ky instance in `src/lib/api-client.ts`:
 
 ```ts
 import ky from "ky";
-export const api = ky.create({ prefixUrl: "/api" });
+export const api = ky.create({ prefix: "/api" });
 ```
 
 Usage in the API layer:

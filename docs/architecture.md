@@ -44,7 +44,7 @@ The Presenter does **not** call the Facade hook directly — it receives Facade 
 
 ### File Placement
 
-A feature folder holds two kinds of files: a **shared cache layer** (`{Resource}.api.ts` + `{Resource}.queries.ts`, one pair per resource) and a **page triad per route** (facade / container / presenter / component / stories). The cache layer is shared by every page; the triad is not (1 page = 1 facade). Optional `{Sub}.component.tsx` files hold extracted sub-components with their own stories.
+A feature folder holds two kinds of files: a **shared cache layer** (`{Resource}.api.ts` + `{Resource}.queries.ts`, one pair per resource) and a **page triad per route** (facade / container / presenter / component / stories). The cache layer is shared by every page; the triad is not (1 page = 1 facade). Optional `{Sub}.component.tsx` files hold extracted sub-components (with stories when isolation is practical).
 
 ```
 src/features/{feature-name}/
@@ -55,10 +55,12 @@ src/features/{feature-name}/
 ├── {Page}.presenter.ts
 ├── {Page}.component.tsx
 ├── {Page}.stories.tsx
-└── {Sub}.component.tsx         ← optional extracted sub-component (+ its stories)
+└── {Sub}.component.tsx         ← optional extracted sub-component (+ stories when practical)
 ```
 
 One feature can have several pages over the same resource — a list, a detail, and a create form share one `{Resource}.api.ts` / `{Resource}.queries.ts` but each get their own triad — and a page may read more than one resource (e.g. a form that consumes both `Team` and `Members`).
+
+App-shell chrome lives **outside** the triad. Navigation, the page layout, and route redirects are not a feature: a chrome-only component like `nav/Nav.component.tsx` has no facade / presenter / container and no stories, and the layout shell plus redirects live in `main.tsx`'s root route.
 
 ---
 
@@ -102,12 +104,14 @@ Each layer's full worked example lives once, in the Layer Details sections below
   - `useNavigate` (action triggered by user interaction) → called in **Component**
 - **No spread** — the Container destructures the Facade and passes each field as an individual prop; never `<Component {...facade} />`. Discrete props keep the wiring visible, and the Component's destructured parameters already document what it consumes. Type the Component as its `{Feature}Facade` interface. Use `Pick<{Feature}Facade, ...>` only when the Component renders a strict subset of its Facade — as the Todo example below does (4 of its 6 fields). Under 1 page = 1 facade the Facade usually holds exactly what its page needs, so the interface is the common case and `Pick` the exception.
 - **Cross-feature data access** — when a Facade needs another feature's data, import that feature's Queries factory and call `useQuery(otherFeatureQueries.list())` directly. The dependency is one-directional (the page-feature depends on the data-feature, not vice versa); cache is shared by `queryKey` through the same factory definition, so the two call sites cannot drift.
-- **Sub-component handling** — When the Component needs internal structure beyond the memo'd body and Skeleton, two decisions arise: where to place it (placement) and whether to apply `memo` (optimization). The two are independent.
+- **Sub-component handling** — When the Component needs internal structure beyond the memo'd body and Skeleton, several independent decisions arise — chiefly placement and whether to apply `memo` (those two are independent):
   - *Placement:*
     - Simple JSX fragments (small, no own state, no own props contract) → private in the same `{Feature}.component.tsx`
-    - Larger pieces (own props contract, own behavior, worth testing in isolation with stories) → separate `{Sub}.component.tsx`
-    - When in doubt, start in the same file; extract when JSX grows or stories are needed.
+    - Larger pieces (own props contract, own behavior) → separate `{Sub}.component.tsx`
+    - When in doubt, start in the same file; extract when JSX grows.
   - *memo:* Apply `memo` to any sub-component that receives reference-stable props. The exported Component is not memo'd because it receives loading flags (`isFetching`) that change on every background refetch.
+  - *Stories:* write isolation stories when practical; a sub-component that can't be meaningfully storied alone (e.g. a chart that needs a sized container, like `ReportChart`) is verified through its parent's story instead.
+  - *Local behavior:* a sub-component may own purely-local UI mechanics (refs/effects for DOM behavior like click-outside, as in `TeamMemberPicker`) without routing them through a Presenter; app-relevant state (e.g. whether the picker is open) still lives in the Presenter.
 - **No View suffix** — the Component file contains the exported Component plus private sub-components (memo'd body, Skeleton). There is no separate "View" layer or `{Feature}View` symbol.
 - **Mutation side effects** — after a mutation, reconcile the caches it made stale. Reach for an **optimistic update** only when the user *observes* the mutated cache (the list stays on screen); when the page navigates away on success, **invalidate only** and never fabricate fields the facade lacks. Which caches to touch per operation (create / update / delete) is tabled in the Facade Layer section.
 

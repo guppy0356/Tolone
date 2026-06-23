@@ -23,7 +23,7 @@ const meta = {
       },
     ],
     isPending: false,
-    isFetching: false,
+    isRefetching: false,
   },
   decorators: [
     (Story) => {

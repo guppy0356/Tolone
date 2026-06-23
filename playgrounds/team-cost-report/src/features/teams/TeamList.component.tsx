@@ -52,16 +52,12 @@ function TeamListSkeleton() {
 export function TeamListComponent({
   teams,
   isPending,
-  isFetching,
+  isRefetching,
 }: TeamListFacade) {
   const { rows } = useTeamListPresenter({ teams });
 
   return (
-    <div
-      className={`transition-opacity ${
-        isFetching && !isPending ? "opacity-50" : ""
-      }`}
-    >
+    <div className={`transition-opacity ${isRefetching ? "opacity-50" : ""}`}>
       <div className="p-6">
         <header className="mb-4 flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Teams</h1>

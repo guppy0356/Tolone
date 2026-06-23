@@ -29,7 +29,7 @@ const meta = {
   args: {
     reports: baseReports,
     isPending: false,
-    isFetching: false,
+    isRefetching: false,
   },
   decorators: [
     (Story) => {

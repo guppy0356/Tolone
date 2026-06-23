@@ -5,10 +5,10 @@ import type { ReportSummary } from "./Report.api";
 export interface ReportListFacade {
   reports: ReportSummary[];
   isPending: boolean;
-  isFetching: boolean;
+  isRefetching: boolean;
 }
 
 export function useReportListFacade(): ReportListFacade {
-  const { data, isPending, isFetching } = useQuery(reportQueries.list());
-  return { reports: data ?? [], isPending, isFetching };
+  const { data, isPending, isRefetching } = useQuery(reportQueries.list());
+  return { reports: data ?? [], isPending, isRefetching };
 }

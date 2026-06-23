@@ -6,7 +6,7 @@ import { ReportChart } from "./ReportChart.component";
 export function ReportDetailComponent({
   detail,
   isPending,
-  isFetching,
+  isRefetching,
   isNotFound,
 }: ReportDetailFacade) {
   if (isNotFound) {
@@ -24,7 +24,7 @@ export function ReportDetailComponent({
   }
 
   return (
-    <div className={`transition-opacity ${isFetching ? "opacity-50" : ""}`}>
+    <div className={`transition-opacity ${isRefetching ? "opacity-50" : ""}`}>
       <ReportDetail detail={detail} />
     </div>
   );

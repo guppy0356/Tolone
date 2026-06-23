@@ -5,10 +5,10 @@ import type { Team } from "./Team.api";
 export interface TeamListFacade {
   teams: Team[];
   isPending: boolean;
-  isFetching: boolean;
+  isRefetching: boolean;
 }
 
 export function useTeamListFacade(): TeamListFacade {
-  const { data, isPending, isFetching } = useQuery(teamQueries.list());
-  return { teams: data ?? [], isPending, isFetching };
+  const { data, isPending, isRefetching } = useQuery(teamQueries.list());
+  return { teams: data ?? [], isPending, isRefetching };
 }

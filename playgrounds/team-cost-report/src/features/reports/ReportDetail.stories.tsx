@@ -43,7 +43,7 @@ const meta = {
   args: {
     detail: baseDetail,
     isPending: false,
-    isFetching: false,
+    isRefetching: false,
     isNotFound: false,
   },
 } satisfies Meta<typeof ReportDetailComponent>;

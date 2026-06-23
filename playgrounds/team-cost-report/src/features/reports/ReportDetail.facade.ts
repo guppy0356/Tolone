@@ -10,14 +10,14 @@ export interface ReportDetailFacadeProps {
 export interface ReportDetailFacade {
   detail: ReportDetail | undefined;
   isPending: boolean;
-  isFetching: boolean;
+  isRefetching: boolean;
   isNotFound: boolean;
 }
 
 export function useReportDetailFacade({
   reportId,
 }: ReportDetailFacadeProps): ReportDetailFacade {
-  const { data, isPending, isFetching, error } = useQuery(
+  const { data, isPending, isRefetching, error } = useQuery(
     reportQueries.detail(reportId),
   );
 
@@ -27,7 +27,7 @@ export function useReportDetailFacade({
   return {
     detail: data,
     isPending,
-    isFetching,
+    isRefetching,
     isNotFound,
   };
 }

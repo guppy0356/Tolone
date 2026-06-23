@@ -4,14 +4,14 @@ import { ReportDetailComponent } from "./ReportDetail.component";
 
 export function ReportDetailContainer() {
   const { reportId } = useParams({ from: "/reports/$reportId" });
-  const { detail, isPending, isFetching, isNotFound } = useReportDetailFacade({
+  const { detail, isPending, isRefetching, isNotFound } = useReportDetailFacade({
     reportId,
   });
   return (
     <ReportDetailComponent
       detail={detail}
       isPending={isPending}
-      isFetching={isFetching}
+      isRefetching={isRefetching}
       isNotFound={isNotFound}
     />
   );

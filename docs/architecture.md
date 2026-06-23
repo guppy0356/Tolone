@@ -16,7 +16,7 @@ API → Queries → Facade → Container → Component → Presenter
 | Queries | `{Feature}.queries.ts` | Query definitions via TanStack Query `queryOptions()` — query key + query function + shared options, co-located in a hierarchical factory | Plain object of factory functions |
 | Facade | `{Feature}.facade.ts` | Server state: `useQuery(featureQueries.x())` + `useMutation`; may hold facade-scoped `useState` for query params. **One dedicated Facade per page** | React hook |
 | Container | `{Feature}.container.tsx` | Wires Facade to Component. Calls Facade + app-shell read hooks (e.g. `useParams`); destructures only fields the Component uses | React component |
-| Component | `{Feature}.component.tsx` | Presentational rendering; loading UI (`isPending` skeleton / `isFetching` opacity); calls Presenter; may call app-shell action hooks (e.g. `useNavigate`) bound to user interactions | React component |
+| Component | `{Feature}.component.tsx` | Presentational rendering; loading UI (`isPending` skeleton / `isRefetching` opacity); calls Presenter; may call app-shell action hooks (e.g. `useNavigate`) bound to user interactions | React component |
 | Presenter | `{Feature}.presenter.ts` | Local UI state + derived display values (incl. view-model transforms from the domain contract); called inside Component; receives Facade actions as props | React hook |
 
 ### Data Flow
@@ -30,7 +30,7 @@ Container
 
 Component (Presentational)
   → receives individual Facade fields
-  → handles isPending (Skeleton) and isFetching (opacity overlay)
+  → handles isPending (Skeleton) and isRefetching (opacity overlay)
   → contains private memo'd body for cache stability across isFetching toggles
   → contains private Skeleton (li-granular for list pages)
   → calls app-shell action hooks (e.g. useNavigate) and wraps them as callbacks for Presenter
@@ -193,7 +193,7 @@ The same definition is consumed everywhere — `useQuery(todoQueries.list())`, `
 - One dedicated Facade per page (not shared across pages)
 - Consume the Queries layer: `useQuery(featureQueries.list())`. Pass consumer-specific options (`enabled`, etc.) at this call site
 - Mutations use `useMutation` + `useQueryClient`; read the cache key from the same factory (`featureQueries.list().queryKey`) so it never drifts
-- Export the loading flags the page actually renders — `isPending` (initial load, `data` is `undefined`) for a Skeleton, `isFetching` (background refetch, stale data still available) for an opacity or inline indicator. A page that shows only one exports only that one: a navigate-away form needs no background overlay (`isPending` alone), and a search picker shows `isFetching` only, which already covers the initial load. Name them per resource only when the Facade has more than one query (see Conventions)
+- Export the loading flags the page actually renders — `isPending` (no data yet) for a Skeleton, `isRefetching` (TanStack Query's `isFetching && !isPending`: a background refetch while data is on screen) for an opacity overlay, and `isFetching` (any fetch, the initial one included) for an inline indicator that should also show on first load. A page exports only what it uses: a list page `isPending` + `isRefetching`, a navigate-away form just `isPending`, a search picker just `isFetching`. Name them per resource only when the Facade has more than one query (see Conventions)
 - `data` may be `undefined` before the first successful fetch — use `data ?? []` or similar defaults
 - Map HTTP errors to domain flags here (the API layer does no error handling): read ky's `HTTPError` directly — `error instanceof HTTPError && error.response.status === 404` → `isNotFound` — rather than wrapping it in a custom error type. ky is the project-wide client, so reading its standard error is the idiomatic approach, not a leak to abstract away
 - No UI logic (forms, validation, etc.)
@@ -431,7 +431,7 @@ The Component file contains three parts: the exported **Component** (handles loa
 **Exported Component rules**:
 - Accepts the Facade fields it renders as individual props — typed as `{Feature}Facade`, or `Pick<{Feature}Facade, ...>` when it renders a strict subset
 - Handles `isPending` → renders the private Skeleton
-- Handles `isFetching` → wraps the rendered content in an opacity overlay, gated on `isFetching && !isPending` so the initial-load Skeleton (when both flags are true) is never dimmed — the overlay is for background refetches of content already on screen. (Early-return Skeletons like the Todo example don't reach the wrapper while `isPending`, so the gate only matters for list pages that keep their header and branch inside the wrapper.)
+- Handles `isRefetching` → wraps the rendered content in an opacity overlay. `isRefetching` (TanStack Query's `isFetching && !isPending`) excludes the initial load, so the Skeleton is never dimmed; the overlay only dims content already on screen during a background refetch
 - Calls app-shell action hooks (e.g. `useNavigate()`) and wraps them as callbacks for the Presenter
 - Not wrapped with `memo` (it receives `isFetching` which changes frequently)
 

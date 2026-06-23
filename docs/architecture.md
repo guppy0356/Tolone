@@ -640,12 +640,14 @@ There is no `*.test.tsx` file and no jsdom / `@testing-library/react` setup; `pn
 
 ### Minimum coverage per Component
 
-For each `{Feature}.component.tsx`, write at minimum:
+For each `{Feature}.component.tsx`, cover its states and each interaction it exposes:
 
-- One populated state (`Default`)
-- One empty state (`Empty`)
-- One loading state (`Skeleton`) — uses `args: { isPending: true }` so the Component renders the private Skeleton
+- A populated state (`Default`)
+- An empty state (`Empty`)
+- A loading state (`Skeleton`) — the names are illustrative (a descriptive `TeamsLoading` is fine); what matters is that the loading UI renders
 - One `play`-function story per interaction handler the Component exposes (e.g. `SubmitsNewTodo`)
+
+An **args-driven** Component pins `Empty` / `Skeleton` through args (`args: { isPending: true }`, `args: { todos: [] }`). A **harness-driven** Component — whose story wires a live `useQuery` to demo a controlled-state interaction (`TeamForm` and `TeamMemberPicker` for member search) — can't drive those through args, so it covers `Default` plus the states its harness and `play` stories reach, and isn't required to add args-named `Empty` / `Skeleton`.
 
 ### Story file template
 

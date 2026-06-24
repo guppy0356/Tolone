@@ -1,0 +1,266 @@
+import { memo } from "react";
+import { Link } from "@tanstack/react-router";
+import type { ReadingItemListFacade } from "./ReadingItemList.facade";
+import type { ReadingStatus } from "./ReadingItem.api";
+import {
+  useReadingItemListPresenter,
+  STATUS_FILTER_OPTIONS,
+  type ReadingItemRow,
+} from "./ReadingItemList.presenter";
+
+const STATUS_BADGE_CLASS: Record<ReadingStatus, string> = {
+  unread: "bg-gray-100 text-gray-700",
+  reading: "bg-amber-100 text-amber-800",
+  read: "bg-green-100 text-green-800",
+};
+
+function StatusBadge({
+  status,
+  label,
+}: {
+  status: ReadingStatus;
+  label: string;
+}) {
+  return (
+    <span
+      className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE_CLASS[status]}`}
+    >
+      {label}
+    </span>
+  );
+}
+
+// Private memo'd body — a pure view over the finished row view-model plus the
+// stable delete action. Reference-stable props keep the memo effective across
+// the parent's isRefetching toggles.
+const ReadingItemRows = memo(function ReadingItemRows({
+  rows,
+  onDelete,
+}: {
+  rows: ReadingItemRow[];
+  onDelete: ReadingItemListFacade["deleteItem"];
+}) {
+  if (rows.length === 0) {
+    return (
+      <p className="rounded border border-dashed border-gray-300 p-8 text-center text-gray-500">
+        No reading items match. Save a URL above to get started.
+      </p>
+    );
+  }
+
+  return (
+    <ul className="space-y-2">
+      {rows.map((row) => (
+        <li
+          key={row.id}
+          className="flex items-stretch gap-3 rounded border border-gray-200 bg-white"
+        >
+          <Link
+            to="/reading-list/$itemId"
+            params={{ itemId: row.id }}
+            className="flex flex-1 items-center gap-3 p-3 transition-colors hover:bg-blue-50/40"
+          >
+            <img
+              src={row.thumbnailUrl}
+              alt=""
+              className="h-14 w-24 shrink-0 rounded bg-gray-100 object-cover"
+            />
+            <div className="min-w-0">
+              <div className="truncate font-medium text-gray-900">
+                {row.title}
+              </div>
+              <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
+                <StatusBadge status={row.status} label={row.statusLabel} />
+                <span>{row.formattedCreatedAt}</span>
+              </div>
+            </div>
+          </Link>
+          <div className="flex items-center p-3">
+            <button
+              type="button"
+              onClick={() => onDelete(row.id)}
+              disabled={!row.canDelete}
+              title={
+                row.canDelete ? "Delete" : "Read items can't be deleted"
+              }
+              className="rounded px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent"
+            >
+              Delete
+            </button>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+});
+
+// Private Skeleton — li-granular placeholder matching the row shape.
+function ReadingItemListSkeleton() {
+  return (
+    <ul className="space-y-2">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <li
+          key={i}
+          className="flex items-center gap-3 rounded border border-gray-200 bg-white p-3"
+        >
+          <div className="h-14 w-24 shrink-0 animate-pulse rounded bg-gray-200" />
+          <div className="flex-1">
+            <div className="h-5 w-48 animate-pulse rounded bg-gray-200" />
+            <div className="mt-2 h-4 w-32 animate-pulse rounded bg-gray-200" />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const controlClass =
+  "rounded border border-gray-300 px-2 py-1.5 text-sm focus:border-blue-400 focus:outline-none";
+
+export function ReadingItemListComponent({
+  items,
+  total,
+  perPage,
+  query,
+  isPending,
+  isRefetching,
+  setQuery,
+  addItem,
+  deleteItem,
+}: ReadingItemListFacade) {
+  const {
+    rows,
+    newUrl,
+    setNewUrl,
+    handleAddSubmit,
+    handleStatusFilterChange,
+    handleCreatedFromChange,
+    handleCreatedToChange,
+    handleOrderChange,
+    totalPages,
+    canPrevPage,
+    canNextPage,
+    handlePrevPage,
+    handleNextPage,
+  } = useReadingItemListPresenter({
+    items,
+    total,
+    perPage,
+    query,
+    setQuery,
+    addItem,
+  });
+
+  return (
+    <div className="mx-auto max-w-3xl p-6">
+      <h1 className="mb-4 text-2xl font-semibold">Reading List</h1>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleAddSubmit();
+        }}
+        className="mb-4 flex gap-2"
+      >
+        <input
+          type="text"
+          value={newUrl}
+          onChange={(e) => setNewUrl(e.target.value)}
+          placeholder="Paste a URL to save"
+          className="flex-1 rounded border border-gray-300 px-3 py-2 focus:border-blue-400 focus:outline-none"
+        />
+        <button
+          type="submit"
+          className="rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600"
+        >
+          Save
+        </button>
+      </form>
+
+      <div className="mb-4 flex flex-wrap items-end gap-3">
+        <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+          Status
+          <select
+            value={query.status ?? "all"}
+            onChange={(e) => handleStatusFilterChange(e.target.value)}
+            className={controlClass}
+          >
+            <option value="all">All</option>
+            {STATUS_FILTER_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+          Registered from
+          <input
+            type="date"
+            value={query.createdFrom ?? ""}
+            onChange={(e) => handleCreatedFromChange(e.target.value)}
+            className={controlClass}
+          />
+        </label>
+
+        <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+          Registered to
+          <input
+            type="date"
+            value={query.createdTo ?? ""}
+            onChange={(e) => handleCreatedToChange(e.target.value)}
+            className={controlClass}
+          />
+        </label>
+
+        <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+          Sort
+          <select
+            value={query.order}
+            onChange={(e) => handleOrderChange(e.target.value)}
+            className={controlClass}
+          >
+            <option value="desc">Newest first</option>
+            <option value="asc">Oldest first</option>
+          </select>
+        </label>
+      </div>
+
+      {isPending ? (
+        <ReadingItemListSkeleton />
+      ) : (
+        <>
+          <div
+            className={`transition-opacity ${isRefetching ? "opacity-50" : ""}`}
+          >
+            <ReadingItemRows rows={rows} onDelete={deleteItem} />
+          </div>
+
+          <div className="mt-4 flex items-center justify-between text-sm">
+            <button
+              type="button"
+              onClick={handlePrevPage}
+              disabled={!canPrevPage}
+              className="rounded border border-gray-300 px-3 py-1 font-medium hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <span className="text-gray-500">
+              Page {query.page} of {totalPages} · {total} item
+              {total === 1 ? "" : "s"}
+            </span>
+            <button
+              type="button"
+              onClick={handleNextPage}
+              disabled={!canNextPage}
+              className="rounded border border-gray-300 px-3 py-1 font-medium hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

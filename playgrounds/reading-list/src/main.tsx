@@ -5,25 +5,49 @@ import {
   createRouter,
   createRootRoute,
   createRoute,
+  Outlet,
   RouterProvider,
+  redirect,
 } from "@tanstack/react-router";
+import { NavComponent } from "./features/nav/Nav.component";
+import { ReadingItemListContainer } from "./features/reading-list/ReadingItemList.container";
+import { ReadingItemDetailContainer } from "./features/reading-list/ReadingItemDetail.container";
 import "./app.css";
 
 const queryClient = new QueryClient();
 
-const rootRoute = createRootRoute();
-
-const indexRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/",
+const rootRoute = createRootRoute({
   component: () => (
-    <div>
-      <h1>Reading-list Playground</h1>
+    <div className="min-h-screen bg-gray-50">
+      <NavComponent />
+      <main>
+        <Outlet />
+      </main>
     </div>
   ),
 });
 
-const routeTree = rootRoute.addChildren([indexRoute]);
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/",
+  beforeLoad: () => {
+    throw redirect({ to: "/reading-list" });
+  },
+});
+
+const listRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/reading-list",
+  component: ReadingItemListContainer,
+});
+
+const detailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/reading-list/$itemId",
+  component: ReadingItemDetailContainer,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, listRoute, detailRoute]);
 const router = createRouter({ routeTree });
 
 async function enableMocking() {

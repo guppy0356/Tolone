@@ -33,6 +33,8 @@ No linter is configured. Tests run as Storybook play functions via `@storybook/a
 
 This is a pnpm monorepo for experimenting with a **Container + Presentational Component** architecture. Each playground in `playgrounds/` implements features using this architecture. The full specification lives in [docs/architecture.md](docs/architecture.md) — always read it before implementing features.
 
+Every playground is an implementation snapshot and drifts from the conventions over time — including the newest one — so **`docs/architecture.md` (with its inline examples) is the single source of truth**. When starting a new playground or feature, follow the docs; **do not copy an existing playground**, since any of them can lag the spec.
+
 <!--
 Intentionally a plain markdown link, NOT an `@docs/architecture.md` import.
 An `@path` import expands the whole file into context at the start of *every*

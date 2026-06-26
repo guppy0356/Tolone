@@ -1,27 +1,20 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSearch, useNavigate } from "@tanstack/react-router";
 import { readingItemQueries } from "./ReadingItem.queries";
 import {
   readingItemApi,
   type ReadingItemSummary,
-  type ReadingStatus,
-  type ReadingOrder,
   type CreateReadingItemInput,
 } from "./ReadingItem.api";
+import type { ReadingItemListQuery } from "./ReadingItem.schema";
+
+// The query shape is defined by the route's validateSearch schema; re-exported
+// so the presenter keeps importing it from the facade (its published contract).
+export type { ReadingItemListQuery };
 
 const PER_PAGE = 5;
-
-// Facade-scoped query inputs the list UI mutates. perPage is fixed and lives
-// outside this state; page is part of it because pagination drives the query.
-export interface ReadingItemListQuery {
-  status?: ReadingStatus;
-  createdFrom?: string;
-  createdTo?: string;
-  order: ReadingOrder;
-  page: number;
-}
-
-const DEFAULT_QUERY: ReadingItemListQuery = { order: "desc", page: 1 };
+const LIST_ROUTE = "/reading-list";
 
 export interface ReadingItemListFacade {
   items: ReadingItemSummary[];
@@ -38,7 +31,21 @@ export interface ReadingItemListFacade {
 export function useReadingItemListFacade(): ReadingItemListFacade {
   const queryClient = useQueryClient();
 
-  const [query, setQuery] = useState<ReadingItemListQuery>(DEFAULT_QUERY);
+  // The filter/sort/page state lives in the URL: read it via the route's
+  // validated search, write it by navigating with new search params. This is
+  // facade-scoped state (per the architecture doc) backed by the URL instead of
+  // useState, so the interface (query + setQuery) is unchanged for callers.
+  // The route types are not registered globally (repo convention), so the read
+  // is named to the schema-inferred type, whose shape validateSearch enforces.
+  const query = useSearch({ from: LIST_ROUTE }) as ReadingItemListQuery;
+  const navigate = useNavigate();
+
+  const setQuery = useCallback(
+    (next: ReadingItemListQuery) => {
+      navigate({ to: LIST_ROUTE, search: next });
+    },
+    [navigate],
+  );
 
   const { data, isPending, isRefetching } = useQuery(
     readingItemQueries.list({ ...query, perPage: PER_PAGE }),

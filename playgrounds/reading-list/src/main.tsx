@@ -12,6 +12,10 @@ import {
 import { NavComponent } from "./features/nav/Nav.component";
 import { ReadingItemListContainer } from "./features/reading-list/ReadingItemList.container";
 import { ReadingItemDetailContainer } from "./features/reading-list/ReadingItemDetail.container";
+import {
+  readingListSearchSchema,
+  type ReadingItemListQuery,
+} from "./features/reading-list/ReadingItem.schema";
 import "./app.css";
 
 const queryClient = new QueryClient();
@@ -38,6 +42,10 @@ const indexRoute = createRoute({
 const listRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/reading-list",
+  // Filter/sort/pagination state lives in the URL search params, validated
+  // (with defaults) by the zod schema. The facade reads it via useSearch.
+  validateSearch: (search): ReadingItemListQuery =>
+    readingListSearchSchema.parse(search),
   component: ReadingItemListContainer,
 });
 

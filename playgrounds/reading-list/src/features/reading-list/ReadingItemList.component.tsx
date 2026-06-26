@@ -130,8 +130,8 @@ export function ReadingItemListComponent({
 }: ReadingItemListFacade) {
   const {
     rows,
-    newUrl,
-    setNewUrl,
+    urlField,
+    isAddValid,
     handleAddSubmit,
     handleStatusFilterChange,
     handleCreatedFromChange,
@@ -160,21 +160,29 @@ export function ReadingItemListComponent({
           e.preventDefault();
           handleAddSubmit();
         }}
-        className="mb-4 flex gap-2"
+        className="mb-4"
       >
-        <input
-          type="text"
-          value={newUrl}
-          onChange={(e) => setNewUrl(e.target.value)}
-          placeholder="Paste a URL to save"
-          className="flex-1 rounded border border-gray-300 px-3 py-2 focus:border-blue-400 focus:outline-none"
-        />
-        <button
-          type="submit"
-          className="rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600"
-        >
-          Save
-        </button>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={urlField.value}
+            onChange={(e) => urlField.onChange(e.target.value)}
+            onBlur={urlField.onBlur}
+            placeholder="Paste a URL to save"
+            aria-invalid={urlField.error ? true : undefined}
+            className="flex-1 rounded border border-gray-300 px-3 py-2 focus:border-blue-400 focus:outline-none"
+          />
+          <button
+            type="submit"
+            disabled={!isAddValid}
+            className="rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Save
+          </button>
+        </div>
+        {urlField.error && (
+          <p className="mt-1 text-sm text-red-500">{urlField.error}</p>
+        )}
       </form>
 
       <div className="mb-4 flex flex-wrap items-end gap-3">

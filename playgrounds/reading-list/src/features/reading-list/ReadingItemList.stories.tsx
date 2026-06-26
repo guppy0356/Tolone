@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, fn, userEvent, within } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import {
   createRootRoute,
   createRoute,
@@ -104,14 +104,23 @@ export const Skeleton: Story = {
 };
 
 // --- Interaction tests ---
+export const SaveDisabledWhenEmpty: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("button", { name: "Save" })).toBeDisabled();
+  },
+};
+
 export const AddsItem: Story = {
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);
     const input = canvas.getByPlaceholderText("Paste a URL to save");
     await userEvent.type(input, "https://example.com/new");
     await userEvent.click(canvas.getByRole("button", { name: "Save" }));
-    await expect(args.addItem).toHaveBeenCalledWith({
-      url: "https://example.com/new",
+    await waitFor(async () => {
+      await expect(args.addItem).toHaveBeenCalledWith({
+        url: "https://example.com/new",
+      });
     });
   },
 };

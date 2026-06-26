@@ -1,4 +1,10 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
+import { useForm, useController } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  createReadingItemSchema,
+  type CreateReadingItemFormValues,
+} from "./ReadingItem.schema";
 import type {
   ReadingItemSummary,
   ReadingStatus,
@@ -38,6 +44,14 @@ export interface ReadingItemRow {
   canDelete: boolean;
 }
 
+// Plain field object so the Component never imports react-hook-form.
+export interface ReadingItemFormField {
+  value: string;
+  onChange: (value: string) => void;
+  onBlur: () => void;
+  error: string | undefined;
+}
+
 export interface ReadingItemListPresenterProps {
   items: ReadingItemSummary[];
   total: number;
@@ -49,9 +63,9 @@ export interface ReadingItemListPresenterProps {
 
 export interface ReadingItemListPresenter {
   rows: ReadingItemRow[];
-  // Add form
-  newUrl: string;
-  setNewUrl: (value: string) => void;
+  // Add form (react-hook-form)
+  urlField: ReadingItemFormField;
+  isAddValid: boolean;
   handleAddSubmit: () => Promise<void>;
   // Filters / sort (each resets to page 1)
   handleStatusFilterChange: (value: string) => void;
@@ -74,7 +88,37 @@ export function useReadingItemListPresenter({
   setQuery,
   addItem,
 }: ReadingItemListPresenterProps): ReadingItemListPresenter {
-  const [newUrl, setNewUrl] = useState("");
+  const {
+    control,
+    handleSubmit: rhfHandleSubmit,
+    reset,
+    formState: { isValid },
+  } = useForm<CreateReadingItemFormValues>({
+    resolver: zodResolver(createReadingItemSchema),
+    mode: "onChange",
+    defaultValues: { url: "" },
+  });
+
+  const urlCtrl = useController({ name: "url", control });
+  const urlField: ReadingItemFormField = {
+    value: urlCtrl.field.value,
+    onChange: (v) => urlCtrl.field.onChange(v),
+    onBlur: urlCtrl.field.onBlur,
+    error: urlCtrl.fieldState.error?.message,
+  };
+
+  const onAddSubmit = useCallback(
+    async (data: CreateReadingItemFormValues) => {
+      await addItem({ url: data.url });
+      reset({ url: "" });
+    },
+    [addItem, reset],
+  );
+
+  const handleAddSubmit = useCallback(
+    () => rhfHandleSubmit(onAddSubmit)(),
+    [rhfHandleSubmit, onAddSubmit],
+  );
 
   const rows = useMemo<ReadingItemRow[]>(
     () =>
@@ -90,13 +134,6 @@ export function useReadingItemListPresenter({
       })),
     [items],
   );
-
-  const handleAddSubmit = useCallback(async () => {
-    const trimmed = newUrl.trim();
-    if (!trimmed) return;
-    await addItem({ url: trimmed });
-    setNewUrl("");
-  }, [newUrl, addItem]);
 
   // A new filter changes which items match, so the current page number may no
   // longer exist — reset to page 1 whenever a filter or the sort order changes.
@@ -147,8 +184,8 @@ export function useReadingItemListPresenter({
 
   return {
     rows,
-    newUrl,
-    setNewUrl,
+    urlField,
+    isAddValid: isValid,
     handleAddSubmit,
     handleStatusFilterChange,
     handleCreatedFromChange,

@@ -1,12 +1,23 @@
 import { memo } from "react";
 import { Link } from "@tanstack/react-router";
-import type { ReadingItemListFacade } from "./ReadingItemList.facade";
+import type {
+  ReadingItemListFacade,
+  ReadingItemListQuery,
+} from "./ReadingItemList.facade";
 import type { ReadingStatus } from "./ReadingItem.api";
 import {
   useReadingItemListPresenter,
   STATUS_FILTER_OPTIONS,
   type ReadingItemRow,
 } from "./ReadingItemList.presenter";
+
+// The facade now returns only server state; the URL-derived query state pair
+// (query + setQuery) is supplied by the container, so the Component renders
+// both.
+type ReadingItemListComponentProps = ReadingItemListFacade & {
+  query: ReadingItemListQuery;
+  setQuery: (query: ReadingItemListQuery) => void;
+};
 
 const STATUS_BADGE_CLASS: Record<ReadingStatus, string> = {
   unread: "bg-gray-100 text-gray-700",
@@ -127,7 +138,7 @@ export function ReadingItemListComponent({
   setQuery,
   addItem,
   deleteItem,
-}: ReadingItemListFacade) {
+}: ReadingItemListComponentProps) {
   const {
     rows,
     urlField,

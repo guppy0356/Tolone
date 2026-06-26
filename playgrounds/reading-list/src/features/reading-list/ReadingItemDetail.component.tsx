@@ -30,9 +30,10 @@ const ReadingItemDetailBody = memo(function ReadingItemDetailBody({
   changeStatus: ReadingItemDetailFacade["changeStatus"];
 }) {
   const {
-    note,
-    setNote,
+    noteField,
     isNoteDirty,
+    isNoteValid,
+    isSavingNote,
     handleSaveNote,
     handleStatusChange,
     formattedCreatedAt,
@@ -102,20 +103,25 @@ const ReadingItemDetailBody = memo(function ReadingItemDetailBody({
         </label>
         <textarea
           id="reading-note"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
+          value={noteField.value}
+          onChange={(e) => noteField.onChange(e.target.value)}
+          onBlur={noteField.onBlur}
           rows={6}
           placeholder="What did you learn?"
+          aria-invalid={noteField.error ? true : undefined}
           className="w-full rounded border border-gray-300 p-3 text-sm focus:border-blue-400 focus:outline-none"
         />
+        {noteField.error && (
+          <p className="mt-1 text-sm text-red-500">{noteField.error}</p>
+        )}
         <div className="mt-2 flex justify-end">
           <button
             type="button"
             onClick={handleSaveNote}
-            disabled={!isNoteDirty}
+            disabled={!isNoteDirty || !isNoteValid || isSavingNote}
             className="rounded bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Save note
+            {isSavingNote ? "Saving..." : "Save note"}
           </button>
         </div>
       </section>

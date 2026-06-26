@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, fn, userEvent, within } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import {
   createRootRoute,
   createRoute,
@@ -92,6 +92,15 @@ export const NotFound: Story = {
 };
 
 // --- Interaction tests ---
+export const SaveNoteDisabledUntilEdited: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(
+      canvas.getByRole("button", { name: "Save note" }),
+    ).toBeDisabled();
+  },
+};
+
 export const SavesNote: Story = {
   args: { detail: { ...sampleDetail, note: "" } },
   play: async ({ args, canvasElement }) => {
@@ -99,9 +108,11 @@ export const SavesNote: Story = {
     const textarea = canvas.getByLabelText("Note");
     await userEvent.type(textarea, "Learned about query keys.");
     await userEvent.click(canvas.getByRole("button", { name: "Save note" }));
-    await expect(args.saveNote).toHaveBeenCalledWith(
-      "Learned about query keys.",
-    );
+    await waitFor(async () => {
+      await expect(args.saveNote).toHaveBeenCalledWith(
+        "Learned about query keys.",
+      );
+    });
   },
 };
 

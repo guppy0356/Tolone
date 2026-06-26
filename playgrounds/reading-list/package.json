@@ -13,12 +13,15 @@
     "generate:api": "openapi-typescript src/openapi.yaml -o src/types/openapi.d.ts"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
     "openapi-msw": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "ky": "catalog:"
+    "react-hook-form": "^7.79.0",
+    "ky": "catalog:",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@storybook/addon-vitest": "catalog:",

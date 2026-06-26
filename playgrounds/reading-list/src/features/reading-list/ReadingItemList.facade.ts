@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { readingItemQueries } from "./ReadingItem.queries";
 import {
   readingItemApi,
+  PER_PAGE,
   type ReadingItemSummary,
   type CreateReadingItemInput,
 } from "./ReadingItem.api";
@@ -11,8 +12,6 @@ import type { ReadingItemListQuery } from "./ReadingItem.schema";
 // The query shape is defined by the route's validateSearch schema; re-exported
 // so the presenter keeps importing it from the facade (its published contract).
 export type { ReadingItemListQuery };
-
-const PER_PAGE = 5;
 
 export interface ReadingItemListFacadeProps {
   query: ReadingItemListQuery;
@@ -38,7 +37,7 @@ export function useReadingItemListFacade({
   const queryClient = useQueryClient();
 
   const { data, isPending, isRefetching } = useQuery(
-    readingItemQueries.list({ ...query, perPage: PER_PAGE }),
+    readingItemQueries.list(query),
   );
 
   // Reconcile every list variant after a write. Both mutations invalidate

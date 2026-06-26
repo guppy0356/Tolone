@@ -11,13 +11,18 @@ export type CreateReadingItemInput =
 export type UpdateReadingItemInput =
   components["schemas"]["UpdateReadingItemInput"];
 
+// Page size is fixed; it is an implementation detail of the API call, not part
+// of the params callers pass (so it never bloats the query key or the URL).
+// Exported only as the facade's placeholder before the first response arrives.
+export const PER_PAGE = 5;
+
+// The list params are exactly the URL search shape (status/dates/order/page).
 export interface ReadingItemListParams {
   status?: ReadingStatus;
   createdFrom?: string;
   createdTo?: string;
   order: ReadingOrder;
   page: number;
-  perPage: number;
 }
 
 // Build the query string, omitting absent filters so they never reach the
@@ -29,7 +34,7 @@ function toSearchParams(params: ReadingItemListParams): URLSearchParams {
   if (params.createdTo) search.set("createdTo", params.createdTo);
   search.set("order", params.order);
   search.set("page", String(params.page));
-  search.set("perPage", String(params.perPage));
+  search.set("perPage", String(PER_PAGE));
   return search;
 }
 

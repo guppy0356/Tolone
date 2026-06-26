@@ -36,4 +36,12 @@ export const readingListSearchSchema = z.object({
   page: z.number().int().min(1).default(1).catch(1),
 });
 
+// Output (what the route/facade consume): order/page are present (defaulted).
 export type ReadingItemListQuery = z.infer<typeof readingListSearchSchema>;
+
+// Default values, for stripSearchParams (keep them out of the URL). Typed as a
+// Partial of the query so stripSearchParams infers the route's search shape.
+export const readingListSearchDefaults: Partial<ReadingItemListQuery> = {
+  order: "desc",
+  page: 1,
+};

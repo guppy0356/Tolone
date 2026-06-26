@@ -16,6 +16,7 @@
     "@hookform/resolvers": "^5.4.0",
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
+    "@tanstack/zod-adapter": "^1.166.0",
     "openapi-msw": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

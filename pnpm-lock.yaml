@@ -563,6 +563,9 @@ importers:
       '@tanstack/react-router':
         specifier: 'catalog:'
         version: 1.170.15(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@tanstack/zod-adapter':
+        specifier: ^1.166.0
+        version: 1.167.0(@tanstack/react-router@1.170.15(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(zod@4.4.3)
       ky:
         specifier: 'catalog:'
         version: 2.0.2
@@ -2006,6 +2009,13 @@ packages:
 
   '@tanstack/store@0.9.3':
     resolution: {integrity: sha512-8reSzl/qGWGGVKhBoxXPMWzATSbZLZFWhwBAFO9NAyp0TxzfBP0mIrGb8CP8KrQTmvzXlR/vFPPUrHTLBGyFyw==}
+
+  '@tanstack/zod-adapter@1.167.0':
+    resolution: {integrity: sha512-5Wlm5teSu+pz3KKhfa1ESsiOJXbvV6ITr1vKOQKi9yEdtozp6VefEzxzafLLida97mnL2tmauva/njokQrG5CA==}
+    engines: {node: '>=20.19'}
+    peerDependencies:
+      '@tanstack/react-router': '>=1.43.2'
+      zod: ^3.23.8
 
   '@testing-library/dom@10.4.1':
     resolution: {integrity: sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==}
@@ -4246,6 +4256,11 @@ snapshots:
       seroval-plugins: 1.5.4(seroval@1.5.4)
 
   '@tanstack/store@0.9.3': {}
+
+  '@tanstack/zod-adapter@1.167.0(@tanstack/react-router@1.170.15(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(zod@4.4.3)':
+    dependencies:
+      '@tanstack/react-router': 1.170.15(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      zod: 4.4.3
 
   '@testing-library/dom@10.4.1':
     dependencies:

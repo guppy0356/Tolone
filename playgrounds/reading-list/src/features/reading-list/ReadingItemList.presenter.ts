@@ -8,10 +8,8 @@ import {
 import type {
   ReadingItemSummary,
   ReadingStatus,
-  ReadingOrder,
   CreateReadingItemInput,
 } from "./ReadingItem.api";
-import type { ReadingItemListQuery } from "./ReadingItemList.facade";
 
 const STATUS_LABELS: Record<ReadingStatus, string> = {
   unread: "Unread",
@@ -52,40 +50,23 @@ export interface ReadingItemFormField {
   error: string | undefined;
 }
 
+// The presenter owns only genuinely local concerns now: the add-URL form state
+// and the row view-model. Filter/sort/pagination are URL state, driven straight
+// from the Component via <Link>/navigate — there is no setter to thread here.
 export interface ReadingItemListPresenterProps {
   items: ReadingItemSummary[];
-  total: number;
-  perPage: number;
-  query: ReadingItemListQuery;
-  setQuery: (query: ReadingItemListQuery) => void;
   addItem: (input: CreateReadingItemInput) => Promise<void>;
 }
 
 export interface ReadingItemListPresenter {
   rows: ReadingItemRow[];
-  // Add form (react-hook-form)
   urlField: ReadingItemFormField;
   isAddValid: boolean;
   handleAddSubmit: () => Promise<void>;
-  // Filters / sort (each resets to page 1)
-  handleStatusFilterChange: (value: string) => void;
-  handleCreatedFromChange: (value: string) => void;
-  handleCreatedToChange: (value: string) => void;
-  handleOrderChange: (value: string) => void;
-  // Pagination
-  totalPages: number;
-  canPrevPage: boolean;
-  canNextPage: boolean;
-  handlePrevPage: () => void;
-  handleNextPage: () => void;
 }
 
 export function useReadingItemListPresenter({
   items,
-  total,
-  perPage,
-  query,
-  setQuery,
   addItem,
 }: ReadingItemListPresenterProps): ReadingItemListPresenter {
   const {
@@ -135,66 +116,5 @@ export function useReadingItemListPresenter({
     [items],
   );
 
-  // A new filter changes which items match, so the current page number may no
-  // longer exist — reset to page 1 whenever a filter or the sort order changes.
-  const handleStatusFilterChange = useCallback(
-    (value: string) => {
-      setQuery({
-        ...query,
-        status: value === "all" ? undefined : (value as ReadingStatus),
-        page: 1,
-      });
-    },
-    [query, setQuery],
-  );
-
-  const handleCreatedFromChange = useCallback(
-    (value: string) => {
-      setQuery({ ...query, createdFrom: value || undefined, page: 1 });
-    },
-    [query, setQuery],
-  );
-
-  const handleCreatedToChange = useCallback(
-    (value: string) => {
-      setQuery({ ...query, createdTo: value || undefined, page: 1 });
-    },
-    [query, setQuery],
-  );
-
-  const handleOrderChange = useCallback(
-    (value: string) => {
-      setQuery({ ...query, order: value as ReadingOrder, page: 1 });
-    },
-    [query, setQuery],
-  );
-
-  const totalPages = Math.max(1, Math.ceil(total / perPage));
-  const canPrevPage = query.page > 1;
-  const canNextPage = query.page < totalPages;
-
-  const handlePrevPage = useCallback(() => {
-    if (query.page <= 1) return;
-    setQuery({ ...query, page: query.page - 1 });
-  }, [query, setQuery]);
-
-  const handleNextPage = useCallback(() => {
-    setQuery({ ...query, page: query.page + 1 });
-  }, [query, setQuery]);
-
-  return {
-    rows,
-    urlField,
-    isAddValid: isValid,
-    handleAddSubmit,
-    handleStatusFilterChange,
-    handleCreatedFromChange,
-    handleCreatedToChange,
-    handleOrderChange,
-    totalPages,
-    canPrevPage,
-    canNextPage,
-    handlePrevPage,
-    handleNextPage,
-  };
+  return { rows, urlField, isAddValid: isValid, handleAddSubmit };
 }

@@ -1,22 +1,21 @@
-import { memo } from "react";
-import { Link } from "@tanstack/react-router";
+import { memo, useCallback } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import type {
   ReadingItemListFacade,
   ReadingItemListQuery,
 } from "./ReadingItemList.facade";
-import type { ReadingStatus } from "./ReadingItem.api";
+import type { ReadingStatus, ReadingOrder } from "./ReadingItem.api";
 import {
   useReadingItemListPresenter,
   STATUS_FILTER_OPTIONS,
   type ReadingItemRow,
 } from "./ReadingItemList.presenter";
 
-// The facade now returns only server state; the URL-derived query state pair
-// (query + setQuery) is supplied by the container, so the Component renders
-// both.
+// The facade returns only server state; `query` (the URL search) is supplied by
+// the container. There is no setter prop — the Component writes the URL itself
+// via <Link>/navigate with functional updaters.
 type ReadingItemListComponentProps = ReadingItemListFacade & {
   query: ReadingItemListQuery;
-  setQuery: (query: ReadingItemListQuery) => void;
 };
 
 const STATUS_BADGE_CLASS: Record<ReadingStatus, string> = {
@@ -91,9 +90,7 @@ const ReadingItemRows = memo(function ReadingItemRows({
               type="button"
               onClick={() => onDelete(row.id)}
               disabled={!row.canDelete}
-              title={
-                row.canDelete ? "Delete" : "Read items can't be deleted"
-              }
+              title={row.canDelete ? "Delete" : "Read items can't be deleted"}
               className="rounded px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent"
             >
               Delete
@@ -127,6 +124,10 @@ function ReadingItemListSkeleton() {
 
 const controlClass =
   "rounded border border-gray-300 px-2 py-1.5 text-sm focus:border-blue-400 focus:outline-none";
+const pageLinkClass =
+  "rounded border border-gray-300 px-3 py-1 font-medium hover:bg-gray-50";
+const pageDisabledClass =
+  "rounded border border-gray-200 px-3 py-1 font-medium text-gray-300";
 
 export function ReadingItemListComponent({
   items,
@@ -135,32 +136,26 @@ export function ReadingItemListComponent({
   query,
   isPending,
   isRefetching,
-  setQuery,
   addItem,
   deleteItem,
 }: ReadingItemListComponentProps) {
-  const {
-    rows,
-    urlField,
-    isAddValid,
-    handleAddSubmit,
-    handleStatusFilterChange,
-    handleCreatedFromChange,
-    handleCreatedToChange,
-    handleOrderChange,
-    totalPages,
-    canPrevPage,
-    canNextPage,
-    handlePrevPage,
-    handleNextPage,
-  } = useReadingItemListPresenter({
-    items,
-    total,
-    perPage,
-    query,
-    setQuery,
-    addItem,
-  });
+  const { rows, urlField, isAddValid, handleAddSubmit } =
+    useReadingItemListPresenter({ items, addItem });
+
+  const navigate = useNavigate();
+
+  // A filter or sort change reorders/refilters the list, so jump back to page 1
+  // while preserving the other params. We patch the current (typed) search and
+  // navigate — there is no setQuery indirection. (Built from `query` rather than
+  // a `(prev) =>` updater because zod defaults make the updater's `prev` the
+  // optional input type, which can't satisfy the required output return.)
+  const applyFilter = useCallback(
+    (patch: Partial<ReadingItemListQuery>) =>
+      navigate({ to: "/reading-list", search: { ...query, ...patch, page: 1 } }),
+    [navigate, query],
+  );
+
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
 
   return (
     <div className="mx-auto max-w-3xl p-6">
@@ -201,7 +196,14 @@ export function ReadingItemListComponent({
           Status
           <select
             value={query.status ?? "all"}
-            onChange={(e) => handleStatusFilterChange(e.target.value)}
+            onChange={(e) =>
+              applyFilter({
+                status:
+                  e.target.value === "all"
+                    ? undefined
+                    : (e.target.value as ReadingStatus),
+              })
+            }
             className={controlClass}
           >
             <option value="all">All</option>
@@ -218,7 +220,9 @@ export function ReadingItemListComponent({
           <input
             type="date"
             value={query.createdFrom ?? ""}
-            onChange={(e) => handleCreatedFromChange(e.target.value)}
+            onChange={(e) =>
+              applyFilter({ createdFrom: e.target.value || undefined })
+            }
             className={controlClass}
           />
         </label>
@@ -228,7 +232,9 @@ export function ReadingItemListComponent({
           <input
             type="date"
             value={query.createdTo ?? ""}
-            onChange={(e) => handleCreatedToChange(e.target.value)}
+            onChange={(e) =>
+              applyFilter({ createdTo: e.target.value || undefined })
+            }
             className={controlClass}
           />
         </label>
@@ -237,7 +243,9 @@ export function ReadingItemListComponent({
           Sort
           <select
             value={query.order}
-            onChange={(e) => handleOrderChange(e.target.value)}
+            onChange={(e) =>
+              applyFilter({ order: e.target.value as ReadingOrder })
+            }
             className={controlClass}
           >
             <option value="desc">Newest first</option>
@@ -257,26 +265,32 @@ export function ReadingItemListComponent({
           </div>
 
           <div className="mt-4 flex items-center justify-between text-sm">
-            <button
-              type="button"
-              onClick={handlePrevPage}
-              disabled={!canPrevPage}
-              className="rounded border border-gray-300 px-3 py-1 font-medium hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Previous
-            </button>
+            {query.page > 1 ? (
+              <Link
+                to="/reading-list"
+                search={{ ...query, page: query.page - 1 }}
+                className={pageLinkClass}
+              >
+                Previous
+              </Link>
+            ) : (
+              <span className={pageDisabledClass}>Previous</span>
+            )}
             <span className="text-gray-500">
               Page {query.page} of {totalPages} · {total} item
               {total === 1 ? "" : "s"}
             </span>
-            <button
-              type="button"
-              onClick={handleNextPage}
-              disabled={!canNextPage}
-              className="rounded border border-gray-300 px-3 py-1 font-medium hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Next
-            </button>
+            {query.page < totalPages ? (
+              <Link
+                to="/reading-list"
+                search={{ ...query, page: query.page + 1 }}
+                className={pageLinkClass}
+              >
+                Next
+              </Link>
+            ) : (
+              <span className={pageDisabledClass}>Next</span>
+            )}
           </div>
         </>
       )}

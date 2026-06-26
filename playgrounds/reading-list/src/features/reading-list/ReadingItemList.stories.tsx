@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import {
+  createMemoryHistory,
   createRootRoute,
   createRoute,
   createRouter,
@@ -8,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { ReadingItemListComponent } from "./ReadingItemList.component";
 import type { ReadingItemSummary } from "./ReadingItem.api";
+import { readingListSearchSchema } from "./ReadingItem.schema";
 
 const sampleItems: ReadingItemSummary[] = [
   {
@@ -36,6 +38,11 @@ const sampleItems: ReadingItemSummary[] = [
   },
 ];
 
+// Filter/sort/pagination now write the URL (Link/navigate), so the story mounts
+// the Component on a real /reading-list route and asserts the resulting search.
+// The router is captured per render so play functions can read its location.
+let storyRouter: ReturnType<typeof createRouter>;
+
 const meta = {
   title: "features/ReadingItemList",
   component: ReadingItemListComponent,
@@ -46,21 +53,27 @@ const meta = {
     query: { order: "desc", page: 1 },
     isPending: false,
     isRefetching: false,
-    setQuery: fn(),
     addItem: fn(),
     deleteItem: fn(),
   },
   decorators: [
     (Story) => {
-      const rootRoute = createRootRoute({ component: () => <Story /> });
+      const rootRoute = createRootRoute();
+      const listRoute = createRoute({
+        getParentRoute: () => rootRoute,
+        path: "/reading-list",
+        validateSearch: (search) => readingListSearchSchema.parse(search),
+        component: () => <Story />,
+      });
       const detailRoute = createRoute({
         getParentRoute: () => rootRoute,
         path: "/reading-list/$itemId",
       });
-      const router = createRouter({
-        routeTree: rootRoute.addChildren([detailRoute]),
+      storyRouter = createRouter({
+        routeTree: rootRoute.addChildren([listRoute, detailRoute]),
+        history: createMemoryHistory({ initialEntries: ["/reading-list"] }),
       });
-      return <RouterProvider router={router} />;
+      return <RouterProvider router={storyRouter} />;
     },
   ],
 } satisfies Meta<typeof ReadingItemListComponent>;
@@ -143,29 +156,37 @@ export const ReadItemNotDeletable: Story = {
 };
 
 export const FiltersByStatus: Story = {
-  play: async ({ args, canvasElement }) => {
+  play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.selectOptions(canvas.getByLabelText("Status"), "reading");
-    await expect(args.setQuery).toHaveBeenCalledWith({
-      order: "desc",
-      page: 1,
-      status: "reading",
-    });
+    await waitFor(() =>
+      expect(storyRouter.state.location.search).toMatchObject({
+        status: "reading",
+        page: 1,
+      }),
+    );
   },
 };
 
 export const SortsByDate: Story = {
-  play: async ({ args, canvasElement }) => {
+  play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.selectOptions(canvas.getByLabelText("Sort"), "asc");
-    await expect(args.setQuery).toHaveBeenCalledWith({ order: "asc", page: 1 });
+    await waitFor(() =>
+      expect(storyRouter.state.location.search).toMatchObject({
+        order: "asc",
+        page: 1,
+      }),
+    );
   },
 };
 
 export const GoesToNextPage: Story = {
-  play: async ({ args, canvasElement }) => {
+  play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: "Next" }));
-    await expect(args.setQuery).toHaveBeenCalledWith({ order: "desc", page: 2 });
+    await userEvent.click(canvas.getByRole("link", { name: "Next" }));
+    await waitFor(() =>
+      expect(storyRouter.state.location.search).toMatchObject({ page: 2 }),
+    );
   },
 };

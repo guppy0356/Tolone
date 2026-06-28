@@ -1,22 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { HTTPError } from "ky";
-import { reportQueries } from "./Report.queries";
-import type { ReportDetail } from "./Report.api";
+import { reportQueries } from "../Report.queries";
+import type { ReportDetail } from "../Report.api";
 
-export interface ReportDetailFacadeProps {
+export interface ReportDetailContainerParams {
   reportId: string;
 }
 
-export interface ReportDetailFacade {
+export interface ReportDetailContainerState {
   detail: ReportDetail | undefined;
   isPending: boolean;
   isRefetching: boolean;
   isNotFound: boolean;
 }
 
-export function useReportDetailFacade({
+export function useReportDetailContainer({
   reportId,
-}: ReportDetailFacadeProps): ReportDetailFacade {
+}: ReportDetailContainerParams): ReportDetailContainerState {
   const { data, isPending, isRefetching, error } = useQuery(
     reportQueries.detail(reportId),
   );

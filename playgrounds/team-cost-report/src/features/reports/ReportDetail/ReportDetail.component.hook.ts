@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import type { ReportDetail } from "./Report.api";
+import type { ReportDetail } from "../Report.api";
 
-export interface ReportDetailPresenterProps {
+export interface ReportDetailComponentParams {
   detail: ReportDetail;
 }
 
@@ -16,7 +16,7 @@ export interface ChartSeries {
 // API contract.
 export type ChartRow = { month: string } & Record<string, number | string>;
 
-export interface ReportDetailPresenter {
+export interface ReportDetailComponentState {
   chartData: ChartRow[];
   series: ChartSeries[];
   formattedTotal: string;
@@ -37,9 +37,9 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-export function useReportDetailPresenter({
+export function useReportDetailComponent({
   detail,
-}: ReportDetailPresenterProps): ReportDetailPresenter {
+}: ReportDetailComponentParams): ReportDetailComponentState {
   const series = useMemo<ChartSeries[]>(
     () =>
       detail.teams.map((t, i) => ({

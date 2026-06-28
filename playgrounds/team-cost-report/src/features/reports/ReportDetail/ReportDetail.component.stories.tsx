@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
 import { ReportDetailComponent } from "./ReportDetail.component";
-import type { ReportDetailFacade } from "./ReportDetail.facade";
+import type { ReportDetailContainerState } from "./ReportDetail.container.hook";
 
-const baseDetail: NonNullable<ReportDetailFacade["detail"]> = {
+const baseDetail: NonNullable<ReportDetailContainerState["detail"]> = {
   id: "r1",
   name: "Q1 2026 Cost",
   teams: [

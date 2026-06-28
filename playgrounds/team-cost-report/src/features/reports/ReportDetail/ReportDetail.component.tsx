@@ -1,14 +1,15 @@
 import { memo } from "react";
-import type { ReportDetailFacade } from "./ReportDetail.facade";
-import { useReportDetailPresenter } from "./ReportDetail.presenter";
-import { ReportChart } from "./ReportChart.component";
+import type { ReportDetailContainerState } from "./ReportDetail.container.hook";
+import { useReportDetailComponent } from "./ReportDetail.component.hook";
+import { ReportChart } from "./components/ReportChart.component";
+import { ReportDetailSkeleton } from "./components/ReportDetailSkeleton.component";
 
 export function ReportDetailComponent({
   detail,
   isPending,
   isRefetching,
   isNotFound,
-}: ReportDetailFacade) {
+}: ReportDetailContainerState) {
   if (isNotFound) {
     return (
       <div className="p-6">
@@ -25,27 +26,17 @@ export function ReportDetailComponent({
 
   return (
     <div className={`transition-opacity ${isRefetching ? "opacity-50" : ""}`}>
-      <ReportDetail detail={detail} />
+      <ReportDetailBody detail={detail} />
     </div>
   );
 }
 
-function ReportDetailSkeleton() {
-  return (
-    <div className="space-y-4 p-6">
-      <div className="h-8 w-40 animate-pulse rounded bg-gray-200" />
-      <div className="h-24 animate-pulse rounded bg-gray-200" />
-      <div className="h-80 animate-pulse rounded bg-gray-200" />
-    </div>
-  );
-}
-
-const ReportDetail = memo(function ReportDetail({
+const ReportDetailBody = memo(function ReportDetailBody({
   detail,
 }: {
-  detail: NonNullable<ReportDetailFacade["detail"]>;
+  detail: NonNullable<ReportDetailContainerState["detail"]>;
 }) {
-  const { chartData, series, formattedTotal } = useReportDetailPresenter({
+  const { chartData, series, formattedTotal } = useReportDetailComponent({
     detail,
   });
 

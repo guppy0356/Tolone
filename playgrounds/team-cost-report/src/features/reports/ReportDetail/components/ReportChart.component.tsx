@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { ChartRow, ChartSeries } from "./ReportDetail.presenter";
+import type { ChartRow, ChartSeries } from "../ReportDetail.component.hook";
 
 export interface ReportChartProps {
   chartData: ChartRow[];

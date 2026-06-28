@@ -1,10 +1,10 @@
 import { useParams } from "@tanstack/react-router";
-import { useReportDetailFacade } from "./ReportDetail.facade";
+import { useReportDetailContainer } from "./ReportDetail.container.hook";
 import { ReportDetailComponent } from "./ReportDetail.component";
 
 export function ReportDetailContainer() {
   const { reportId } = useParams({ from: "/reports/$reportId" });
-  const { detail, isPending, isRefetching, isNotFound } = useReportDetailFacade({
+  const { detail, isPending, isRefetching, isNotFound } = useReportDetailContainer({
     reportId,
   });
   return (

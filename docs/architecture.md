@@ -7,121 +7,132 @@ Reference document for Claude when implementing features.
 ## Container + Presentational Component Architecture
 
 ```
-API → Queries → Facade → Container → Component → Presenter
+API → Queries → Container (+ container.hook) → Component (+ component.hook)
 ```
+
+Two shared **cache-layer** files per resource (API + Queries), then per page a **Container** and a **Component**, each owning one hook. The container hook holds server state; the component hook holds local UI state and derived view-models.
 
 | Layer | File | Responsibility | Form |
 |---|---|---|---|
-| API | `{Feature}.api.ts` | HTTP communication + types (from OpenAPI). No query keys — those live in the Queries layer | Plain function object |
-| Queries | `{Feature}.queries.ts` | Query definitions via TanStack Query `queryOptions()` — query key + query function + shared options, co-located in a hierarchical factory | Plain object of factory functions |
-| Facade | `{Feature}.facade.ts` | Server state: `useQuery(featureQueries.x())` + `useMutation`; may hold facade-scoped `useState` for query params. **One dedicated Facade per page** | React hook |
-| Container | `{Feature}.container.tsx` | Wires Facade to Component. Calls Facade + app-shell read hooks (e.g. `useParams`); destructures only fields the Component uses | React component |
-| Component | `{Feature}.component.tsx` | Presentational rendering; loading UI (`isPending` skeleton / `isRefetching` opacity); calls Presenter; may call app-shell action hooks (e.g. `useNavigate`) bound to user interactions | React component |
-| Presenter | `{Feature}.presenter.ts` | Local UI state + derived display values (incl. view-model transforms from the domain contract); called inside Component; receives Facade actions as props | React hook |
+| API | `{Resource}.api.ts` | HTTP communication + types (from OpenAPI). No query keys — those live in the Queries layer | Plain function object |
+| Queries | `{Resource}.queries.ts` | Query definitions via TanStack Query `queryOptions()` — query key + query function + shared options, co-located in a hierarchical factory | Plain object of factory functions |
+| Container | `{Page}.container.tsx` | Wires the container hook to the Component. Calls the container hook + app-shell read hooks (e.g. `useParams`); destructures only fields the Component uses | React component |
+| Container hook | `{Page}.container.hook.ts` | Server state: `useQuery(featureQueries.x())` + `useMutation`; may hold hook-scoped `useState` for query params. **One dedicated container hook per page** | React hook |
+| Component | `{Page}.component.tsx` | Presentational rendering; loading UI (`isPending` skeleton / `isRefetching` opacity); calls the component hook; may call app-shell action hooks (e.g. `useNavigate`) bound to user interactions | React component |
+| Component hook | `{Page}.component.hook.ts` | Local UI state + derived display values (incl. view-model transforms from the domain contract); called inside the Component; receives container-hook actions as params | React hook |
+
+The container hook is the page's server-state hook (what older Container/Presentational write-ups call a "facade"); the component hook is the page's local-state-and-derivation hook (a "presenter"). They are named by the layer that owns them, not by those role words.
 
 ### Data Flow
 
 ```
 Container
-  → calls Facade hook (the only place that does)
+  → calls the container hook (the only place that does)
   → calls app-shell read hooks (e.g. useParams) if needed
   → destructures only fields used by Component
   → passes them as individual props (no spread)
 
 Component (Presentational)
-  → receives individual Facade fields
+  → receives individual container-state fields
   → handles isPending (Skeleton) and isRefetching (opacity overlay)
   → contains private memo'd body for cache stability across isFetching toggles
   → contains private Skeleton (li-granular for list pages)
-  → calls app-shell action hooks (e.g. useNavigate) and wraps them as callbacks for Presenter
-  → calls Presenter hook internally
-  → renders using props + Presenter return values
+  → calls app-shell action hooks (e.g. useNavigate) and wraps them as callbacks for the component hook
+  → calls the component hook internally
+  → renders using props + component-hook return values
 ```
 
-The Presenter is always called **inside** the Component, never from outside. The Component never receives Presenter output from outside.
+The component hook is always called **inside** the Component, never from outside. The Component never receives component-hook output from outside.
 
-The Presenter does **not** call the Facade hook directly — it receives Facade actions as props.
+The component hook does **not** call the container hook directly — it receives container-hook actions as params.
 
 ### File Placement
 
-A feature folder holds two kinds of files: a **shared cache layer** (`{Resource}.api.ts` + `{Resource}.queries.ts`, one pair per resource) and a **page triad per route** (facade / container / presenter / component / stories). The cache layer is shared by every page; the triad is not (1 page = 1 facade). Optional `{Sub}.component.tsx` files hold extracted sub-components (with stories when isolation is practical).
+A feature folder holds two kinds of files: a **shared cache layer** (`{Resource}.api.ts` + `{Resource}.queries.ts`, one pair per resource) at the feature root, and a **page directory per route** (`{Page}/`) holding that page's container / container hook / component / component hook / stories, plus a nested `components/` for extracted sub-components. The cache layer is shared by every page; the page directory is not (1 page = 1 container hook).
 
 ```
 src/features/{feature-name}/
-├── {Resource}.api.ts          ← shared cache layer (one pair per resource)
-├── {Resource}.queries.ts      ← queryOptions factory, consumed by every page
-├── {Page}.facade.ts           ← one dedicated facade per page/route
-├── {Page}.container.tsx
-├── {Page}.presenter.ts
-├── {Page}.component.tsx
-├── {Page}.stories.tsx
-└── {Sub}.component.tsx         ← optional extracted sub-component (+ stories when practical)
+├── {Resource}.api.ts              ← shared cache layer (one pair per resource)
+├── {Resource}.queries.ts          ← queryOptions factory, consumed by every page
+└── {Page}/                        ← one directory per page/route
+    ├── {Page}.container.tsx
+    ├── {Page}.container.hook.ts        ← one dedicated container hook per page
+    ├── {Page}.component.tsx            ← entry + private memo'd body + private Skeleton
+    ├── {Page}.component.hook.ts        ← local UI state + derived view-model
+    ├── {Page}.component.stories.tsx
+    └── components/
+        └── {Sub}.component.tsx         ← extracted sub-component (concern-named; + stories when practical)
 ```
 
-One feature can have several pages over the same resource — a list, a detail, and a create form share one `{Resource}.api.ts` / `{Resource}.queries.ts` but each get their own triad — and a page may read more than one resource (e.g. a form that consumes both `Team` and `Member`).
+Every page gets its own `{Page}/` directory — uniformly, including single-page features (a lone `Todo` list page still lives at `features/todo/Todo/`, beside the shared `features/todo/Todo.api.ts`). The page directory is where the page owns its files; the slight `todo/Todo/` repetition is accepted for a single, judgment-free rule.
 
-`{Resource}` is **singular**, shared across the resource's files and symbols — `Member.api.ts` / `memberApi` / `memberQueries` / type `Member` — even though the endpoint (`/members`) and `getAll` return a collection. (`{Page}` is singular-based too: `ReportDetail`, `TeamForm`.)
+One feature can have several pages over the same resource — a list, a detail, and a create form share one `{Resource}.api.ts` / `{Resource}.queries.ts` but each get their own `{Page}/` directory — and a page may read more than one resource (e.g. a form that consumes both `Team` and `Member`).
 
-App-shell chrome lives **outside** the triad. Navigation, the page layout, and route redirects are not a feature: a chrome-only component like `nav/Nav.component.tsx` has no facade / presenter / container and no stories, and the layout shell plus redirects live in `main.tsx`'s root route.
+`{Resource}` is **singular**, shared across the resource's files and symbols — `Member.api.ts` / `memberApi` / `memberQueries` / type `Member` — even though the endpoint (`/members`) and `getAll` return a collection. `{Page}` is singular-based too: `ReportDetail`, `TeamForm`.
+
+App-shell chrome lives **outside** the page directories. Navigation, the page layout, and route redirects are not a feature: a chrome-only component like `nav/Nav.component.tsx` has no container / component hook / container and no stories, and the layout shell plus redirects live in `main.tsx`'s root route.
 
 ---
 
 ## Type Patterns
 
-Hook props and return types are **explicit named interfaces**, never `ReturnType<typeof ...>` — the interface is each layer's published contract. The Facade exports its return shape; the Presenter takes Facade actions as Props and returns **only what it creates** (no pass-through of Facade data).
+Hook params and return types are **explicit named interfaces**, never `ReturnType<typeof ...>` — the interface is each layer's published contract. `use` marks the hook; the type names describe its contents: a `{Page}…State` return and a `{Page}…Params` input (named `Params`, not `Props`, so a hook input never reads as a React component's props). The container hook exports its return shape; the component hook takes container-hook actions as Params and returns **only what it creates** (no pass-through of container data).
 
 ```ts
-// Facade — return type is a named interface
-export interface TodoFacade {
+// container hook — return type is a named interface
+export interface TodoContainerState {
   todos: Todo[];
   isPending: boolean;
   isFetching: boolean;
   addTodo: (input: CreateTodoInput) => Promise<void>;
 }
 
-// Presenter — Props in, created-here values out (no Facade pass-through)
-export interface TodoPresenterProps {
-  addTodo: TodoFacade["addTodo"];
+// component hook — Params in, created-here values out (no container-state pass-through)
+export interface TodoComponentParams {
+  addTodo: TodoContainerState["addTodo"];
 }
-export interface TodoPresenter {
+export interface TodoComponentState {
   newTitle: string;
   setNewTitle: (value: string) => void;
   handleSubmit: () => Promise<void>;
 }
 ```
 
-Each layer's full worked example lives once, in the Layer Details sections below — the Container / Component / Presenter wiring is not repeated here.
+The Component is typed by the container hook's return — its props are `{Page}ContainerState` (or `Pick<{Page}ContainerState, ...>` for a strict subset), because the Container passes that state straight down.
+
+Each layer's full worked example lives once, in the Layer Details sections below — the Container / Component / hook wiring is not repeated here.
 
 ---
 
 ## Conventions
 
-- **1 page = 1 dedicated facade** — each page (route) has its own Facade, called from its Container. The Facade covers everything *that page* needs (a within-page "god" facade) and is **not shared across pages** — a list page and a create-form page for the same feature get separate Facades, so neither fires the other's queries. Data needed by multiple pages is shared at the **cache** level: two Facades calling `useQuery` with the same `queryKey` deduplicate through TanStack Query's global keyed cache. Sharing is a property of the cache, not of a shared Facade hook.
-- **Facade-scoped state** — when the Facade needs a *query parameter* the UI mutates (e.g. search keyword, filter), hold it as `useState` inside the Facade. The Facade exposes both the value and the setter; the Component drives them through the same controlled-state pair. This applies to inputs that reach the server — not to pure UI state (e.g. whether a dropdown is open), which stays in the Presenter.
-- **Loading flags follow query count** — name loading flags after the resource only when a Facade exposes more than one query. A single-query Facade names them plainly (`isPending` / `isFetching`); a Facade with two or more queries returns resource-named flags (`isReportsPending`, `isTeamsPending`) so each consumer knows which resource it waits on.
-- **Domain contract, not view model** — the API contract (OpenAPI schema) carries clean domain data. Shaping it for a specific view (e.g. a chart's row format, team-name-keyed columns) is the Presenter's job, not the contract's. Keep the schema statically typed and transform in the Presenter.
+- **1 page = 1 dedicated container hook** — each page (route) has its own container hook, called from its Container. It covers everything *that page* needs (a within-page "god" hook) and is **not shared across pages** — a list page and a create-form page for the same feature get separate container hooks, so neither fires the other's queries. Data needed by multiple pages is shared at the **cache** level: two container hooks calling `useQuery` with the same `queryKey` deduplicate through TanStack Query's global keyed cache. Sharing is a property of the cache, not of a shared hook.
+- **Container-hook-scoped state** — when the container hook needs a *query parameter* the UI mutates (e.g. search keyword, filter), hold it as `useState` inside the container hook. It exposes both the value and the setter; the Component drives them through the same controlled-state pair. This applies to inputs that reach the server — not to pure UI state (e.g. whether a dropdown is open), which stays in the component hook.
+- **Loading flags follow query count** — name loading flags after the resource only when a container hook exposes more than one query. A single-query hook names them plainly (`isPending` / `isFetching`); a hook with two or more queries returns resource-named flags (`isReportsPending`, `isTeamsPending`) so each consumer knows which resource it waits on.
+- **Domain contract, not view model** — the API contract (OpenAPI schema) carries clean domain data. Shaping it for a specific view (e.g. a chart's row format, team-name-keyed columns) is the component hook's job, not the contract's. Keep the schema statically typed and transform in the component hook.
 - **Stable mutation dependency** — when wrapping a mutation in `useCallback`, depend on `mutation.mutateAsync` (a stable reference), never the mutation object (a new reference each render, which would defeat the `memo` that keeps the private body's props reference-stable).
 - **Routing hooks split**:
-  - `useParams` (read URL → drives a Facade query) → called in **Container**
+  - `useParams` (read URL → drives a container-hook query) → called in **Container**
   - `useNavigate` (action triggered by user interaction) → called in **Component**
-- **No spread** — the Container destructures the Facade and passes each field as an individual prop; never `<Component {...facade} />`. Discrete props keep the wiring visible, and the Component's destructured parameters already document what it consumes. Type the Component as its `{Feature}Facade` interface. Use `Pick<{Feature}Facade, ...>` only when the Component renders a strict subset of its Facade — as the Todo example below does (4 of its 6 fields). Under 1 page = 1 facade the Facade usually holds exactly what its page needs, so the interface is the common case and `Pick` the exception.
-- **Cross-feature data access** — when a Facade needs another feature's data, import that feature's Queries factory and call `useQuery(otherFeatureQueries.list())` directly. The dependency is one-directional (the page-feature depends on the data-feature, not vice versa); cache is shared by `queryKey` through the same factory definition, so the two call sites cannot drift.
-- **Sub-component handling** — When the Component needs internal structure beyond the memo'd body and Skeleton, several independent decisions arise — chiefly placement and whether to apply `memo` (those two are independent):
+- **No spread** — the Container destructures the container state and passes each field as an individual prop; never `<Component {...state} />`. Discrete props keep the wiring visible, and the Component's destructured parameters already document what it consumes. Type the Component as its `{Page}ContainerState` interface. Use `Pick<{Page}ContainerState, ...>` only when the Component renders a strict subset of the container state — as the Todo example below does (4 of its 6 fields). Under 1 page = 1 container hook the state usually holds exactly what its page needs, so the interface is the common case and `Pick` the exception.
+- **Cross-feature data access** — when a container hook needs another feature's data, import that feature's Queries factory and call `useQuery(otherFeatureQueries.list())` directly. The dependency is one-directional (the page-feature depends on the data-feature, not vice versa); cache is shared by `queryKey` through the same factory definition, so the two call sites cannot drift.
+- **Sub-component handling** — When the Component needs internal structure beyond the memo'd body and Skeleton, several independent decisions arise — chiefly naming, placement, and whether to apply `memo`:
+  - *Naming:* name a sub-component for its **concern** (`ReportChart`), never a generic structural word. The loaded body stays a *private* memo'd inner of `{Page}.component.tsx` — do not promote it to a public `{Page}Body` component just to give it a name; a generic public name only invites blind copying.
   - *Placement:*
-    - Simple JSX fragments (small, no own state, no own props contract) → private in the same `{Feature}.component.tsx`
-    - Larger pieces (own props contract, own behavior) → separate `{Sub}.component.tsx`
-    - When in doubt, start in the same file; extract when JSX grows.
+    - Simple JSX fragments (small, no own state, no own props contract) → private in the same `{Page}.component.tsx`
+    - Larger pieces with a distinct concern (own props contract, own behavior) → separate `{Page}/components/{Sub}.component.tsx`
+    - When in doubt, keep it private; extract when a distinct concern emerges.
   - *memo:* Apply `memo` to any sub-component that receives reference-stable props. The exported Component is not memo'd because it receives loading flags (`isFetching`) that change on every background refetch.
   - *Stories:* write isolation stories when practical; a sub-component that can't be meaningfully storied alone (e.g. a chart that needs a sized container, like `ReportChart`) is verified through its parent's story instead.
-  - *Local behavior:* a sub-component may own purely-local UI mechanics (refs/effects for DOM behavior like click-outside, as in `TeamMemberPicker`) without routing them through a Presenter; app-relevant state (e.g. whether the picker is open) still lives in the Presenter.
-- **No View suffix** — the Component file contains the exported Component plus private sub-components (memo'd body, Skeleton). There is no separate "View" layer or `{Feature}View` symbol.
-- **Mutation side effects** — after a mutation, reconcile the caches it made stale. Reach for an **optimistic update** only when the user *observes* the mutated cache (the list stays on screen); when the page navigates away on success, **invalidate only** and never fabricate fields the facade lacks. Which caches to touch per operation (create / update / delete) is tabled in the Facade Layer section.
+  - *Local behavior:* a sub-component may own purely-local UI mechanics (refs/effects for DOM behavior like click-outside, as in `TeamMemberPicker`) without routing them through a component hook; app-relevant state (e.g. whether the picker is open) still lives in the component hook.
+- **No View suffix** — the Component file contains the exported Component plus private sub-components (memo'd body, Skeleton). There is no separate "View" layer or `{Page}View` symbol.
+- **Mutation side effects** — after a mutation, reconcile the caches it made stale. Reach for an **optimistic update** only when the user *observes* the mutated cache (the list stays on screen); when the page navigates away on success, **invalidate only** and never fabricate fields the container hook lacks. Which caches to touch per operation (create / update / delete) is tabled in the Container Hook Layer section.
 
 ---
 
 ## Layer Details
 
-### 1. API Layer (`{Feature}.api.ts`)
+### 1. API Layer (`{Resource}.api.ts`)
 
 **Responsibility**: HTTP communication and response type definitions
 
@@ -152,7 +163,7 @@ export const todoApi = {
 };
 ```
 
-### 2. Queries Layer (`{Feature}.queries.ts`)
+### 2. Queries Layer (`{Resource}.queries.ts`)
 
 **Responsibility**: Query definitions — co-locate the query key, query function, and shared options in one reusable, hierarchical factory.
 
@@ -160,7 +171,7 @@ export const todoApi = {
 - Define each query with TanStack Query's `queryOptions()` so the key, `queryFn`, and shared options travel together as one typed definition. `queryOptions()` is a runtime pass-through; its value is the compile-time check — it validates the option shape at the definition site and tags the key with the data type
 - The `queryFn` references the API layer's functions; the Queries layer imports the API layer, never the reverse
 - Use a hierarchical key factory: an `all()` root key plus nested `list()` / `detail(id)` definitions (`[...all(), "list"]`, `[...all(), "detail", id]`). This lets `invalidateQueries(all())` wipe everything while keeping list and detail independently invalidatable
-- Put **shared** options in the definition (`staleTime`, `placeholderData`, `retry`). Leave **consumer-specific** options (`enabled`, and anything `useSuspenseQuery` omits) at the call site in the Facade
+- Put **shared** options in the definition (`staleTime`, `placeholderData`, `retry`). Leave **consumer-specific** options (`enabled`, and anything `useSuspenseQuery` omits) at the call site in the container hook
 - No React, no hooks — a plain object of factory functions
 
 ```ts
@@ -185,34 +196,34 @@ export const todoQueries = {
 };
 ```
 
-The same definition is consumed everywhere — `useQuery(todoQueries.list())`, `queryClient.invalidateQueries({ queryKey: todoQueries.list().queryKey })`, `prefetchQuery(todoQueries.detail(id))` — so the key and its data type never drift across call sites.
+The same definition is consumed everywhere — `useQuery(todoQueries.list())`, `queryClient.invalidateQueries({ queryKey: todoQueries.list().queryKey })`, `prefetchQuery(todoQueries.detail(id))` — so the key and its data type never drift across call sites. It is the resource's shared cache layer, named `{Resource}` (singular) and kept at the feature root precisely so any page (and any page's mutation) reaches the same key without one page importing another page's directory.
 
-### 3. Facade Layer (`{Feature}.facade.ts`)
+### 3. Container Hook Layer (`{Page}.container.hook.ts`)
 
 **Responsibility**: Server state management (fetching and mutating data)
 
 **Rules**:
-- One dedicated Facade per page (not shared across pages)
+- One dedicated container hook per page (not shared across pages)
 - Consume the Queries layer: `useQuery(featureQueries.list())`. Pass consumer-specific options (`enabled`, etc.) at this call site
 - Mutations use `useMutation` + `useQueryClient`; read the cache key from the same factory (`featureQueries.list().queryKey`) so it never drifts
-- Export the loading flags the page actually renders — `isPending` (no data yet) for a Skeleton, `isRefetching` (TanStack Query's `isFetching && !isPending`: a background refetch while data is on screen) for an opacity overlay, and `isFetching` (any fetch, the initial one included) for an inline indicator that should also show on first load. A page exports only what it uses: a list page `isPending` + `isRefetching`, a navigate-away form just `isPending`, a search picker just `isFetching`. Name them per resource only when the Facade has more than one query (see Conventions)
+- Export the loading flags the page actually renders — `isPending` (no data yet) for a Skeleton, `isRefetching` (TanStack Query's `isFetching && !isPending`: a background refetch while data is on screen) for an opacity overlay, and `isFetching` (any fetch, the initial one included) for an inline indicator that should also show on first load. A page exports only what it uses: a list page `isPending` + `isRefetching`, a navigate-away form just `isPending`, a search picker just `isFetching`. Name them per resource only when the hook has more than one query (see Conventions)
 - `data` may be `undefined` before the first successful fetch — use `data ?? []` or similar defaults
 - Map HTTP errors to domain flags here (the API layer does no error handling): read ky's `HTTPError` directly — `error instanceof HTTPError && error.response.status === 404` → `isNotFound` — rather than wrapping it in a custom error type. ky is the project-wide client, so reading its standard error is the idiomatic approach, not a leak to abstract away
 - No UI logic (forms, validation, etc.)
-- Export an explicit interface for the return type
+- Export an explicit interface for the return type — `{Page}ContainerState`
 - Return action functions + data + loading states
 - When wrapping a mutation in `useCallback`, depend on `mutation.mutateAsync` (stable), not the mutation object
-- Optimistic updates (`onMutate` / `onError` / `onSettled`) are for instant UI feedback — add them only when the user actually observes the cache update. If the page navigates away on success (e.g. a create form), skip the optimistic write and just invalidate; never fabricate fields the Facade does not have
-- **Facade-scoped state**: when a query parameter is driven by the UI (e.g. a search keyword bound to an input), hold it as `useState` inside the Facade and include both the value and the setter on the returned interface. The Facade becomes the source of truth for its own query inputs
+- Optimistic updates (`onMutate` / `onError` / `onSettled`) are for instant UI feedback — add them only when the user actually observes the cache update. If the page navigates away on success (e.g. a create form), skip the optimistic write and just invalidate; never fabricate fields the hook does not have
+- **Hook-scoped state**: when a query parameter is driven by the UI (e.g. a search keyword bound to an input), hold it as `useState` inside the container hook and include both the value and the setter on the returned interface. The hook becomes the source of truth for its own query inputs
 
 ```ts
-// Todo.facade.ts
+// Todo/Todo.container.hook.ts
 import { useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { todoQueries } from "./Todo.queries";
-import { todoApi, type Todo, type CreateTodoInput } from "./Todo.api";
+import { todoQueries } from "../Todo.queries";
+import { todoApi, type Todo, type CreateTodoInput } from "../Todo.api";
 
-export interface TodoFacade {
+export interface TodoContainerState {
   todos: Todo[];
   isPending: boolean;
   isFetching: boolean;
@@ -221,7 +232,7 @@ export interface TodoFacade {
   deleteTodo: (id: string) => Promise<void>;
 }
 
-export function useTodoFacade(): TodoFacade {
+export function useTodoContainer(): TodoContainerState {
   const queryClient = useQueryClient();
 
   const listQuery = todoQueries.list();
@@ -272,17 +283,17 @@ export function useTodoFacade(): TodoFacade {
 }
 ```
 
-The Todo facade above is the **optimistic** pattern — the list stays on screen, so the user observes the cache write. When the form **navigates away on success**, use the contrasting pattern: invalidate only, no optimistic write.
+The Todo container hook above is the **optimistic** pattern — the list stays on screen, so the user observes the cache write. When the form **navigates away on success**, use the contrasting pattern: invalidate only, no optimistic write.
 
 ```ts
-// ReportForm.facade.ts — create form that redirects to the new report's detail
-export interface ReportFormFacade {
+// ReportForm/ReportForm.container.hook.ts — create form that redirects to the new report's detail
+export interface ReportFormContainerState {
   teams: Team[];
   isPending: boolean;
   addReport: (input: CreateReportInput) => Promise<ReportSummary>;
 }
 
-export function useReportFormFacade(): ReportFormFacade {
+export function useReportFormContainer(): ReportFormContainerState {
   const queryClient = useQueryClient();
   const { data: teams, isPending } = useQuery(teamQueries.list());
 
@@ -290,7 +301,7 @@ export function useReportFormFacade(): ReportFormFacade {
   // mutation invalidates it directly without subscribing. No optimistic
   // update: the form navigates to the new report's detail on save, so the
   // list is never on screen — nobody observes the optimistic state, and the
-  // facade has no server-assigned id/createdAt to write without fabricating.
+  // hook has no server-assigned id/createdAt to write without fabricating.
   const reportsKey = reportQueries.list().queryKey;
 
   const addMutation = useMutation({
@@ -310,7 +321,7 @@ export function useReportFormFacade(): ReportFormFacade {
 }
 ```
 
-**Which pattern?** Optimistic only when the user *observes* the mutated cache. List stays on screen → optimistic (Todo). Form redirects → invalidate only (ReportForm). Never fabricate fields the facade lacks just to satisfy the optimistic shape.
+**Which pattern?** Optimistic only when the user *observes* the mutated cache. List stays on screen → optimistic (Todo). Form redirects → invalidate only (ReportForm). Never fabricate fields the hook lacks just to satisfy the optimistic shape.
 
 #### After-mutation invalidation
 
@@ -322,27 +333,27 @@ A mutation makes every cache that mirrors the changed data wrong. Invalidate (ma
 | update(id) | `list().queryKey` + `detail(id).queryKey` | two calls; or `setQueryData(detail(id).queryKey, response)` to skip the detail refetch using the authoritative payload |
 | delete(id) | `list().queryKey` + **`removeQueries(detail(id).queryKey)`** | invalidating the detail would refetch a deleted resource → 404 |
 
-- **Prefix matching** — `invalidateQueries({ queryKey })` matches every query whose key *starts with* the given key. `list` (`["x", "list"]`) and `detail` (`["x", "detail", id]`) are siblings: neither is the other's prefix, so hitting *both* with one key is only possible via `all()` (`["x"]`), which also catches every other cached detail.
-- **Screen-dependent skip** — invalidate the list only when a field the list actually renders changed. The decision boundary is what the **Presenter reads**: if the list endpoint omits the changed field (a projection), or the Presenter never reads it, skip the list. (With `staleTime: 0` the list refetches on remount anyway, so skipping only saves a fetch when the list is active or `staleTime > 0`.)
+- **Prefix matching** — `invalidateQueries({ queryKey })` matches every query whose key *starts with* the given key. `list` (`["x", "list"]`) and `detail` (`["x", "detail", id]`) are siblings: neither is the other's prefix, so hitting *both* with one key is only possible via `all()` (`["x"]`), which also catches every other cached detail. (This sibling split is why the `all()` root exists: a flat `["x"]` list key would prefix-match — and needlessly refetch — every detail.)
+- **Screen-dependent skip** — invalidate the list only when a field the list actually renders changed. The decision boundary is what the **component hook reads**: if the list endpoint omits the changed field (a projection), or the component hook never reads it, skip the list. (With `staleTime: 0` the list refetches on remount anyway, so skipping only saves a fetch when the list is active or `staleTime > 0`.)
 
-### 4. Container Layer (`{Feature}.container.tsx`)
+### 4. Container Layer (`{Page}.container.tsx`)
 
-**Responsibility**: Wire the Facade to the Component. Resolve app-shell inputs (URL params) before calling the Facade.
+**Responsibility**: Wire the container hook to the Component. Resolve app-shell inputs (URL params) before calling the hook.
 
 **Rules**:
-- Calls the Facade hook (the only layer that does)
-- Calls app-shell read hooks needed to drive the Facade — typically `useParams({ from: ... })` for detail pages where a URL segment becomes a Facade input
-- Destructures only the fields the Component uses (never spreads `{...facade}`)
+- Calls the container hook (the only layer that does)
+- Calls app-shell read hooks needed to drive the hook — typically `useParams({ from: ... })` for detail pages where a URL segment becomes a hook input
+- Destructures only the fields the Component uses (never spreads `{...state}`)
 - Passes each field as an individual prop to the Component
 - No design, no JSX beyond the single Component render — the Container is pure wiring
 
 ```tsx
-// Todo.container.tsx — list page
-import { useTodoFacade } from "./Todo.facade";
+// Todo/Todo.container.tsx — list page
+import { useTodoContainer } from "./Todo.container.hook";
 import { TodoComponent } from "./Todo.component";
 
 export function TodoContainer() {
-  const { todos, isPending, isFetching, addTodo } = useTodoFacade();
+  const { todos, isPending, isFetching, addTodo } = useTodoContainer();
   return (
     <TodoComponent
       todos={todos}
@@ -355,14 +366,14 @@ export function TodoContainer() {
 ```
 
 ```tsx
-// TodoDetail.container.tsx — detail page with URL param
+// TodoDetail/TodoDetail.container.tsx — detail page with URL param
 import { useParams } from "@tanstack/react-router";
-import { useTodoDetailFacade } from "./TodoDetail.facade";
+import { useTodoDetailContainer } from "./TodoDetail.container.hook";
 import { TodoDetailComponent } from "./TodoDetail.component";
 
 export function TodoDetailContainer() {
   const { todoId } = useParams({ from: "/todos/$todoId" });
-  const { detail, isPending, isFetching, isNotFound } = useTodoDetailFacade({ todoId });
+  const { detail, isPending, isFetching, isNotFound } = useTodoDetailContainer({ todoId });
   return (
     <TodoDetailComponent
       detail={detail}
@@ -374,79 +385,29 @@ export function TodoDetailContainer() {
 }
 ```
 
-### 5. Presenter Layer (`{Feature}.presenter.ts`)
+### 5. Component Layer (`{Page}.component.tsx`)
 
-**Responsibility**: Local UI state management + derived display values
+**Responsibility**: Presentational rendering + loading UI + delegating to the component hook
 
-**Rules**:
-- Receive content data/actions it needs as props (define own Props interface)
-- Props are **guaranteed non-undefined** — the Component handles the `undefined` / loading case before rendering the private memo'd body, which calls the Presenter
-- Manage form input values, validation, UI toggles, etc.
-- Derive display values from Facade data (e.g. merging server-returned options with current selections)
-- Transform the domain contract into view-specific shapes here (e.g. pivot domain rows into a chart's dynamic-key format, map ids to display labels). The view model is a Presenter concern, never part of the API contract
-- May have no `useState` when its job is purely derivation + handler wrapping
-- **No direct Facade call** — receive Facade actions as props
-- **No pass-through**: return only what the Presenter creates (local state, derived values, handlers). Facade data the Component or its private body needs is accessed directly from props, not re-exported through the Presenter
-- Export an explicit interface for the return type
-
-```ts
-// Todo.presenter.ts
-import { useState, useCallback } from "react";
-import type { CreateTodoInput } from "./Todo.api";
-
-export interface TodoPresenterProps {
-  addTodo: (input: CreateTodoInput) => Promise<void>;
-}
-
-export interface TodoPresenter {
-  newTitle: string;
-  setNewTitle: (value: string) => void;
-  handleSubmit: () => Promise<void>;
-}
-
-export function useTodoPresenter({
-  addTodo,
-}: TodoPresenterProps): TodoPresenter {
-  const [newTitle, setNewTitle] = useState("");
-
-  const handleSubmit = useCallback(async () => {
-    const trimmed = newTitle.trim();
-    if (!trimmed) return;
-    await addTodo({ title: trimmed });
-    setNewTitle("");
-  }, [newTitle, addTodo]);
-
-  return {
-    newTitle,
-    setNewTitle,
-    handleSubmit,
-  };
-}
-```
-
-### 6. Component Layer (`{Feature}.component.tsx`)
-
-**Responsibility**: Presentational rendering + loading UI + delegating to the Presenter
-
-The Component file contains three parts: the exported **Component** (handles loading and delegation), a **private memo'd body** (the actual rendered content), and a **private Skeleton** (the loading placeholder). The private body keeps `memo` effective — it only receives reference-stable props.
+The Component file contains three parts: the exported **Component** (handles loading and delegation), a **private memo'd body** (the actual rendered content), and a **private Skeleton** (the loading placeholder). The private body keeps `memo` effective — it only receives reference-stable props. The body stays private; extract a piece into `components/{Sub}.component.tsx` only when it is a distinct concern (see Sub-component handling), never just to give the body a name.
 
 **Exported Component rules**:
-- Accepts the Facade fields it renders as individual props — typed as `{Feature}Facade`, or `Pick<{Feature}Facade, ...>` when it renders a strict subset
+- Accepts the container-state fields it renders as individual props — typed as `{Page}ContainerState`, or `Pick<{Page}ContainerState, ...>` when it renders a strict subset
 - Handles `isPending` → renders the private Skeleton
 - Handles `isRefetching` → wraps the rendered content in an opacity overlay. `isRefetching` (TanStack Query's `isFetching && !isPending`) excludes the initial load, so the Skeleton is never dimmed; the overlay only dims content already on screen during a background refetch
-- Calls app-shell action hooks (e.g. `useNavigate()`) and wraps them as callbacks for the Presenter
+- Calls app-shell action hooks (e.g. `useNavigate()`) and wraps them as callbacks for the component hook
 - Not wrapped with `memo` (it receives `isFetching` which changes frequently)
 
 **Private memo'd body rules**:
 - Wrapped with `memo`
 - Receives only the props it needs to render — never `isFetching` or `isPending`
-- May call the Presenter to derive from domain data, or be a pure view over a finished view-model — see *Where the Presenter is called*
+- May call the component hook to derive from domain data, or be a pure view over a finished view-model — see *Where the component hook is called*
 - No business logic — only JSX and CSS classes
 
-**Where the Presenter is called** — the Presenter lives in whichever component renders its output:
+**Where the component hook is called** — it lives in whichever component renders its output:
 - **Body is fully view-model-driven** → derive in the exported Component and pass the view-model into a pure memo body (`ReportList` / `TeamList` take `rows`).
-- **Body also needs raw domain** → pass the domain into the body and call the Presenter there (`ReportDetail` takes `detail`: derives chart data *and* reads `detail.teams`).
-- **Presenter holds local state** (form inputs, toggles) → call it in the exported Component / form, so the state is not reset by a loading toggle or skipped by `memo` (`ReportForm` / `TeamForm`).
+- **Body also needs raw domain** → pass the domain into the body and call the component hook there (`ReportDetail` passes `detail` to its private body, which calls `useReportDetailComponent` to derive chart data *and* reads `detail.teams`).
+- **Component hook holds local state** (form inputs, toggles) → call it in the exported Component / form, so the state is not reset by a loading toggle or skipped by `memo` (`ReportForm` / `TeamForm`).
 
 **Private Skeleton rules**:
 - No props
@@ -456,11 +417,11 @@ The Component file contains three parts: the exported **Component** (handles loa
 **Why memo on the private body works**: `isFetching` flips on every background refetch, but only reaches the exported Component. The private body's props (e.g. `todos`, `addTodo`) are reference-stable thanks to TanStack Query's structural sharing and `useCallback`, so `memo` skips the re-render.
 
 ```tsx
-// Todo.component.tsx
+// Todo/Todo.component.tsx
 import { memo } from "react";
-import { useTodoPresenter } from "./Todo.presenter";
-import type { TodoFacade } from "./Todo.facade";
-import type { Todo } from "./Todo.api";
+import { useTodoComponent } from "./Todo.component.hook";
+import type { TodoContainerState } from "./Todo.container.hook";
+import type { Todo } from "../Todo.api";
 
 // Private memo'd body
 const TodoList = memo(function TodoList({
@@ -468,9 +429,9 @@ const TodoList = memo(function TodoList({
   addTodo,
 }: {
   todos: Todo[];
-  addTodo: TodoFacade["addTodo"];
+  addTodo: TodoContainerState["addTodo"];
 }) {
-  const { newTitle, setNewTitle, handleSubmit } = useTodoPresenter({ addTodo });
+  const { newTitle, setNewTitle, handleSubmit } = useTodoComponent({ addTodo });
 
   return (
     <>
@@ -520,13 +481,13 @@ function TodoListSkeleton() {
   );
 }
 
-// Exported Component — Pick-narrowed Facade props
+// Exported Component — Pick-narrowed container-state props
 export function TodoComponent({
   todos,
   isPending,
   isFetching,
   addTodo,
-}: Pick<TodoFacade, "todos" | "isPending" | "isFetching" | "addTodo">) {
+}: Pick<TodoContainerState, "todos" | "isPending" | "isFetching" | "addTodo">) {
   if (isPending) return <TodoListSkeleton />;
 
   return (
@@ -537,11 +498,61 @@ export function TodoComponent({
 }
 ```
 
+### 6. Component Hook Layer (`{Page}.component.hook.ts`)
+
+**Responsibility**: Local UI state management + derived display values
+
+**Rules**:
+- Receive content data/actions it needs as params (define own `{Page}ComponentParams` interface)
+- Params are **guaranteed non-undefined** — the Component handles the `undefined` / loading case before rendering the private memo'd body, which calls the hook
+- Manage form input values, validation, UI toggles, etc.
+- Derive display values from container data (e.g. merging server-returned options with current selections)
+- Transform the domain contract into view-specific shapes here (e.g. pivot domain rows into a chart's dynamic-key format, map ids to display labels). The view model is a component-hook concern, never part of the API contract
+- May have no `useState` when its job is purely derivation + handler wrapping — and when a Component has no local state and nothing to derive, it needs no component hook at all (an empty pass-through hook is ceremony; skip it)
+- **No direct container-hook call** — receive container-hook actions as params
+- **No pass-through**: return only what the hook creates (local state, derived values, handlers). Container data the Component or its private body needs is accessed directly from props, not re-exported
+- Export an explicit interface for the return type — `{Page}ComponentState`
+
+```ts
+// Todo/Todo.component.hook.ts
+import { useState, useCallback } from "react";
+import type { CreateTodoInput } from "../Todo.api";
+
+export interface TodoComponentParams {
+  addTodo: (input: CreateTodoInput) => Promise<void>;
+}
+
+export interface TodoComponentState {
+  newTitle: string;
+  setNewTitle: (value: string) => void;
+  handleSubmit: () => Promise<void>;
+}
+
+export function useTodoComponent({
+  addTodo,
+}: TodoComponentParams): TodoComponentState {
+  const [newTitle, setNewTitle] = useState("");
+
+  const handleSubmit = useCallback(async () => {
+    const trimmed = newTitle.trim();
+    if (!trimmed) return;
+    await addTodo({ title: trimmed });
+    setNewTitle("");
+  }, [newTitle, addTodo]);
+
+  return {
+    newTitle,
+    setNewTitle,
+    handleSubmit,
+  };
+}
+```
+
 ---
 
 ## Wiring a Feature Together
 
-Each Container (defined in its own `{Feature}.container.tsx` — see the Container Layer section) is mounted on a route in `main.tsx`, which also provides the `QueryClient`. Containers that read a URL param do so with `useParams`, shown in the Container Layer section and not repeated here.
+Each Container (defined in its own `{Page}/{Page}.container.tsx` — see the Container Layer section) is mounted on a route in `main.tsx`, which also provides the `QueryClient`. Containers that read a URL param do so with `useParams`, shown in the Container Layer section and not repeated here.
 
 ```tsx
 // main.tsx
@@ -552,7 +563,7 @@ import {
   createRoute,
   RouterProvider,
 } from "@tanstack/react-router";
-import { TodoContainer } from "./features/todo/Todo.container";
+import { TodoContainer } from "./features/todo/Todo/Todo.container";
 
 const queryClient = new QueryClient();
 const rootRoute = createRootRoute();
@@ -628,21 +639,21 @@ export const handlers = [
 
 ## Writing Tests
 
-Tests live as Storybook stories in `{Feature}.stories.tsx`, colocated with the Component. Stories serve two purposes:
+Tests live as Storybook stories in `{Page}.component.stories.tsx`, colocated with the Component in the page directory. Stories serve two purposes:
 
 - **Visual catalog** — each Component state (populated, empty, loading) is its own story
 - **Interaction tests** — `play` functions assert behavior, executed by `@storybook/addon-vitest` in browser mode (Playwright Chromium)
 
-There is no `*.test.tsx` file and no jsdom / `@testing-library/react` setup; `pnpm test` runs every story as a browser-mode Vitest test.
+There is no jsdom / `@testing-library/react` setup; `pnpm test` runs every story as a browser-mode Vitest test.
 
 ### What to story (and what not to)
 
-- ✅ Component (the exported one in `{Feature}.component.tsx`) — covers populated, empty, and skeleton via args (`isPending` / `isFetching` / data)
-- ❌ Container / Facade / Presenter / API — these are non-UI or pure wiring; never write stories for them
+- ✅ Component (the exported one in `{Page}.component.tsx`) — covers populated, empty, and skeleton via args (`isPending` / `isFetching` / data)
+- ❌ Container / container hook / component hook / API — these are non-UI or pure wiring; never write stories for them
 
 ### Minimum coverage per Component
 
-For each `{Feature}.component.tsx`, cover its states and each interaction it exposes:
+For each `{Page}.component.tsx`, cover its states and each interaction it exposes:
 
 - A populated state (`Default`)
 - An empty state (`Empty`)
@@ -654,7 +665,7 @@ An **args-driven** Component pins `Empty` / `Skeleton` through args (`args: { is
 ### Story file template
 
 ```tsx
-// Todo.stories.tsx
+// Todo/Todo.component.stories.tsx
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
 import { TodoComponent } from "./Todo.component";
@@ -712,7 +723,7 @@ export const SubmitsNewTodo: Story = {
 
 ### Conventions
 
-- **`title`**: `features/{Feature}` for feature-level stories
+- **`title`**: `features/{Page}` for page-level stories
 - **Action handler mocks**: declare in `meta.args` with `fn()` from `storybook/test`; each story inherits them. Override per-story only when the call signature differs
 - **Assertions**: import `expect` from `storybook/test`, not `vitest`
 - **DOM queries**: use `within(canvasElement)`, not `screen` (browser-mode Vitest does not expose Testing Library globals)
@@ -720,10 +731,9 @@ export const SubmitsNewTodo: Story = {
 
 ### Anti-patterns
 
-- ❌ Calling the Facade hook directly from a story — pass the Component's Facade props as args instead, or use a story-local hook (see [`storybook: Harness を廃止して Story-local state へ移行する検討`](https://github.com/guppy0356/Tolone/issues/5)) for controlled state pairs
-- ❌ Storying the Container, Facade, Presenter, or API — they are non-UI or pure wiring
+- ❌ Calling the container hook directly from a story — pass the Component's container-state props as args instead, or use a story-local hook (see [`storybook: Harness を廃止して Story-local state へ移行する検討`](https://github.com/guppy0356/Tolone/issues/5)) for controlled state pairs
+- ❌ Storying the Container, container hook, component hook, or API — they are non-UI or pure wiring
 - ❌ Importing `vi`, `vitest`, `@testing-library/react`, or `@testing-library/jest-dom` inside a story — they are not in scope and break the browser-mode runner
-- ❌ Creating a `*.test.tsx` file under `src/features/` — the test entry point is the story file
 - ❌ Hand-writing a query key / `queryFn` in a story harness — consume the Queries factory (`useQuery(featureQueries.list())`) so the test exercises the same wiring as production
 
 ### Browser-mode caveats
@@ -779,12 +789,14 @@ Commit after each step. Do not batch multiple steps into one commit.
 1. Define endpoints and schemas in `src/openapi.yaml` → **commit**
 2. Run `pnpm generate:api` to generate types → **commit**
 3. Create `src/features/{feature-name}/` directory
-4. `{Feature}.api.ts` — import generated types + API function object → **commit**
-5. `{Feature}.queries.ts` — `{Feature}Queries` `queryOptions()` factory (`all` / `list` / `detail`) over the API functions → **commit**
-6. `{Feature}.facade.ts` — `use{Feature}Facade` hook + `{Feature}Facade` interface (one dedicated facade per page; `useQuery(featureQueries.x())` + `useMutation`; pick the mutation side-effect pattern — optimistic vs invalidate-only — per the Facade Layer section) → **commit**
-7. `{Feature}.presenter.ts` — `use{Feature}Presenter` hook + `{Feature}Presenter` interface → **commit**
-8. `{Feature}.component.tsx` — exported `{Feature}Component` (Facade-typed props) + private memo'd body + private Skeleton
-9. `{Feature}.stories.tsx` — visual states (`Default` / `Empty` / `Skeleton`) + `play`-function interaction stories with Pick-narrowed args; a story harness needing data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key; run `pnpm test` to verify → **commit** (Component + stories together)
-10. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
-11. `{Feature}.container.tsx` — `{Feature}Container` calls Facade, destructures needed fields, passes to Component → **commit**
-12. Wire the feature in `main.tsx` (add route; import `{Feature}Container`) → **commit**
+4. `{Resource}.api.ts` — import generated types + API function object → **commit**
+5. `{Resource}.queries.ts` — `{Resource}Queries` `queryOptions()` factory (`all` / `list` / `detail`) over the API functions → **commit**
+6. Create `src/features/{feature-name}/{Page}/` directory
+7. `{Page}.container.hook.ts` — `use{Page}Container` hook + `{Page}ContainerState` interface (one dedicated container hook per page; `useQuery(featureQueries.x())` + `useMutation`; pick the mutation side-effect pattern — optimistic vs invalidate-only — per the Container Hook Layer section) → **commit**
+8. `{Page}.component.hook.ts` — `use{Page}Component` hook + `{Page}ComponentState` interface (skip this file entirely when the Component has no local state and nothing to derive) → **commit**
+9. `{Page}.component.tsx` — exported `{Page}Component` (container-state-typed props) + private memo'd body + private Skeleton
+10. `{Page}.component.stories.tsx` — visual states (`Default` / `Empty` / `Skeleton`) + `play`-function interaction stories with Pick-narrowed args; a story harness needing data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key; run `pnpm test` to verify → **commit** (Component + stories together)
+11. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
+12. `{Page}.container.tsx` — `{Page}Container` calls the container hook, destructures needed fields, passes to Component → **commit**
+13. Wire the feature in `main.tsx` (add route; import `{Page}Container` from `features/{feature}/{Page}/{Page}.container`) → **commit**
+```

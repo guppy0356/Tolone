@@ -45,37 +45,39 @@ Keep this a plain link.
 -->
 
 
-### Layers: API → Queries → Facade → Container → Component → Presenter
+### Layers: API → Queries → Container (+ container.hook) → Component (+ component.hook)
 
 | Layer | File | Form | Responsibility |
 |---|---|---|---|
-| API | `{Feature}.api.ts` | Plain object of functions | HTTP calls via `ky` + type definitions. No query keys |
-| Queries | `{Feature}.queries.ts` | Plain object of factory functions | Query definitions via `queryOptions()` — key + queryFn + shared options, hierarchical (`all` / `list` / `detail`) |
-| Facade | `{Feature}.facade.ts` | React hook | Server state: `useQuery(featureQueries.x())` + `useMutation`; may hold facade-scoped `useState` for query params. One dedicated facade per page |
-| Container | `{Feature}.container.tsx` | React component | Wires Facade to Component. Calls Facade hook + app-shell read hooks (e.g. `useParams`); destructures only fields the Component uses |
-| Component | `{Feature}.component.tsx` | React component (Presentational) | Renders UI; handles loading UI (`isPending` skeleton / `isFetching` opacity); calls Presenter for local state; calls app-shell action hooks (e.g. `useNavigate`) bound to user interactions |
-| Presenter | `{Feature}.presenter.ts` | React hook | Local UI state + derived display values; called inside Component; receives Facade actions as props (does not call Facade directly) |
+| API | `{Resource}.api.ts` | Plain object of functions | HTTP calls via `ky` + type definitions. No query keys |
+| Queries | `{Resource}.queries.ts` | Plain object of factory functions | Query definitions via `queryOptions()` — key + queryFn + shared options, hierarchical (`all` / `list` / `detail`) |
+| Container | `{Page}.container.tsx` | React component | Wires the container hook to the Component. Calls the container hook + app-shell read hooks (e.g. `useParams`); destructures only fields the Component uses |
+| Container hook | `{Page}.container.hook.ts` | React hook | Server state: `useQuery(featureQueries.x())` + `useMutation`; may hold hook-scoped `useState` for query params. One dedicated container hook per page. Returns `{Page}ContainerState` |
+| Component | `{Page}.component.tsx` | React component (Presentational) | Renders UI; handles loading UI (`isPending` skeleton / `isRefetching` opacity); calls the component hook; calls app-shell action hooks (e.g. `useNavigate`) bound to user interactions |
+| Component hook | `{Page}.component.hook.ts` | React hook | Local UI state + derived display values; called inside Component; receives container-hook actions as params (does not call the container hook directly). Returns `{Page}ComponentState` |
 
 ### Wiring rules & conventions
 
-The detailed wiring rules (Container/Component/Presenter responsibilities, routing-hook placement, Pick-over-spread) and conventions (1 page = 1 facade, Queries-layer keys, loading-flag naming, optimistic-update policy, sub-component placement/memo, no View suffix) are **not duplicated here** — they live in [docs/architecture.md](docs/architecture.md), the single source of truth. Read it before implementing a feature.
+The detailed wiring rules (Container/Component/hook responsibilities, routing-hook placement, Pick-over-spread) and conventions (1 page = 1 container hook, Queries-layer keys, loading-flag naming, optimistic-update policy, sub-component naming/placement/memo, no View suffix) are **not duplicated here** — they live in [docs/architecture.md](docs/architecture.md), the single source of truth. Read it before implementing a feature.
 
 ### Feature file structure
 
 ```
 src/features/{feature-name}/
-├── {Feature}.api.ts
-├── {Feature}.queries.ts        ← queryOptions factory (all / list / detail)
-├── {Feature}.facade.ts
-├── {Feature}.container.tsx     ← wires Facade to Component
-├── {Feature}.presenter.ts
-├── {Feature}.component.tsx     ← Component + private memo'd body + private Skeleton
-└── {Feature}.stories.tsx
+├── {Resource}.api.ts                ← shared cache layer (one pair per resource)
+├── {Resource}.queries.ts            ← queryOptions factory (all / list / detail)
+└── {Page}/                          ← one directory per page/route
+    ├── {Page}.container.tsx          ← wires the container hook to the Component
+    ├── {Page}.container.hook.ts      ← server state (one per page)
+    ├── {Page}.component.tsx          ← Component + private memo'd body + private Skeleton
+    ├── {Page}.component.hook.ts      ← local UI state + derived view-model
+    ├── {Page}.component.stories.tsx
+    └── components/                   ← extracted sub-components (concern-named)
 ```
 
 ### Testing approach
 
-Stories double as tests. Visual states (`Default`, `Empty`, `Skeleton`) and interaction tests (`play` functions) live in the same `{Feature}.stories.tsx` file, with Facade-shaped props mocked via `fn()` from `storybook/test`. Running `pnpm test` executes every story in browser-mode Vitest, so the same file is both the documentation and the test suite. A story harness that needs live data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key, so the test exercises production wiring. See [docs/architecture.md](./docs/architecture.md#writing-tests) for the full convention.
+Stories double as tests. Visual states (`Default`, `Empty`, `Skeleton`) and interaction tests (`play` functions) live in the same `{Page}.component.stories.tsx` file, with container-state-shaped props mocked via `fn()` from `storybook/test`. Running `pnpm test` executes every story in browser-mode Vitest, so the same file is both the documentation and the test suite. A story harness that needs live data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key, so the test exercises production wiring. See [docs/architecture.md](./docs/architecture.md#writing-tests) for the full convention.
 
 ## Commit Strategy
 
@@ -86,8 +88,8 @@ Typical commit sequence:
 2. generate:api (type generation) → commit
 3. API layer → commit
 4. Queries layer → commit
-5. Facade layer → commit
-6. Presenter layer → commit
+5. Container hook layer → commit
+6. Component hook layer → commit
 7. MSW handlers → commit
 8. Component + stories (run `pnpm test` before committing) → commit
 9. Container layer → commit
@@ -95,7 +97,7 @@ Typical commit sequence:
 
 ## Future Work
 
-Once a feature is working end-to-end, if a single Component/Presenter contains multiple distinct UI concerns (e.g. form, filter, list), **propose** splitting into sub-components each with its own Presenter. Do not split without user approval.
+Once a feature is working end-to-end, if a single Component contains multiple distinct UI concerns (e.g. form, filter, list), **propose** splitting into sub-components (each with its own component hook when it owns state). Do not split without user approval.
 
 ## Updating Dependencies
 

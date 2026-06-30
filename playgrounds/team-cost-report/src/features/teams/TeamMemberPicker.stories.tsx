@@ -2,8 +2,8 @@ import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import type { Member } from "./Member.api";
-import { memberQueries } from "./Member.queries";
+import type { Member } from "@api/Member.api";
+import { memberQueries } from "@api/Member.queries";
 import { TeamMemberPicker } from "./TeamMemberPicker.component";
 
 interface HarnessProps {

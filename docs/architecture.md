@@ -14,8 +14,8 @@ Two shared **cache-layer** files per resource (API + Queries), then per page a *
 
 | Layer | File | Responsibility | Form |
 |---|---|---|---|
-| API | `{Resource}.api.ts` | HTTP communication + types (from OpenAPI). No query keys — those live in the Queries layer | Plain function object |
-| Queries | `{Resource}.queries.ts` | Query definitions via TanStack Query `queryOptions()` — query key + query function + shared options, co-located in a hierarchical factory | Plain object of factory functions |
+| API | `src/api/{Resource}.api.ts` | HTTP communication + types (from OpenAPI). No query keys — those live in the Queries layer | Plain function object |
+| Queries | `src/api/{Resource}.queries.ts` | Query definitions via TanStack Query `queryOptions()` — query key + query function + shared options, co-located in a hierarchical factory | Plain object of factory functions |
 | Container | `{Page}.container.tsx` | Wires the container hook to the Component. Calls the container hook + app-shell read hooks (e.g. `useParams`); destructures only fields the Component uses | React component |
 | Container hook | `{Page}.container.hook.ts` | Server state: `useQuery(featureQueries.x())` + `useMutation`; may hold hook-scoped `useState` for query params. **One dedicated container hook per page** | React hook |
 | Component | `{Page}.component.tsx` | Presentational rendering; loading UI (`isPending` skeleton / `isRefetching` opacity); calls the component hook; may call app-shell action hooks (e.g. `useNavigate`) bound to user interactions | React component |
@@ -48,23 +48,25 @@ The component hook does **not** call the container hook directly — it receives
 
 ### File Placement
 
-A feature folder holds two kinds of files: a **shared cache layer** (`{Resource}.api.ts` + `{Resource}.queries.ts`, one pair per resource) at the feature root, and a **page directory per route** (`{Page}/`) holding that page's container / container hook / component / component hook / stories, plus a nested `components/` for extracted sub-components. The cache layer is shared by every page; the page directory is not (1 page = 1 container hook).
+The **shared cache layer** (`{Resource}.api.ts` + `{Resource}.queries.ts`, one pair per resource) lives in a top-level `src/api/` directory — a shared data layer, not feature-owned, imported everywhere through the `@api` alias (wired in each playground's `tsconfig.json`, `vite.config.ts`, and `vitest.config.ts`). Each feature folder holds only its UI: a **page directory per route** (`{Page}/`) with that page's container / container hook / component / component hook / stories, plus a nested `components/` for extracted sub-components. The cache layer is shared by every page and across features; a page directory is not (1 page = 1 container hook).
 
 ```
-src/features/{feature-name}/
-├── {Resource}.api.ts              ← shared cache layer (one pair per resource)
-├── {Resource}.queries.ts          ← queryOptions factory, consumed by every page
-└── {Page}/                        ← one directory per page/route
-    ├── {Page}.container.tsx
-    ├── {Page}.container.hook.ts        ← one dedicated container hook per page
-    ├── {Page}.component.tsx            ← entry + private memo'd body + private Skeleton
-    ├── {Page}.component.hook.ts        ← local UI state + derived view-model
-    ├── {Page}.component.stories.tsx
-    └── components/
-        └── {Sub}.component.tsx         ← extracted sub-component (concern-named; + stories when practical)
+src/
+├── api/                            ← shared cache layer (all resources), imported via @api
+│   ├── {Resource}.api.ts
+│   └── {Resource}.queries.ts       ← queryOptions factory, consumed by every page
+└── features/{feature-name}/
+    └── {Page}/                     ← one directory per page/route
+        ├── {Page}.container.tsx
+        ├── {Page}.container.hook.ts        ← one dedicated container hook per page
+        ├── {Page}.component.tsx            ← entry + private memo'd body + private Skeleton
+        ├── {Page}.component.hook.ts        ← local UI state + derived view-model
+        ├── {Page}.component.stories.tsx
+        └── components/
+            └── {Sub}.component.tsx         ← extracted sub-component (concern-named; + stories when practical)
 ```
 
-Every page gets its own `{Page}/` directory — uniformly, including single-page features (a lone `Todo` list page still lives at `features/todo/Todo/`, beside the shared `features/todo/Todo.api.ts`). The page directory is where the page owns its files; the slight `todo/Todo/` repetition is accepted for a single, judgment-free rule.
+Every page gets its own `{Page}/` directory — uniformly, including single-page features (a lone `Todo` list page still lives at `features/todo/Todo/`). The page directory is where the page owns its files; the slight `todo/Todo/` repetition is accepted for a single, judgment-free rule.
 
 One feature can have several pages over the same resource — a list, a detail, and a create form share one `{Resource}.api.ts` / `{Resource}.queries.ts` but each get their own `{Page}/` directory — and a page may read more than one resource (e.g. a form that consumes both `Team` and `Member`).
 
@@ -115,7 +117,7 @@ Each layer's full worked example lives once, in the Layer Details sections below
   - `useParams` (read URL → drives a container-hook query) → called in **Container**
   - `useNavigate` (action triggered by user interaction) → called in **Component**
 - **No spread** — the Container destructures the container state and passes each field as an individual prop; never `<Component {...state} />`. Discrete props keep the wiring visible, and the Component's destructured parameters already document what it consumes. Type the Component as its `{Page}ContainerState` interface. Use `Pick<{Page}ContainerState, ...>` only when the Component renders a strict subset of the container state — as the Todo example below does (4 of its 6 fields). Under 1 page = 1 container hook the state usually holds exactly what its page needs, so the interface is the common case and `Pick` the exception.
-- **Cross-feature data access** — when a container hook needs another feature's data, import that feature's Queries factory and call `useQuery(otherFeatureQueries.list())` directly. The dependency is one-directional (the page-feature depends on the data-feature, not vice versa); cache is shared by `queryKey` through the same factory definition, so the two call sites cannot drift.
+- **Cross-feature data access** — when a container hook needs another resource's data, import its Queries factory from `@api` and call `useQuery(otherQueries.list())` directly. The cache layer is central (`src/api/`), so this is never reaching into another feature's directory; cache is shared by `queryKey` through the same factory definition, so the call sites cannot drift.
 - **Sub-component handling** — When the Component needs internal structure beyond the memo'd body and Skeleton, several independent decisions arise — chiefly naming, placement, and whether to apply `memo`:
   - *Naming:* name a sub-component for its **concern** (`ReportChart`), never a generic structural word. The loaded body stays a *private* memo'd inner of `{Page}.component.tsx` — do not promote it to a public `{Page}Body` component just to give it a name; a generic public name only invites blind copying.
   - *Placement:*
@@ -132,7 +134,7 @@ Each layer's full worked example lives once, in the Layer Details sections below
 
 ## Layer Details
 
-### 1. API Layer (`{Resource}.api.ts`)
+### 1. API Layer (`src/api/{Resource}.api.ts`)
 
 **Responsibility**: HTTP communication and response type definitions
 
@@ -146,8 +148,8 @@ Each layer's full worked example lives once, in the Layer Details sections below
 
 ```ts
 // Todo.api.ts
-import { api } from "../../lib/api-client";
-import type { components } from "../../types/openapi";
+import { api } from "../lib/api-client";
+import type { components } from "../types/openapi";
 
 export type Todo = components["schemas"]["Todo"];
 export type CreateTodoInput = components["schemas"]["CreateTodoInput"];
@@ -163,7 +165,7 @@ export const todoApi = {
 };
 ```
 
-### 2. Queries Layer (`{Resource}.queries.ts`)
+### 2. Queries Layer (`src/api/{Resource}.queries.ts`)
 
 **Responsibility**: Query definitions — co-locate the query key, query function, and shared options in one reusable, hierarchical factory.
 
@@ -196,7 +198,7 @@ export const todoQueries = {
 };
 ```
 
-The same definition is consumed everywhere — `useQuery(todoQueries.list())`, `queryClient.invalidateQueries({ queryKey: todoQueries.list().queryKey })`, `prefetchQuery(todoQueries.detail(id))` — so the key and its data type never drift across call sites. It is the resource's shared cache layer, named `{Resource}` (singular) and kept at the feature root precisely so any page (and any page's mutation) reaches the same key without one page importing another page's directory.
+The same definition is consumed everywhere — `useQuery(todoQueries.list())`, `queryClient.invalidateQueries({ queryKey: todoQueries.list().queryKey })`, `prefetchQuery(todoQueries.detail(id))` — so the key and its data type never drift across call sites. It is the resource's shared cache layer, named `{Resource}` (singular) and kept in `src/api/` (imported via `@api`) precisely so any page — and any page's mutation, in any feature — reaches the same key without importing another feature's directory.
 
 ### 3. Container Hook Layer (`{Page}.container.hook.ts`)
 
@@ -220,8 +222,8 @@ The same definition is consumed everywhere — `useQuery(todoQueries.list())`, `
 // Todo/Todo.container.hook.ts
 import { useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { todoQueries } from "../Todo.queries";
-import { todoApi, type Todo, type CreateTodoInput } from "../Todo.api";
+import { todoQueries } from "@api/Todo.queries";
+import { todoApi, type Todo, type CreateTodoInput } from "@api/Todo.api";
 
 export interface TodoContainerState {
   todos: Todo[];
@@ -421,7 +423,7 @@ The Component file contains three parts: the exported **Component** (handles loa
 import { memo } from "react";
 import { useTodoComponent } from "./Todo.component.hook";
 import type { TodoContainerState } from "./Todo.container.hook";
-import type { Todo } from "../Todo.api";
+import type { Todo } from "@api/Todo.api";
 
 // Private memo'd body
 const TodoList = memo(function TodoList({
@@ -516,7 +518,7 @@ export function TodoComponent({
 ```ts
 // Todo/Todo.component.hook.ts
 import { useState, useCallback } from "react";
-import type { CreateTodoInput } from "../Todo.api";
+import type { CreateTodoInput } from "@api/Todo.api";
 
 export interface TodoComponentParams {
   addTodo: (input: CreateTodoInput) => Promise<void>;
@@ -788,15 +790,14 @@ Commit after each step. Do not batch multiple steps into one commit.
 
 1. Define endpoints and schemas in `src/openapi.yaml` → **commit**
 2. Run `pnpm generate:api` to generate types → **commit**
-3. Create `src/features/{feature-name}/` directory
-4. `{Resource}.api.ts` — import generated types + API function object → **commit**
-5. `{Resource}.queries.ts` — `{Resource}Queries` `queryOptions()` factory (`all` / `list` / `detail`) over the API functions → **commit**
-6. Create `src/features/{feature-name}/{Page}/` directory
-7. `{Page}.container.hook.ts` — `use{Page}Container` hook + `{Page}ContainerState` interface (one dedicated container hook per page; `useQuery(featureQueries.x())` + `useMutation`; pick the mutation side-effect pattern — optimistic vs invalidate-only — per the Container Hook Layer section) → **commit**
-8. `{Page}.component.hook.ts` — `use{Page}Component` hook + `{Page}ComponentState` interface (skip this file entirely when the Component has no local state and nothing to derive) → **commit**
-9. `{Page}.component.tsx` — exported `{Page}Component` (container-state-typed props) + private memo'd body + private Skeleton
-10. `{Page}.component.stories.tsx` — visual states (`Default` / `Empty` / `Skeleton`) + `play`-function interaction stories with Pick-narrowed args; a story harness needing data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key; run `pnpm test` to verify → **commit** (Component + stories together)
-11. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
-12. `{Page}.container.tsx` — `{Page}Container` calls the container hook, destructures needed fields, passes to Component → **commit**
-13. Wire the feature in `main.tsx` (add route; import `{Page}Container` from `features/{feature}/{Page}/{Page}.container`) → **commit**
+3. `src/api/{Resource}.api.ts` — import generated types + API function object → **commit**
+4. `src/api/{Resource}.queries.ts` — `{Resource}Queries` `queryOptions()` factory (`all` / `list` / `detail`) over the API functions → **commit**
+5. Create `src/features/{feature-name}/{Page}/` directory
+6. `{Page}.container.hook.ts` — `use{Page}Container` hook + `{Page}ContainerState` interface (one dedicated container hook per page; `useQuery(featureQueries.x())` + `useMutation`; pick the mutation side-effect pattern — optimistic vs invalidate-only — per the Container Hook Layer section) → **commit**
+7. `{Page}.component.hook.ts` — `use{Page}Component` hook + `{Page}ComponentState` interface (skip this file entirely when the Component has no local state and nothing to derive) → **commit**
+8. `{Page}.component.tsx` — exported `{Page}Component` (container-state-typed props) + private memo'd body + private Skeleton
+9. `{Page}.component.stories.tsx` — visual states (`Default` / `Empty` / `Skeleton`) + `play`-function interaction stories with Pick-narrowed args; a story harness needing data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key; run `pnpm test` to verify → **commit** (Component + stories together)
+10. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
+11. `{Page}.container.tsx` — `{Page}Container` calls the container hook, destructures needed fields, passes to Component → **commit**
+12. Wire the feature in `main.tsx` (add route; import `{Page}Container` from `features/{feature}/{Page}/{Page}.container`) → **commit**
 ```

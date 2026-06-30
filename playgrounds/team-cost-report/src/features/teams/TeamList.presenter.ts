@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { Team } from "./Team.api";
+import type { Team } from "@api/Team.api";
 
 export interface TeamListPresenterProps {
   teams: Team[];

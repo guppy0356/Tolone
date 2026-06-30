@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { CreateReportInput, ReportSummary } from "./Report.api";
+import type { CreateReportInput, ReportSummary } from "@api/Report.api";
 
 export interface ReportFormPresenterProps {
   addReport: (input: CreateReportInput) => Promise<ReportSummary>;

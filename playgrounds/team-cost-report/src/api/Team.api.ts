@@ -1,5 +1,5 @@
-import { api } from "../../lib/api-client";
-import type { components } from "../../types/openapi";
+import { api } from "../lib/api-client";
+import type { components } from "../types/openapi";
 
 export type Team = components["schemas"]["Team"];
 export type TeamMember = components["schemas"]["TeamMember"];

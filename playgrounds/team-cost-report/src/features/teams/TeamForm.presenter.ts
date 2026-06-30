@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
-import type { Member } from "./Member.api";
-import type { CreateTeamInput } from "./Team.api";
+import type { Member } from "@api/Member.api";
+import type { CreateTeamInput } from "@api/Team.api";
 
 export interface PickedMember {
   memberId: string;

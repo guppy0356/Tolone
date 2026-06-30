@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { ReportDetail } from "../Report.api";
+import type { ReportDetail } from "@api/Report.api";
 
 export interface ReportDetailComponentParams {
   detail: ReportDetail;

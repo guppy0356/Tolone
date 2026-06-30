@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { HTTPError } from "ky";
-import { reportQueries } from "../Report.queries";
-import type { ReportDetail } from "../Report.api";
+import { reportQueries } from "@api/Report.queries";
+import type { ReportDetail } from "@api/Report.api";
 
 export interface ReportDetailContainerParams {
   reportId: string;

@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef } from "react";
-import type { Member } from "./Member.api";
+import type { Member } from "@api/Member.api";
 
 export interface TeamMemberPickerProps {
   open: boolean;

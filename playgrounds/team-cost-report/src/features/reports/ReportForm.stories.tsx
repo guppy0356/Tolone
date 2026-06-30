@@ -7,7 +7,7 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { ReportFormComponent } from "./ReportForm.component";
-import type { Team } from "../teams/Team.api";
+import type { Team } from "@api/Team.api";
 
 const sampleTeams: Team[] = [
   {

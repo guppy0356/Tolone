@@ -49,8 +49,8 @@ Keep this a plain link.
 
 | Layer | File | Form | Responsibility |
 |---|---|---|---|
-| API | `{Resource}.api.ts` | Plain object of functions | HTTP calls via `ky` + type definitions. No query keys |
-| Queries | `{Resource}.queries.ts` | Plain object of factory functions | Query definitions via `queryOptions()` — key + queryFn + shared options, hierarchical (`all` / `list` / `detail`) |
+| API | `src/api/{Resource}.api.ts` | Plain object of functions | HTTP calls via `ky` + type definitions. No query keys |
+| Queries | `src/api/{Resource}.queries.ts` | Plain object of factory functions | Query definitions via `queryOptions()` — key + queryFn + shared options, hierarchical (`all` / `list` / `detail`) |
 | Container | `{Page}.container.tsx` | React component | Wires the container hook to the Component. Calls the container hook + app-shell read hooks (e.g. `useParams`); destructures only fields the Component uses |
 | Container hook | `{Page}.container.hook.ts` | React hook | Server state: `useQuery(featureQueries.x())` + `useMutation`; may hold hook-scoped `useState` for query params. One dedicated container hook per page. Returns `{Page}ContainerState` |
 | Component | `{Page}.component.tsx` | React component (Presentational) | Renders UI; handles loading UI (`isPending` skeleton / `isRefetching` opacity); calls the component hook; calls app-shell action hooks (e.g. `useNavigate`) bound to user interactions |
@@ -63,16 +63,18 @@ The detailed wiring rules (Container/Component/hook responsibilities, routing-ho
 ### Feature file structure
 
 ```
-src/features/{feature-name}/
-├── {Resource}.api.ts                ← shared cache layer (one pair per resource)
-├── {Resource}.queries.ts            ← queryOptions factory (all / list / detail)
-└── {Page}/                          ← one directory per page/route
-    ├── {Page}.container.tsx          ← wires the container hook to the Component
-    ├── {Page}.container.hook.ts      ← server state (one per page)
-    ├── {Page}.component.tsx          ← Component + private memo'd body + private Skeleton
-    ├── {Page}.component.hook.ts      ← local UI state + derived view-model
-    ├── {Page}.component.stories.tsx
-    └── components/                   ← extracted sub-components (concern-named)
+src/
+├── api/                             ← shared cache layer (all resources), imported via @api
+│   ├── {Resource}.api.ts
+│   └── {Resource}.queries.ts        ← queryOptions factory (all / list / detail)
+└── features/{feature-name}/
+    └── {Page}/                       ← one directory per page/route
+        ├── {Page}.container.tsx      ← wires the container hook to the Component
+        ├── {Page}.container.hook.ts  ← server state (one per page)
+        ├── {Page}.component.tsx      ← Component + private memo'd body + private Skeleton
+        ├── {Page}.component.hook.ts  ← local UI state + derived view-model
+        ├── {Page}.component.stories.tsx
+        └── components/               ← extracted sub-components (concern-named)
 ```
 
 ### Testing approach

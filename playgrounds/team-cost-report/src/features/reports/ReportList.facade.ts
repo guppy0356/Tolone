@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { reportQueries } from "./Report.queries";
-import type { ReportSummary } from "./Report.api";
+import { reportQueries } from "@api/Report.queries";
+import type { ReportSummary } from "@api/Report.api";
 
 export interface ReportListFacade {
   reports: ReportSummary[];

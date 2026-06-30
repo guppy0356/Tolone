@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { memberQueries } from "./Member.queries";
-import type { Member } from "./Member.api";
-import { teamQueries } from "./Team.queries";
-import { teamApi, type CreateTeamInput } from "./Team.api";
+import { memberQueries } from "@api/Member.queries";
+import type { Member } from "@api/Member.api";
+import { teamQueries } from "@api/Team.queries";
+import { teamApi, type CreateTeamInput } from "@api/Team.api";
 
 export interface TeamFormFacade {
   addTeam: (input: CreateTeamInput) => Promise<void>;

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { ReportSummary } from "./Report.api";
+import type { ReportSummary } from "@api/Report.api";
 
 export interface ReportListPresenterProps {
   reports: ReportSummary[];

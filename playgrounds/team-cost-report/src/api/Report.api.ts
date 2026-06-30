@@ -1,5 +1,5 @@
-import { api } from "../../lib/api-client";
-import type { components } from "../../types/openapi";
+import { api } from "../lib/api-client";
+import type { components } from "../types/openapi";
 
 export type ReportSummary = components["schemas"]["ReportSummary"];
 export type CreateReportInput = components["schemas"]["CreateReportInput"];

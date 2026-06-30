@@ -1,13 +1,13 @@
 import { useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { teamQueries } from "../teams/Team.queries";
-import type { Team } from "../teams/Team.api";
-import { reportQueries } from "./Report.queries";
+import { teamQueries } from "@api/Team.queries";
+import type { Team } from "@api/Team.api";
+import { reportQueries } from "@api/Report.queries";
 import {
   reportApi,
   type ReportSummary,
   type CreateReportInput,
-} from "./Report.api";
+} from "@api/Report.api";
 
 export interface ReportFormFacade {
   teams: Team[];

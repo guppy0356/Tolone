@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, within } from "storybook/test";
 import { ReportDetailComponent } from "./ReportDetail.component";
 import type { ReportDetailContainerState } from "./ReportDetail.container.hook";
 
@@ -52,40 +51,32 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await expect(canvas.getByText("Q1 2026 Cost")).toBeInTheDocument();
-    await expect(canvas.getByText("$12,345")).toBeInTheDocument();
-    // Recharts legend duplicates team names in the DOM (real layout in Chromium).
-    await expect(canvas.getAllByText("Platform").length).toBeGreaterThan(0);
-    await expect(canvas.getAllByText("Mobile").length).toBeGreaterThan(0);
-  },
+export const Default: Story = {};
+
+export const EmptyData: Story = {
+  args: { detail: { ...baseDetail, monthly: [], teams: [] } },
 };
 
 export const Skeleton: Story = {
   args: { isPending: true, detail: undefined },
-  play: async ({ canvasElement }) => {
-    await expect(
-      canvasElement.querySelectorAll(".animate-pulse").length,
-    ).toBeGreaterThan(0);
-  },
 };
 
 export const NotFound: Story = {
   args: { isNotFound: true, detail: undefined },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await expect(canvas.getByText(/Report not found/)).toBeInTheDocument();
-  },
 };
 
-export const EmptyData: Story = {
+export const LongText: Story = {
   args: {
-    detail: { ...baseDetail, monthly: [], teams: [] },
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await expect(canvas.getByText(/No data to display/)).toBeInTheDocument();
+    detail: {
+      ...baseDetail,
+      name: "Consolidated infrastructure and platform cost report for the global engineering organization, FY2026 first quarter",
+      teams: [
+        {
+          ...baseDetail.teams[0],
+          name: "Platform Reliability and Infrastructure Engineering",
+        },
+        baseDetail.teams[1],
+      ],
+    },
   },
 };

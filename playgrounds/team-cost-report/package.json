@@ -39,7 +39,8 @@
     "typescript": "^6.0.3",
     "vite": "^8.0.16",
     "vite-plugin-checker": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "vitest-browser-react": "catalog:"
   },
   "msw": {
     "workerDirectory": [

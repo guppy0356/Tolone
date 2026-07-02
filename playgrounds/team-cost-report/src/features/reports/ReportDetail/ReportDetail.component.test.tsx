@@ -54,6 +54,15 @@ test("renders name, formatted total, and each team", async () => {
   await expect.element(screen.getByText("Mobile").first()).toBeInTheDocument();
 });
 
+test("keeps content visible but dimmed while refetching", async () => {
+  const screen = await render(
+    <ReportDetailComponent {...baseState} isRefetching />,
+  );
+
+  await expect.element(screen.getByText("Q1 2026 Cost")).toBeInTheDocument();
+  expect(screen.container.querySelector(".opacity-50")).not.toBeNull();
+});
+
 test("shows the skeleton while pending", async () => {
   const screen = await render(
     <ReportDetailComponent {...baseState} isPending detail={undefined} />,

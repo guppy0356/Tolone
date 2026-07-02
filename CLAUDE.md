@@ -27,7 +27,7 @@ pnpm new:playground <name>
 pnpm --filter @tolone/todo generate:api
 ```
 
-No linter is configured. Tests run as Storybook play functions via `@storybook/addon-vitest` in browser mode (Playwright Chromium); there is no jsdom or `@testing-library/*` in scope.
+No linter is configured. Tests run in browser mode (Playwright Chromium): Storybook stories are a visual catalog (no `play`), and behavior lives in `*.test.tsx` run by Vitest via `vitest-browser-react`. No jsdom.
 
 ## Architecture
 
@@ -79,7 +79,7 @@ src/
 
 ### Testing approach
 
-Stories double as tests. Visual states (`Default`, `Empty`, `Skeleton`) and interaction tests (`play` functions) live in the same `{Page}.component.stories.tsx` file, with container-state-shaped props mocked via `fn()` from `storybook/test`. Running `pnpm test` executes every story in browser-mode Vitest, so the same file is both the documentation and the test suite. A story harness that needs live data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key, so the test exercises production wiring. See [docs/architecture.md](./docs/architecture.md#writing-tests) for the full convention.
+Storybook stories (`{Page}.component.stories.tsx`) are a **visual catalog** — states via `args`, **no `play`**. **Behavior** lives in `*.test.tsx`, run by Vitest in browser mode via `vitest-browser-react`. Entry `{Page}.component.tsx` gets a catalog story + a `.test.tsx`; `components/` sub-components get a `.test.tsx` only. `pnpm test` runs both. See [docs/architecture.md](./docs/architecture.md#writing-tests) for the full convention (state menu, placement, anti-patterns).
 
 ## Commit Strategy
 

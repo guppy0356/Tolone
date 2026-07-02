@@ -641,106 +641,100 @@ export const handlers = [
 
 ## Writing Tests
 
-Tests live as Storybook stories in `{Page}.component.stories.tsx`, colocated with the Component in the page directory. Stories serve two purposes:
+Two artifacts, two purposes — kept separate:
 
-- **Visual catalog** — each Component state (populated, empty, loading) is its own story
-- **Interaction tests** — `play` functions assert behavior, executed by `@storybook/addon-vitest` in browser mode (Playwright Chromium)
+- **Stories** (`{Page}.component.stories.tsx`) — a **visual catalog only**: each story renders one state, with **no `play` functions and no assertions**. `@storybook/addon-vitest` still runs every story as a browser-mode render (a crash-free smoke test), and the Storybook UI is where layout is eyeballed.
+- **Behavior tests** (`{Name}.component.test.tsx`) — interaction, branch, and logic assertions, run by Vitest in **browser mode** (Playwright Chromium, the same runner as the stories) via `vitest-browser-react`. No jsdom — the browser is required so layout-dependent UI (e.g. Recharts) actually renders.
 
-There is no jsdom / `@testing-library/react` setup; `pnpm test` runs every story as a browser-mode Vitest test.
+Behavior never lives in a story; a catalog never asserts. `pnpm test` runs both — the stories (as render smoke tests) and the `*.test.tsx` files.
 
-### What to story (and what not to)
+### What gets a story vs a test
 
-- ✅ Component (the exported one in `{Page}.component.tsx`) — covers populated, empty, and skeleton via args (`isPending` / `isFetching` / data)
-- ❌ Container / container hook / component hook / API — these are non-UI or pure wiring; never write stories for them
+| | Story (catalog) | `.test.tsx` (behavior) |
+|---|---|---|
+| Page entry `{Page}.component.tsx` | ✅ catalog states | ✅ branch + interaction behavior |
+| Sub-component in `components/` | ❌ implementation detail | ✅ behavior — incl. ones that can't be storied alone (e.g. a chart needing a sized container) |
+| Container hook / component hook | ❌ | ✅ logic directly (error mapping, derivations) when worth it |
+| Container / API | ❌ | ❌ — pure wiring |
 
-### Minimum coverage per Component
+### Catalog states (per component)
 
-For each `{Page}.component.tsx`, cover its states and each interaction it exposes:
+Pick the states that apply — a menu, not a checklist:
 
-- A populated state (`Default`)
-- An empty state (`Empty`)
-- A loading state (`Skeleton`) — the names are illustrative (a descriptive `TeamsLoading` is fine); what matters is that the loading UI renders
-- One `play`-function story per interaction handler the Component exposes (e.g. `SubmitsNewTodo`)
+- **list**: has-data · empty · loading · (error, if it renders one)
+- **detail**: has-data · loading · 404 / error
+- **form**: default · validation error · submitting
+- **extreme / boundary data** (any type): long text, count boundaries (0 / 1 / many) — the visual stresses only a catalog (or later visual-regression) catches
 
-An **args-driven** Component pins `Empty` / `Skeleton` through args (`args: { isPending: true }`, `args: { todos: [] }`). A **harness-driven** Component — whose story wires a live `useQuery` to demo a controlled-state interaction (`TeamForm` and `TeamMemberPicker` for member search) — can't drive those through args, so it covers `Default` plus the states its harness and `play` stories reach, and isn't required to add args-named `Empty` / `Skeleton`.
+Each state is pinned through `args`; no live data in a story.
 
 ### Story file template
 
 ```tsx
-// Todo/Todo.component.stories.tsx
+// Todo/Todo.component.stories.tsx — catalog only, no play
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, fn, userEvent, within } from "storybook/test";
+import { fn } from "storybook/test";
 import { TodoComponent } from "./Todo.component";
-
-const meta = {
-  title: "features/Todo",
-  component: TodoComponent,
-  args: {
-    todos: [],
-    isPending: false,
-    isFetching: false,
-    addTodo: fn(),
-  },
-} satisfies Meta<typeof TodoComponent>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
 
 const sampleTodos = [
   { id: "1", title: "Test todo", completed: false },
   { id: "2", title: "Done todo", completed: true },
 ];
 
-// --- Visual states ---
-export const Default: Story = {
-  args: { todos: sampleTodos },
-};
+const meta = {
+  title: "features/Todo",
+  component: TodoComponent,
+  args: { todos: [], isPending: false, isFetching: false, addTodo: fn() },
+} satisfies Meta<typeof TodoComponent>;
 
-export const Empty: Story = {
-  args: { todos: [] },
-};
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-export const Skeleton: Story = {
-  args: { isPending: true, todos: [] },
-  play: async ({ canvasElement }) => {
-    await expect(
-      canvasElement.querySelectorAll(".animate-pulse").length,
-    ).toBeGreaterThan(0);
-  },
-};
-
-// --- Interaction tests ---
-export const SubmitsNewTodo: Story = {
-  args: { todos: sampleTodos },
-  play: async ({ args, canvasElement }) => {
-    const canvas = within(canvasElement);
-    const input = canvas.getByPlaceholderText("What needs to be done?");
-    await userEvent.type(input, "New todo");
-    await userEvent.click(canvas.getByText("Add"));
-    await expect(args.addTodo).toHaveBeenCalledWith({ title: "New todo" });
-  },
+export const Default: Story = { args: { todos: sampleTodos } };
+export const Empty: Story = { args: { todos: [] } };
+export const Loading: Story = { args: { isPending: true, todos: [] } };
+export const LongText: Story = {
+  args: { todos: [{ id: "1", title: "A ".repeat(120), completed: false }] },
 };
 ```
 
+```tsx
+// Todo/Todo.component.test.tsx — behavior, browser mode
+// (render/query API illustrative; finalized when the test project is wired)
+import { expect, test, vi } from "vitest";
+import { render } from "vitest-browser-react";
+import { TodoComponent } from "./Todo.component";
+
+test("submits a new todo", async () => {
+  const addTodo = vi.fn();
+  const screen = render(
+    <TodoComponent todos={[]} isPending={false} isFetching={false} addTodo={addTodo} />,
+  );
+  await screen.getByPlaceholder("What needs to be done?").fill("New todo");
+  await screen.getByText("Add").click();
+  expect(addTodo).toHaveBeenCalledWith({ title: "New todo" });
+});
+```
+
+The `*.test.tsx` files run in their own browser-mode Vitest project (globbing `*.test.tsx`, sharing the Playwright provider with the Storybook project). Wire that project + `vitest-browser-react` when a playground adds its first behavior test.
+
 ### Conventions
 
-- **`title`**: `features/{Page}` for page-level stories
-- **Action handler mocks**: declare in `meta.args` with `fn()` from `storybook/test`; each story inherits them. Override per-story only when the call signature differs
-- **Assertions**: import `expect` from `storybook/test`, not `vitest`
-- **DOM queries**: use `within(canvasElement)`, not `screen` (browser-mode Vitest does not expose Testing Library globals)
-- **Global setup** (CSS, providers): in `.storybook/preview.ts`; do not repeat in stories
+- **Story `title`**: `features/{Page}`
+- **Catalog args**: drive every state through `args`; action props take `fn()` from `storybook/test` (for the actions panel, not assertions). No live data in a story
+- **Behavior tests**: `expect` from `vitest`, `render` from `vitest-browser-react`; query through the returned locators
+- **Global setup** (CSS, providers): `.storybook/preview.ts` for stories; the test project's setup file for `.test.tsx`
 
 ### Anti-patterns
 
-- ❌ Calling the container hook directly from a story — pass the Component's container-state props as args instead, or use a story-local hook (see [`storybook: Harness を廃止して Story-local state へ移行する検討`](https://github.com/guppy0356/Tolone/issues/5)) for controlled state pairs
-- ❌ Storying the Container, container hook, component hook, or API — they are non-UI or pure wiring
-- ❌ Importing `vi`, `vitest`, `@testing-library/react`, or `@testing-library/jest-dom` inside a story — they are not in scope and break the browser-mode runner
-- ❌ Hand-writing a query key / `queryFn` in a story harness — consume the Queries factory (`useQuery(featureQueries.list())`) so the test exercises the same wiring as production
+- ❌ A `play` function or any assertion inside a story — stories are catalog-only; behavior goes in `.test.tsx`
+- ❌ A catalog story for a `components/` sub-component — sub-components are covered by `.test.tsx`, not the catalog
+- ❌ Storying the Container / container hook / component hook / API — non-UI or pure wiring
+- ❌ Calling the container hook from a story or a test — pass container-state props directly; if a test truly needs data, consume the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key
 
 ### Browser-mode caveats
 
-- `play` functions verify DOM structure only — CSS layout / color regressions are not caught. Open the Storybook UI to eyeball visual changes
+- Tests verify DOM structure only — CSS layout / color regressions are not caught. Open the Storybook UI (the catalog) to eyeball visual changes
 - Playwright Chromium must be installed once per machine; see [README.md](../README.md#setup) for the setup command
 
 ---

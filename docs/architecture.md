@@ -700,14 +700,13 @@ export const LongText: Story = {
 
 ```tsx
 // Todo/Todo.component.test.tsx — behavior, browser mode
-// (render/query API illustrative; finalized when the test project is wired)
 import { expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import { TodoComponent } from "./Todo.component";
 
 test("submits a new todo", async () => {
   const addTodo = vi.fn();
-  const screen = render(
+  const screen = await render(
     <TodoComponent todos={[]} isPending={false} isFetching={false} addTodo={addTodo} />,
   );
   await screen.getByPlaceholder("What needs to be done?").fill("New todo");
@@ -716,13 +715,13 @@ test("submits a new todo", async () => {
 });
 ```
 
-The `*.test.tsx` files run in their own browser-mode Vitest project (globbing `*.test.tsx`, sharing the Playwright provider with the Storybook project). Wire that project + `vitest-browser-react` when a playground adds its first behavior test.
+The `*.test.tsx` files run in their own browser-mode Vitest project (globbing `*.test.tsx`, sharing the Playwright provider with the Storybook project). Wire that project + `vitest-browser-react` when a playground adds its first behavior test; `expect.element`'s matcher types come from a `/// <reference types="@vitest/browser/matchers" />` in `vite-env.d.ts`. Reference wiring: `playgrounds/team-cost-report/vitest.config.ts`.
 
 ### Conventions
 
 - **Story `title`**: `features/{Page}`
 - **Catalog args**: drive every state through `args`; action props take `fn()` from `storybook/test` (for the actions panel, not assertions). No live data in a story
-- **Behavior tests**: `expect` from `vitest`, `render` from `vitest-browser-react`; query through the returned locators
+- **Behavior tests**: `expect` from `vitest`, `render` from `vitest-browser-react` (async — `await` it); query through the returned locators; assert on the DOM with the retrying `await expect.element(locator)`, and disambiguate repeated text (e.g. a chart legend) with `locator.first()`
 - **Global setup** (CSS, providers): `.storybook/preview.ts` for stories; the test project's setup file for `.test.tsx`
 
 ### Anti-patterns
@@ -790,7 +789,7 @@ Commit after each step. Do not batch multiple steps into one commit.
 6. `{Page}.container.hook.ts` — `use{Page}Container` hook + `{Page}ContainerState` interface (one dedicated container hook per page; `useQuery(featureQueries.x())` + `useMutation`; pick the mutation side-effect pattern — optimistic vs invalidate-only — per the Container Hook Layer section) → **commit**
 7. `{Page}.component.hook.ts` — `use{Page}Component` hook + `{Page}ComponentState` interface (skip this file entirely when the Component has no local state and nothing to derive) → **commit**
 8. `{Page}.component.tsx` — exported `{Page}Component` (container-state-typed props) + private memo'd body + private Skeleton
-9. `{Page}.component.stories.tsx` — visual states (`Default` / `Empty` / `Skeleton`) + `play`-function interaction stories with Pick-narrowed args; a story harness needing data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key; run `pnpm test` to verify → **commit** (Component + stories together)
+9. `{Page}.component.stories.tsx` — catalog states through `args` per the [state menu](#catalog-states-per-component), no `play` — and `{Page}.component.test.tsx` — behavior assertions per [Writing Tests](#writing-tests); a harness needing data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key; run `pnpm test` to verify → **commit** (Component + stories + tests together)
 10. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
 11. `{Page}.container.tsx` — `{Page}Container` calls the container hook, destructures needed fields, passes to Component → **commit**
 12. Wire the feature in `main.tsx` (add route; import `{Page}Container` from `features/{feature}/{Page}/{Page}.container`) → **commit**

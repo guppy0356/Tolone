@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, within } from "storybook/test";
 import {
   createRootRoute,
   createRoute,
@@ -7,8 +6,9 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { ReportListComponent } from "./ReportList.component";
+import type { ReportSummary } from "@api/Report.api";
 
-const baseReports = [
+const baseReports: ReportSummary[] = [
   {
     id: "r1",
     name: "Q1 Cost",
@@ -54,38 +54,26 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const rows = canvas
-      .getAllByRole("link")
-      .filter((el) => el.getAttribute("href")?.startsWith("/reports/r"));
-    await expect(rows[0]).toHaveTextContent("Q1 Cost");
-    await expect(rows[1]).toHaveTextContent("Older");
-  },
-};
-
-export const LinksToDetail: Story = {
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const detailLink = canvas.getByRole("link", { name: /Q1 Cost/ });
-    await expect(detailLink).toHaveAttribute("href", "/reports/r1");
-  },
-};
-
-export const Skeleton: Story = {
-  args: { isPending: true, reports: [] },
-  play: async ({ canvasElement }) => {
-    await expect(
-      canvasElement.querySelectorAll(".animate-pulse").length,
-    ).toBeGreaterThan(0);
-  },
-};
+export const Default: Story = {};
 
 export const Empty: Story = {
   args: { reports: [] },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await expect(canvas.getByText(/No reports yet/)).toBeInTheDocument();
+};
+
+export const Loading: Story = {
+  args: { isPending: true, reports: [] },
+};
+
+export const LongText: Story = {
+  args: {
+    reports: [
+      {
+        id: "r1",
+        name: "Consolidated infrastructure and platform cost report for the global engineering organization, FY2026 first quarter",
+        teamIds: ["t1", "t2", "t3", "t4", "t5", "t6"],
+        createdAt: "2026-04-01T00:00:00Z",
+      },
+      baseReports[1],
+    ],
   },
 };

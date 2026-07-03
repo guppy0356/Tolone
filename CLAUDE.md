@@ -73,6 +73,7 @@ src/
         ├── {Page}.container.hook.ts  ← server state (one per page)
         ├── {Page}.component.tsx      ← Component + private memo'd body + private Skeleton
         ├── {Page}.component.hook.ts  ← local UI state + derived view-model
+        ├── {Page}.schema.ts          ← zod validation contract (form pages only)
         ├── {Page}.component.stories.tsx
         └── components/               ← extracted sub-components (concern-named)
 ```
@@ -91,11 +92,12 @@ Typical commit sequence:
 3. API layer → commit
 4. Queries layer → commit
 5. Container hook layer → commit
-6. Component hook layer → commit
-7. MSW handlers → commit
-8. Component + stories (run `pnpm test` before committing) → commit
-9. Container layer → commit
-10. Wire in main.tsx → commit
+6. zod schema (`{Page}.schema.ts`, form pages only) → commit
+7. Component hook layer → commit
+8. MSW handlers → commit
+9. Component + stories (run `pnpm test` before committing) → commit
+10. Container layer → commit
+11. Wire in main.tsx → commit
 
 ## Future Work
 
@@ -219,7 +221,7 @@ MSW intercepts at the fetch level, so unit tests do not exercise `ky` directly. 
 
 ## Tech Stack
 
-React 19, TanStack Query 5, TanStack Router 1, Vite 8, Vitest 4, Storybook 10 (+ `@storybook/addon-vitest`), Playwright 1, TailwindCSS 4, MSW 2, openapi-msw 2, openapi-typescript 7, ky 2, TypeScript 6, vite-plugin-checker
+React 19, TanStack Query 5, TanStack Router 1, Vite 8, Vitest 4, Storybook 10 (+ `@storybook/addon-vitest`), Playwright 1, TailwindCSS 4, MSW 2, openapi-msw 2, openapi-typescript 7, ky 2, zod 4, react-hook-form 7 (+ `@hookform/resolvers`), TypeScript 6, vite-plugin-checker
 
 ## Workspace Layout
 

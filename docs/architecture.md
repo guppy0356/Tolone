@@ -61,6 +61,7 @@ src/
         ├── {Page}.container.hook.ts        ← one dedicated container hook per page
         ├── {Page}.component.tsx            ← entry + private memo'd body + private Skeleton
         ├── {Page}.component.hook.ts        ← local UI state + derived view-model
+        ├── {Page}.schema.ts                ← zod validation contract (only for pages that validate a form)
         ├── {Page}.component.stories.tsx
         └── components/
             └── {Sub}.component.tsx         ← extracted sub-component (concern-named; + stories when practical)
@@ -550,6 +551,66 @@ export function useTodoComponent({
 }
 ```
 
+#### Form validation (`{Page}.schema.ts`)
+
+When a page validates a form, the validation contract is a **zod schema in a page-owned `{Page}.schema.ts`**. Validation rules and their messages are UI concerns of that page, so the file lives in the page directory — never in `src/api/`, which stays free of UI wording. The form-values type is `z.infer` of the schema (the schema itself is the published contract here, so deriving the type is the point — the named-interface rule targets hook contracts). Pin the schema's output to the API input type with `satisfies z.ZodType<...>` so contract drift surfaces at the schema definition, not at the submit call site.
+
+```ts
+// ReportForm/ReportForm.schema.ts
+import { z } from "zod";
+import type { CreateReportInput } from "@api/Report.api";
+
+export const reportFormSchema = z.object({
+  name: z.string().trim().min(1, "Report name is required"),
+  teamIds: z.array(z.string()).min(1, "Select at least one team"),
+}) satisfies z.ZodType<CreateReportInput>;
+
+export type ReportFormValues = z.infer<typeof reportFormSchema>;
+```
+
+The component hook consumes the schema through react-hook-form's `zodResolver` in `onChange` mode. The library's `formState` replaces hand-written form mechanics — `isValid` is the can-submit condition, `isSubmitting` the in-flight flag — and the submit handler receives the schema's **parsed output**, so normalization (the `.trim()` above) is owned by the schema, not the handler. Fields cross the hook boundary as **plain field objects**, so the Component and its returned `{Page}ComponentState` never import react-hook-form:
+
+```ts
+// ReportForm/ReportForm.component.hook.ts (excerpt)
+export interface ReportFormField {
+  value: string;
+  onChange: (value: string) => void;
+  onBlur: () => void;
+  error: string | undefined;
+}
+
+const {
+  control,
+  handleSubmit: rhfHandleSubmit,
+  reset,
+  formState: { isValid, isSubmitting },
+} = useForm<ReportFormValues>({
+  resolver: zodResolver(reportFormSchema),
+  mode: "onChange",
+  defaultValues: { name: "", teamIds: [] },
+});
+
+const nameCtrl = useController({ name: "name", control });
+const nameField: ReportFormField = {
+  value: nameCtrl.field.value,
+  onChange: (v) => nameCtrl.field.onChange(v),
+  onBlur: nameCtrl.field.onBlur,
+  error: nameCtrl.fieldState.error?.message,
+};
+
+// The parsed output — `name` arrives already trimmed.
+const onSubmit = useCallback(
+  async (data: ReportFormValues) => {
+    const created = await addReport(data);
+    reset({ name: "", teamIds: [] });
+    onSaved(created);
+  },
+  [addReport, reset, onSaved],
+);
+```
+
+A non-text input is still a controlled field: ReportForm's team checkboxes drive a `teamIds: string[]` field through a `toggleTeam(id)` handler that computes the next array and calls the controller's `onChange`.
+
 ---
 
 ## Wiring a Feature Together
@@ -663,7 +724,7 @@ Pick the states that apply — a menu, not a checklist:
 
 - **list**: has-data · empty · loading · (error, if it renders one)
 - **detail**: has-data · loading · 404 / error
-- **form**: default · validation error · submitting
+- **form**: default · empty/loading option sources — validation-error and submitting states live in react-hook-form's internals, not `args`, so they are asserted in behavior tests instead of storied
 - **extreme / boundary data** (any type): long text, count boundaries (0 / 1 / many) — the visual stresses only a catalog (or later visual-regression) catches
 
 Each state is pinned through `args`; no live data in a story.
@@ -787,10 +848,11 @@ Commit after each step. Do not batch multiple steps into one commit.
 4. `src/api/{Resource}.queries.ts` — `{Resource}Queries` `queryOptions()` factory (`all` / `list` / `detail`) over the API functions → **commit**
 5. Create `src/features/{feature-name}/{Page}/` directory
 6. `{Page}.container.hook.ts` — `use{Page}Container` hook + `{Page}ContainerState` interface (one dedicated container hook per page; `useQuery(featureQueries.x())` + `useMutation`; pick the mutation side-effect pattern — optimistic vs invalidate-only — per the Container Hook Layer section) → **commit**
-7. `{Page}.component.hook.ts` — `use{Page}Component` hook + `{Page}ComponentState` interface (skip this file entirely when the Component has no local state and nothing to derive) → **commit**
-8. `{Page}.component.tsx` — exported `{Page}Component` (container-state-typed props) + private memo'd body + private Skeleton
-9. `{Page}.component.stories.tsx` — catalog states through `args` per the [state menu](#catalog-states-per-component), no `play` — and `{Page}.component.test.tsx` — behavior assertions per [Writing Tests](#writing-tests); a harness needing data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key; run `pnpm test` to verify → **commit** (Component + stories + tests together)
-10. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
-11. `{Page}.container.tsx` — `{Page}Container` calls the container hook, destructures needed fields, passes to Component → **commit**
-12. Wire the feature in `main.tsx` (add route; import `{Page}Container` from `features/{feature}/{Page}/{Page}.container`) → **commit**
+7. `{Page}.schema.ts` — zod validation contract + `z.infer` form-values type, output pinned to the API input via `satisfies` (only when the page validates a form) → **commit**
+8. `{Page}.component.hook.ts` — `use{Page}Component` hook + `{Page}ComponentState` interface (skip this file entirely when the Component has no local state and nothing to derive) → **commit**
+9. `{Page}.component.tsx` — exported `{Page}Component` (container-state-typed props) + private memo'd body + private Skeleton
+10. `{Page}.component.stories.tsx` — catalog states through `args` per the [state menu](#catalog-states-per-component), no `play` — and `{Page}.component.test.tsx` — behavior assertions per [Writing Tests](#writing-tests); a harness needing data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key; run `pnpm test` to verify → **commit** (Component + stories + tests together)
+11. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
+12. `{Page}.container.tsx` — `{Page}Container` calls the container hook, destructures needed fields, passes to Component → **commit**
+13. Wire the feature in `main.tsx` (add route; import `{Page}Container` from `features/{feature}/{Page}/{Page}.container`) → **commit**
 ```

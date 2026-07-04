@@ -10,7 +10,7 @@ import {
   redirect,
 } from "@tanstack/react-router";
 import { TeamListContainer } from "./features/teams/TeamList/TeamList.container";
-import { TeamFormContainer } from "./features/teams/TeamForm.container";
+import { TeamFormContainer } from "./features/teams/TeamForm/TeamForm.container";
 import { ReportListContainer } from "./features/reports/ReportList/ReportList.container";
 import { ReportFormContainer } from "./features/reports/ReportForm/ReportForm.container";
 import { ReportDetailContainer } from "./features/reports/ReportDetail/ReportDetail.container";

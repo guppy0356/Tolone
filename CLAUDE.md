@@ -91,7 +91,7 @@ Typical commit sequence:
 2. generate:api (type generation) → commit
 3. API layer → commit
 4. Queries layer → commit
-5. Container hook layer → commit
+5. Container hook layer (+ hook test when worth it — error mapping, hook-scoped query params) → commit
 6. zod schema (`{Page}.schema.ts`, form pages only) → commit
 7. Component hook layer → commit
 8. Component + stories + behavior tests (run `pnpm test` before committing) → commit

@@ -94,8 +94,8 @@ Typical commit sequence:
 5. Container hook layer → commit
 6. zod schema (`{Page}.schema.ts`, form pages only) → commit
 7. Component hook layer → commit
-8. MSW handlers → commit
-9. Component + stories (run `pnpm test` before committing) → commit
+8. Component + stories + behavior tests (run `pnpm test` before committing) → commit
+9. MSW handlers → commit
 10. Container layer → commit
 11. Wire in main.tsx → commit
 

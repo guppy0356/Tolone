@@ -86,7 +86,7 @@ Hook params and return types are **explicit named interfaces**, never `ReturnTyp
 export interface TodoContainerState {
   todos: Todo[];
   isPending: boolean;
-  isFetching: boolean;
+  isRefetching: boolean;
   addTodo: (input: CreateTodoInput) => Promise<void>;
 }
 
@@ -229,7 +229,7 @@ import { todoApi, type Todo, type CreateTodoInput } from "@api/Todo.api";
 export interface TodoContainerState {
   todos: Todo[];
   isPending: boolean;
-  isFetching: boolean;
+  isRefetching: boolean;
   addTodo: (input: CreateTodoInput) => Promise<void>;
   toggleTodo: (id: string, completed: boolean) => Promise<void>;
   deleteTodo: (id: string) => Promise<void>;
@@ -239,7 +239,7 @@ export function useTodoContainer(): TodoContainerState {
   const queryClient = useQueryClient();
 
   const listQuery = todoQueries.list();
-  const { data, isPending, isFetching } = useQuery(listQuery);
+  const { data, isPending, isRefetching } = useQuery(listQuery);
 
   // Optimistic update pattern (used here because the list stays on screen):
   //   onMutate  — cancel queries, snapshot previous, update cache optimistically
@@ -278,7 +278,7 @@ export function useTodoContainer(): TodoContainerState {
   return {
     todos: data ?? [],
     isPending,
-    isFetching,
+    isRefetching,
     addTodo,
     toggleTodo,
     deleteTodo,
@@ -356,12 +356,12 @@ import { useTodoContainer } from "./Todo.container.hook";
 import { TodoComponent } from "./Todo.component";
 
 export function TodoContainer() {
-  const { todos, isPending, isFetching, addTodo } = useTodoContainer();
+  const { todos, isPending, isRefetching, addTodo } = useTodoContainer();
   return (
     <TodoComponent
       todos={todos}
       isPending={isPending}
-      isFetching={isFetching}
+      isRefetching={isRefetching}
       addTodo={addTodo}
     />
   );
@@ -488,13 +488,13 @@ function TodoListSkeleton() {
 export function TodoComponent({
   todos,
   isPending,
-  isFetching,
+  isRefetching,
   addTodo,
-}: Pick<TodoContainerState, "todos" | "isPending" | "isFetching" | "addTodo">) {
+}: Pick<TodoContainerState, "todos" | "isPending" | "isRefetching" | "addTodo">) {
   if (isPending) return <TodoListSkeleton />;
 
   return (
-    <div className={`transition-opacity ${isFetching ? "opacity-50" : ""}`}>
+    <div className={`transition-opacity ${isRefetching ? "opacity-50" : ""}`}>
       <TodoList todos={todos} addTodo={addTodo} />
     </div>
   );
@@ -745,7 +745,7 @@ const sampleTodos = [
 const meta = {
   title: "features/Todo",
   component: TodoComponent,
-  args: { todos: [], isPending: false, isFetching: false, addTodo: fn() },
+  args: { todos: [], isPending: false, isRefetching: false, addTodo: fn() },
 } satisfies Meta<typeof TodoComponent>;
 
 export default meta;
@@ -768,7 +768,7 @@ import { TodoComponent } from "./Todo.component";
 test("submits a new todo", async () => {
   const addTodo = vi.fn();
   const screen = await render(
-    <TodoComponent todos={[]} isPending={false} isFetching={false} addTodo={addTodo} />,
+    <TodoComponent todos={[]} isPending={false} isRefetching={false} addTodo={addTodo} />,
   );
   await screen.getByPlaceholder("What needs to be done?").fill("New todo");
   await screen.getByText("Add").click();

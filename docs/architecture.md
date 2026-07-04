@@ -790,7 +790,8 @@ The `*.test.tsx` files run in their own browser-mode Vitest project (globbing `*
 - ❌ A `play` function or any assertion inside a story — stories are catalog-only; behavior goes in `.test.tsx`
 - ❌ A catalog story for a `components/` sub-component — sub-components are covered by `.test.tsx`, not the catalog
 - ❌ Storying the Container / container hook / component hook / API — non-UI or pure wiring
-- ❌ Calling the container hook from a story or a component test — pass container-state props directly; if a test truly needs data, consume the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key. Behavior owned by the container hook's wiring (e.g. a hook-scoped search keyword reaching the query key, and the server-filtered refetch it triggers) is tested on the hook itself — `renderHook` + the MSW worker — never by rebuilding that wiring in a test harness, which would drift from the real hook
+- ❌ Calling the container hook from a story or a component test — pass container-state props directly; if a test truly needs data, consume the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key
+- ❌ Rebuilding container hook wiring in a component test harness — hook-scoped behavior (e.g. a search keyword reaching the query key and triggering a server-filtered refetch) is tested on the hook itself via `renderHook` + the MSW worker; duplicating that wiring in a test harness drifts from the real hook
 
 ### Browser-mode caveats
 

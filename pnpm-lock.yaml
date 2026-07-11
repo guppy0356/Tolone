@@ -40,8 +40,8 @@ catalogs:
       specifier: ^7.13.0
       version: 7.13.0
     playwright:
-      specifier: ^1.61.0
-      version: 1.61.0
+      specifier: ^1.61.1
+      version: 1.61.1
     react:
       specifier: ^19.2.7
       version: 19.2.7
@@ -140,7 +140,7 @@ importers:
         version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.0)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
+        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       msw:
         specifier: 'catalog:'
         version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
@@ -149,7 +149,7 @@ importers:
         version: 7.13.0(typescript@6.0.3)
       playwright:
         specifier: 'catalog:'
-        version: 1.61.0
+        version: 1.61.1
       storybook:
         specifier: 'catalog:'
         version: 10.4.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -225,7 +225,7 @@ importers:
         version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.0)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
+        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       msw:
         specifier: 'catalog:'
         version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
@@ -234,7 +234,7 @@ importers:
         version: 7.13.0(typescript@6.0.3)
       playwright:
         specifier: 'catalog:'
-        version: 1.61.0
+        version: 1.61.1
       storybook:
         specifier: 'catalog:'
         version: 10.4.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -301,7 +301,7 @@ importers:
         version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.0)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
+        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       msw:
         specifier: 'catalog:'
         version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
@@ -310,7 +310,7 @@ importers:
         version: 7.13.0(typescript@6.0.3)
       playwright:
         specifier: 'catalog:'
-        version: 1.61.0
+        version: 1.61.1
       storybook:
         specifier: 'catalog:'
         version: 10.4.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -377,7 +377,7 @@ importers:
         version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.0)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
+        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       msw:
         specifier: 'catalog:'
         version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
@@ -386,7 +386,7 @@ importers:
         version: 7.13.0(typescript@6.0.3)
       playwright:
         specifier: 'catalog:'
-        version: 1.61.0
+        version: 1.61.1
       storybook:
         specifier: 'catalog:'
         version: 10.4.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -453,7 +453,7 @@ importers:
         version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.0)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
+        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       msw:
         specifier: 'catalog:'
         version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
@@ -462,7 +462,7 @@ importers:
         version: 7.13.0(typescript@6.0.3)
       playwright:
         specifier: 'catalog:'
-        version: 1.61.0
+        version: 1.61.1
       storybook:
         specifier: 'catalog:'
         version: 10.4.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -529,7 +529,7 @@ importers:
         version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.0)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
+        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       msw:
         specifier: 'catalog:'
         version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
@@ -538,7 +538,7 @@ importers:
         version: 7.13.0(typescript@6.0.3)
       playwright:
         specifier: 'catalog:'
-        version: 1.61.0
+        version: 1.61.1
       storybook:
         specifier: 'catalog:'
         version: 10.4.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -617,7 +617,7 @@ importers:
         version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.0)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
+        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       msw:
         specifier: 'catalog:'
         version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
@@ -626,7 +626,7 @@ importers:
         version: 7.13.0(typescript@6.0.3)
       playwright:
         specifier: 'catalog:'
-        version: 1.61.0
+        version: 1.61.1
       storybook:
         specifier: 'catalog:'
         version: 10.4.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -693,7 +693,7 @@ importers:
         version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.0)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
+        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       msw:
         specifier: 'catalog:'
         version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
@@ -702,7 +702,7 @@ importers:
         version: 7.13.0(typescript@6.0.3)
       playwright:
         specifier: 'catalog:'
-        version: 1.61.0
+        version: 1.61.1
       storybook:
         specifier: 'catalog:'
         version: 10.4.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -781,7 +781,7 @@ importers:
         version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.0)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
+        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       msw:
         specifier: 'catalog:'
         version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
@@ -790,7 +790,7 @@ importers:
         version: 7.13.0(typescript@6.0.3)
       playwright:
         specifier: 'catalog:'
-        version: 1.61.0
+        version: 1.61.1
       storybook:
         specifier: 'catalog:'
         version: 10.4.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -857,7 +857,7 @@ importers:
         version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.0)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
+        version: 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       msw:
         specifier: 'catalog:'
         version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
@@ -869,7 +869,7 @@ importers:
         version: 7.13.0(typescript@6.0.3)
       playwright:
         specifier: 'catalog:'
-        version: 1.61.0
+        version: 1.61.1
       storybook:
         specifier: 'catalog:'
         version: 10.4.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -2853,13 +2853,13 @@ packages:
     resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
     engines: {node: '>=12'}
 
-  playwright-core@1.61.0:
-    resolution: {integrity: sha512-caX7TrY3Ml6egyDX0WUcTHDxodl/b51y5wJOdCEA36QviK/s2g081hvmGs8eaE3DWb6NYZQ6BjO/QkNRPenoPA==}
+  playwright-core@1.61.1:
+    resolution: {integrity: sha512-h7Qlt6m4REp25qvIdvbDtVmD4LqVXfpRxhORv9L0jzETM05p4fuPJ3dKyuSXQxDSbXnmS79HAgi9589lGSpLkg==}
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright@1.61.0:
-    resolution: {integrity: sha512-Z+7BeeqQPRRzklHsVFP4KTGIyMxKUmfeRA4WisM6G3/XW6nwGeX6fX9qYaDa+CiUqpOkb2f6X3nar05R3kSuJQ==}
+  playwright@1.61.1:
+    resolution: {integrity: sha512-DWnY5o3YbLWK4GovuAVwpqL+1VwGNdUGrRr++8j8PtQQzvAVZUIMjKQ90fY689sEJZJBbZVw1rXaOKSTitkzPQ==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -4099,7 +4099,7 @@ snapshots:
       storybook: 10.4.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
     optionalDependencies:
       '@vitest/browser': 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
-      '@vitest/browser-playwright': 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.0)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
+      '@vitest/browser-playwright': 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       '@vitest/runner': 4.1.9
       vitest: 4.1.9(@types/node@25.6.0)(@vitest/browser-playwright@4.1.9)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))
     transitivePeerDependencies:
@@ -4402,11 +4402,11 @@ snapshots:
       '@rolldown/pluginutils': 1.0.1
       vite: 8.0.16(@types/node@25.6.0)(jiti@2.7.0)
 
-  '@vitest/browser-playwright@4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.0)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)':
+  '@vitest/browser-playwright@4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)':
     dependencies:
       '@vitest/browser': 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       '@vitest/mocker': 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))
-      playwright: 1.61.0
+      playwright: 1.61.1
       tinyrainbow: 3.1.0
       vitest: 4.1.9(@types/node@25.6.0)(@vitest/browser-playwright@4.1.9)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))
     transitivePeerDependencies:
@@ -5121,11 +5121,11 @@ snapshots:
 
   picomatch@4.0.4: {}
 
-  playwright-core@1.61.0: {}
+  playwright-core@1.61.1: {}
 
-  playwright@1.61.0:
+  playwright@1.61.1:
     dependencies:
-      playwright-core: 1.61.0
+      playwright-core: 1.61.1
     optionalDependencies:
       fsevents: 2.3.2
 
@@ -5565,7 +5565,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 25.6.0
-      '@vitest/browser-playwright': 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.0)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
+      '@vitest/browser-playwright': 4.1.9(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.0.16(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.9)
       jsdom: 29.1.1
     transitivePeerDependencies:
       - msw

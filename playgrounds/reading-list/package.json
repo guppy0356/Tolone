@@ -17,11 +17,11 @@
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@tanstack/zod-adapter": "^1.166.0",
+    "ky": "catalog:",
     "openapi-msw": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-hook-form": "^7.80.0",
-    "ky": "catalog:",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -31,7 +31,7 @@
     "@tolone/tailwind": "workspace:*",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
+    "@vitejs/plugin-react": "^6.0.3",
     "@vitest/browser": "catalog:",
     "@vitest/browser-playwright": "catalog:",
     "msw": "catalog:",

@@ -727,7 +727,7 @@ Pick the states that apply — a menu, not a checklist:
 - **form**: default · empty/loading option sources — validation-error and submitting states live in react-hook-form's internals, not `args`, so they are asserted in behavior tests instead of storied
 - **extreme / boundary data** (any type): long text, count boundaries (0 / 1 / many) — the visual stresses only a catalog (or later visual-regression) catches
 
-Each state is pinned through `args`; no live data in a story.
+Each state is pinned through `args`; no live data in a story. A catalog state must therefore be reachable through `args` alone — a state that surfaces only after an interaction (opening a disclosure) or that lives in form/hook-internal state has no catalog entry and is covered by behavior tests instead.
 
 ### Story file template
 

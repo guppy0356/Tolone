@@ -7,8 +7,8 @@ import {
 } from "./TeamMemberList.component";
 
 const picked: PickedMember[] = [
-  { memberId: "m1", name: "Ada Lovelace", hourlyRate: 120 },
-  { memberId: "m2", name: "Alan Turing", hourlyRate: 0 },
+  { memberId: "m1", name: "Ada Lovelace", hourlyRate: 120, rateError: undefined },
+  { memberId: "m2", name: "Alan Turing", hourlyRate: 0, rateError: undefined },
 ];
 
 async function renderList(overrides: Partial<TeamMemberListProps> = {}) {
@@ -68,4 +68,29 @@ test("reports the removal of a member", async () => {
   await screen.getByRole("button", { name: "Remove Ada Lovelace" }).click();
 
   expect(props.onRemove).toHaveBeenCalledWith("m1");
+});
+
+test("shows the rate error only on the row that carries it", async () => {
+  const { screen } = await renderList({
+    picked: [
+      { memberId: "m1", name: "Ada Lovelace", hourlyRate: 120, rateError: undefined },
+      {
+        memberId: "m2",
+        name: "Alan Turing",
+        hourlyRate: 0,
+        rateError: "Hourly rate must be greater than 0",
+      },
+    ],
+  });
+
+  // getByText matching a single element also proves Ada's row omits it.
+  await expect
+    .element(screen.getByText("Hourly rate must be greater than 0"))
+    .toBeInTheDocument();
+  await expect
+    .element(screen.getByLabelText("Hourly rate for Alan Turing"))
+    .toHaveAttribute("aria-invalid", "true");
+  await expect
+    .element(screen.getByLabelText("Hourly rate for Ada Lovelace"))
+    .not.toHaveAttribute("aria-invalid");
 });

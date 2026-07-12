@@ -16,11 +16,13 @@ export interface TeamFormField {
 // View model for the picked-members list. The form value carries only the
 // API contract ({ memberId, hourlyRate }); the display name is recorded when
 // the member is picked, because the member may have dropped out of the
-// server-filtered candidates since.
+// server-filtered candidates since. `rateError` is the per-row validation
+// message (plain string), so the rhf error object never crosses the boundary.
 export interface PickedMember {
   memberId: string;
   name: string;
   hourlyRate: number;
+  rateError: string | undefined;
 }
 
 export interface TeamFormComponentParams {
@@ -76,17 +78,30 @@ export function useTeamFormComponent({
   const membersCtrl = useController({ name: "members", control });
   const pickedInputs = membersCtrl.field.value;
 
+  // react-hook-form keeps two error shapes on this one field. The array-level
+  // min(1) error arrives as a `.message`; per-element errors (a member's
+  // non-positive rate) arrive as an array indexed by position. They never
+  // coexist — min(1) only fails on an empty array — so both are read off the
+  // same field state, the per-element one by indexing it as an array.
+  const membersFieldError = membersCtrl.fieldState.error;
+  const rateErrors = membersFieldError as unknown as
+    | ({ hourlyRate?: { message?: string } } | undefined)[]
+    | undefined;
+
   // Names of everyone picked so far, keyed by id — kept outside the form
   // values so the submitted payload stays exactly the API contract.
   const [memberNames, setMemberNames] = useState<Record<string, string>>({});
 
   const picked = useMemo(
     () =>
-      pickedInputs.map((m) => ({
+      pickedInputs.map((m, i) => ({
         ...m,
         name: memberNames[m.memberId] ?? m.memberId,
+        rateError: Array.isArray(rateErrors)
+          ? rateErrors[i]?.hourlyRate?.message
+          : undefined,
       })),
-    [pickedInputs, memberNames],
+    [pickedInputs, memberNames, rateErrors],
   );
 
   // getValues/setValue are referentially stable, so these callbacks stay
@@ -162,7 +177,7 @@ export function useTeamFormComponent({
   return {
     nameField,
     picked,
-    membersError: membersCtrl.fieldState.error?.message,
+    membersError: membersFieldError?.message,
     addMember,
     removeMember,
     setRate,

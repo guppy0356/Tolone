@@ -24,43 +24,51 @@ export const TeamMemberList = memo(function TeamMemberList({
       {picked.map((p) => (
         <li
           key={p.memberId}
-          className="flex items-center gap-3 rounded border border-gray-200 bg-white p-2.5"
+          className="rounded border border-gray-200 bg-white p-2.5"
         >
-          <span className="flex-1 text-sm text-gray-800">{p.name}</span>
-          <label className="flex items-center gap-1 text-sm text-gray-600">
-            <span>$</span>
-            <input
-              type="number"
-              min={0}
-              step={1}
-              value={p.hourlyRate || ""}
-              onChange={(e) => handleRateChange(p.memberId, e.target.value)}
-              placeholder="rate"
-              aria-label={`Hourly rate for ${p.name}`}
-              className="w-24 rounded border border-gray-300 px-2 py-1 text-right focus:border-blue-400 focus:outline-none"
-            />
-            <span>/h</span>
-          </label>
-          <button
-            type="button"
-            aria-label={`Remove ${p.name}`}
-            onClick={() => onRemove(p.memberId)}
-            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-          >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
+          <div className="flex items-center gap-3">
+            <span className="flex-1 text-sm text-gray-800">{p.name}</span>
+            <label className="flex items-center gap-1 text-sm text-gray-600">
+              <span>$</span>
+              <input
+                type="number"
+                min={0}
+                step={1}
+                value={p.hourlyRate || ""}
+                onChange={(e) => handleRateChange(p.memberId, e.target.value)}
+                placeholder="rate"
+                aria-label={`Hourly rate for ${p.name}`}
+                aria-invalid={p.rateError ? true : undefined}
+                className="w-24 rounded border border-gray-300 px-2 py-1 text-right focus:border-blue-400 focus:outline-none"
               />
-            </svg>
-          </button>
+              <span>/h</span>
+            </label>
+            <button
+              type="button"
+              aria-label={`Remove ${p.name}`}
+              onClick={() => onRemove(p.memberId)}
+              className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+            >
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+          {p.rateError && (
+            <p className="mt-1 text-right text-sm text-red-500">
+              {p.rateError}
+            </p>
+          )}
         </li>
       ))}
     </ul>

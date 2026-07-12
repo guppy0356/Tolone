@@ -111,6 +111,22 @@ test("surfaces schema errors once a field goes invalid", async () => {
     .toBeInTheDocument();
 });
 
+test("surfaces a per-member rate error until a positive rate is entered", async () => {
+  const { screen } = await renderForm();
+
+  // A freshly added member enters with rate 0, so the per-row error shows at once.
+  await screen.getByRole("button", { name: "+ Add member" }).click();
+  await screen.getByText("Ada Lovelace").click();
+  await expect
+    .element(screen.getByText("Hourly rate must be greater than 0"))
+    .toBeInTheDocument();
+
+  await screen.getByLabelText("Hourly rate for Ada Lovelace").fill("120");
+  await expect
+    .element(screen.getByText("Hourly rate must be greater than 0"))
+    .not.toBeInTheDocument();
+});
+
 test("disables the button and shows progress while saving", async () => {
   const addTeam = vi.fn((): Promise<void> => new Promise(() => {}));
   const { screen } = await renderForm({ addTeam });

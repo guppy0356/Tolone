@@ -148,4 +148,5 @@ test("shows the teams skeleton while teams load", async () => {
   expect(
     screen.container.querySelectorAll(".animate-pulse").length,
   ).toBeGreaterThan(0);
+  expect(screen.container.textContent).not.toContain("No teams available");
 });

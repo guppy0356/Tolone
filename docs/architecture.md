@@ -52,11 +52,15 @@ The **shared cache layer** (`{Resource}.api.ts` + `{Resource}.queries.ts`, one p
 
 ```
 src/
+├── main.tsx                        ← bootstrap only: QueryClient, MSW, render
+├── root.route.tsx                  ← root route: layout shell + redirects; imports no page code
+├── router.ts                       ← route tree (page-granular list) + Register declaration
 ├── api/                            ← shared cache layer (all resources), imported via @api
 │   ├── {Resource}.api.ts
 │   └── {Resource}.queries.ts       ← queryOptions factory, consumed by every page
 └── features/{feature-name}/
     └── {Page}/                     ← one directory per page/route
+        ├── {Page}.route.ts                 ← the page's URL: path + Container reference only
         ├── {Page}.container.tsx
         ├── {Page}.container.hook.ts        ← one dedicated container hook per page
         ├── {Page}.component.tsx            ← entry + private memo'd body + private Skeleton
@@ -73,7 +77,7 @@ One feature can have several pages over the same resource — a list, a detail, 
 
 `{Resource}` is **singular**, shared across the resource's files and symbols — `Member.api.ts` / `memberApi` / `memberQueries` / type `Member` — even though the endpoint (`/members`) and `getAll` return a collection. `{Page}` is singular-based too: `ReportDetail`, `TeamForm`.
 
-App-shell chrome lives **outside** the page directories. Navigation, the page layout, and route redirects are not a feature: a chrome-only component like `nav/Nav.component.tsx` has no container / component hook / container and no stories, and the layout shell plus redirects live in `main.tsx`'s root route.
+App-shell chrome lives **outside** the page directories. Navigation, the page layout, and route redirects are not a feature: a chrome-only component like `nav/Nav.component.tsx` has no container / component hook / container and no stories, and the layout shell plus redirects live in the root route module (`root.route.tsx`).
 
 ---
 
@@ -615,36 +619,66 @@ A non-text input is still a controlled field: ReportForm's team checkboxes drive
 
 ## Wiring a Feature Together
 
-Each Container (defined in its own `{Page}/{Page}.container.tsx` — see the Container Layer section) is mounted on a route in `main.tsx`, which also provides the `QueryClient`. Containers that read a URL param do so with `useParams`, shown in the Container Layer section and not repeated here.
+Routing is code-based and page-owned. Each page directory declares its own URL in `{Page}.route.ts` — the path and the Container reference, nothing else; data stays in the Queries layer and container hooks. Three `src/`-level modules divide the rest: `root.route.tsx` owns the app shell (layout + redirects) and imports no page code — page route files import `rootRoute` back, so an import in the other direction is a cycle (chrome like `Nav` is safe: it never imports a route). `router.ts` composes every page route into the tree — its `addChildren` list is the app's page-granular sitemap — and registers the router type, which is what makes `Link` / `useNavigate` / `useParams({ from })` strings type-checked against the tree. `main.tsx` only bootstraps. Why code-based rather than the file-based default: [ADR 0001](adr/0001-route-definition-placement.md).
 
 ```tsx
-// main.tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  createRouter,
-  createRootRoute,
-  createRoute,
-  RouterProvider,
-} from "@tanstack/react-router";
-import { TodoContainer } from "./features/todo/Todo/Todo.container";
+// root.route.tsx
+import { createRootRoute, Outlet } from "@tanstack/react-router";
 
-const queryClient = new QueryClient();
-const rootRoute = createRootRoute();
+export const rootRoute = createRootRoute({
+  component: () => (
+    <main>
+      <Outlet />
+    </main>
+  ),
+});
+```
 
-const indexRoute = createRoute({
+```ts
+// features/todo/Todo/Todo.route.ts
+import { createRoute } from "@tanstack/react-router";
+import { rootRoute } from "../../../root.route";
+import { TodoContainer } from "./Todo.container";
+
+export const todoRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
   component: TodoContainer,
 });
+```
 
-const routeTree = rootRoute.addChildren([indexRoute]);
-const router = createRouter({ routeTree });
+```ts
+// router.ts
+import { createRouter } from "@tanstack/react-router";
+import { rootRoute } from "./root.route";
+import { todoRoute } from "./features/todo/Todo/Todo.route";
+
+const routeTree = rootRoute.addChildren([todoRoute]);
+
+export const router = createRouter({ routeTree });
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
+```
+
+```tsx
+// main.tsx
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { RouterProvider } from "@tanstack/react-router";
+import { router } from "./router";
+
+const queryClient = new QueryClient();
 
 // Inside render:
 <QueryClientProvider client={queryClient}>
   <RouterProvider router={router} />
 </QueryClientProvider>
 ```
+
+Containers that read a URL param do so with `useParams`, shown in the Container Layer section and not repeated here.
 
 ---
 
@@ -716,7 +750,7 @@ Behavior never lives in a story; a catalog never asserts. `pnpm test` runs both 
 | Page entry `{Page}.component.tsx` | ✅ catalog states | ✅ branch + interaction behavior |
 | Sub-component in `components/` | ❌ implementation detail | ✅ behavior — incl. ones that can't be storied alone (e.g. a chart needing a sized container) |
 | Container hook / component hook | ❌ | ✅ logic directly (error mapping, derivations, hook-scoped query params) when worth it |
-| Container / API | ❌ | ❌ — pure wiring |
+| Container / API / {Page}.route.ts | ❌ | ❌ — pure wiring |
 
 ### Catalog states (per component)
 
@@ -855,5 +889,5 @@ Commit after each step. Do not batch multiple steps into one commit.
 10. `{Page}.component.stories.tsx` — catalog states through `args` per the [state menu](#catalog-states-per-component), no `play` — and `{Page}.component.test.tsx` — behavior assertions per [Writing Tests](#writing-tests); a harness needing data consumes the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key; run `pnpm test` to verify → **commit** (Component + stories + tests together)
 11. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
 12. `{Page}.container.tsx` — `{Page}Container` calls the container hook, destructures needed fields, passes to Component → **commit**
-13. Wire the feature in `main.tsx` (add route; import `{Page}Container` from `features/{feature}/{Page}/{Page}.container`) → **commit**
+13. Wire the route: `{Page}.route.ts` (path + `{Page}Container`) + add it to `router.ts`'s `addChildren` list → **commit**
 ```

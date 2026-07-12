@@ -69,6 +69,7 @@ src/
 │   └── {Resource}.queries.ts        ← queryOptions factory (all / list / detail)
 └── features/{feature-name}/
     └── {Page}/                       ← one directory per page/route
+        ├── {Page}.route.ts           ← route definition: path + Container (registered in src/router.ts)
         ├── {Page}.container.tsx      ← wires the container hook to the Component
         ├── {Page}.container.hook.ts  ← server state (one per page)
         ├── {Page}.component.tsx      ← Component + private memo'd body + private Skeleton
@@ -97,7 +98,7 @@ Typical commit sequence:
 8. Component + stories + behavior tests (run `pnpm test` before committing) → commit
 9. MSW handlers → commit
 10. Container layer → commit
-11. Wire in main.tsx → commit
+11. Route wiring ({Page}.route.ts + router.ts registration) → commit
 
 ## Future Work
 
@@ -229,3 +230,4 @@ React 19, TanStack Query 5, TanStack Router 1, Vite 8, Vitest 4, Storybook 10 (+
 - `packages/tailwind/` — shared TailwindCSS base styles
 - `scripts/` — scaffold generators
 - `docs/architecture.md` — full architecture specification (authoritative reference)
+- `docs/adr/` — architecture decision records (why a convention is what it is; revisit triggers)

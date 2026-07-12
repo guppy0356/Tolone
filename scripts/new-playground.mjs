@@ -185,22 +185,18 @@ const indexHtml = `<!doctype html>
 </html>
 `;
 
-const mainTsx = `import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  createRouter,
-  createRootRoute,
-  createRoute,
-  RouterProvider,
-} from "@tanstack/react-router";
-import "./app.css";
+const rootRouteTsx = `import { createRootRoute, createRoute, Outlet } from "@tanstack/react-router";
 
-const queryClient = new QueryClient();
+export const rootRoute = createRootRoute({
+  component: () => (
+    <main>
+      <Outlet />
+    </main>
+  ),
+});
 
-const rootRoute = createRootRoute();
-
-const indexRoute = createRoute({
+// Placeholder until the first feature page registers its own route.
+export const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
   component: () => (
@@ -209,9 +205,30 @@ const indexRoute = createRoute({
     </div>
   ),
 });
+`;
+
+const routerTs = `import { createRouter } from "@tanstack/react-router";
+import { rootRoute, indexRoute } from "./root.route";
 
 const routeTree = rootRoute.addChildren([indexRoute]);
-const router = createRouter({ routeTree });
+
+export const router = createRouter({ routeTree });
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
+`;
+
+const mainTsx = `import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { RouterProvider } from "@tanstack/react-router";
+import { router } from "./router";
+import "./app.css";
+
+const queryClient = new QueryClient();
 
 async function enableMocking() {
   const { worker } = await import("./mocks/browser");
@@ -260,6 +277,8 @@ const files = [
   [join(root, "vitest.config.ts"), vitestConfig],
   [join(root, "index.html"), indexHtml],
   [join(root, "src", "main.tsx"), mainTsx],
+  [join(root, "src", "root.route.tsx"), rootRouteTsx],
+  [join(root, "src", "router.ts"), routerTs],
   [join(root, "src", "app.css"), appCss],
   [join(root, "src", "vite-env.d.ts"), viteEnvDts],
   [join(root, "src", "lib", "api-client.ts"), apiClient],

@@ -1,7 +1,8 @@
 import { createRouter } from "@tanstack/react-router";
-import { rootRoute, indexRoute } from "./root.route";
+import { rootRoute } from "./root.route";
+import { galleryRoute } from "./features/gallery/Gallery/Gallery.route";
 
-const routeTree = rootRoute.addChildren([indexRoute]);
+const routeTree = rootRoute.addChildren([galleryRoute]);
 
 export const router = createRouter({ routeTree });
 

@@ -65,7 +65,5 @@ test("useGalleryComponent keeps every photo exactly once across columns", async 
   const { result } = await renderHook(() => useGalleryComponent({ photos }));
 
   const ids = result.current.columns.flat().map((p) => p.id);
-  expect(ids.toSorted()).toEqual(
-    photos.map((p) => p.id).toSorted(),
-  );
+  expect([...ids].sort()).toEqual(photos.map((p) => p.id).sort());
 });

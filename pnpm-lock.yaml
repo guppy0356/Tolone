@@ -31,8 +31,8 @@ catalogs:
       specifier: ^2.0.2
       version: 2.0.2
     msw:
-      specifier: ^2.14.6
-      version: 2.14.6
+      specifier: ^2.15.0
+      version: 2.15.0
     openapi-msw:
       specifier: ^2.0.0
       version: 2.0.0
@@ -100,7 +100,7 @@ importers:
         version: 2.0.2
       openapi-msw:
         specifier: 'catalog:'
-        version: 2.0.0(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))
+        version: 2.0.0(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))
       react:
         specifier: 'catalog:'
         version: 19.2.7
@@ -116,7 +116,7 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
+        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
       '@storybook/react-vite':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
@@ -137,13 +137,13 @@ importers:
         version: 6.0.3(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       '@vitest/browser':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       msw:
         specifier: 'catalog:'
-        version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
+        version: 2.15.0(@types/node@25.6.0)(typescript@6.0.3)
       openapi-typescript:
         specifier: 'catalog:'
         version: 7.13.0(typescript@6.0.3)
@@ -167,7 +167,7 @@ importers:
         version: 0.14.4(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
 
   playgrounds/blog:
     dependencies:
@@ -185,7 +185,7 @@ importers:
         version: 2.0.2
       openapi-msw:
         specifier: 'catalog:'
-        version: 2.0.0(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))
+        version: 2.0.0(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))
       react:
         specifier: 'catalog:'
         version: 19.2.7
@@ -201,7 +201,7 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
+        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
       '@storybook/react-vite':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
@@ -222,13 +222,13 @@ importers:
         version: 6.0.3(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       '@vitest/browser':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       msw:
         specifier: 'catalog:'
-        version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
+        version: 2.15.0(@types/node@25.6.0)(typescript@6.0.3)
       openapi-typescript:
         specifier: 'catalog:'
         version: 7.13.0(typescript@6.0.3)
@@ -252,7 +252,7 @@ importers:
         version: 0.14.4(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
 
   playgrounds/family-todo:
     dependencies:
@@ -267,7 +267,7 @@ importers:
         version: 2.0.2
       openapi-msw:
         specifier: 'catalog:'
-        version: 2.0.0(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))
+        version: 2.0.0(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))
       react:
         specifier: 'catalog:'
         version: 19.2.7
@@ -277,7 +277,7 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
+        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
       '@storybook/react-vite':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
@@ -298,13 +298,13 @@ importers:
         version: 6.0.3(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       '@vitest/browser':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       msw:
         specifier: 'catalog:'
-        version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
+        version: 2.15.0(@types/node@25.6.0)(typescript@6.0.3)
       openapi-typescript:
         specifier: 'catalog:'
         version: 7.13.0(typescript@6.0.3)
@@ -328,7 +328,7 @@ importers:
         version: 0.14.4(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
 
   playgrounds/novel:
     dependencies:
@@ -343,7 +343,7 @@ importers:
         version: 2.0.2
       openapi-msw:
         specifier: 'catalog:'
-        version: 2.0.0(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))
+        version: 2.0.0(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))
       react:
         specifier: 'catalog:'
         version: 19.2.7
@@ -353,7 +353,7 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
+        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
       '@storybook/react-vite':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
@@ -374,13 +374,13 @@ importers:
         version: 6.0.3(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       '@vitest/browser':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       msw:
         specifier: 'catalog:'
-        version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
+        version: 2.15.0(@types/node@25.6.0)(typescript@6.0.3)
       openapi-typescript:
         specifier: 'catalog:'
         version: 7.13.0(typescript@6.0.3)
@@ -404,7 +404,7 @@ importers:
         version: 0.14.4(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
 
   playgrounds/pat:
     dependencies:
@@ -419,7 +419,7 @@ importers:
         version: 2.0.2
       openapi-msw:
         specifier: 'catalog:'
-        version: 2.0.0(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))
+        version: 2.0.0(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))
       react:
         specifier: 'catalog:'
         version: 19.2.7
@@ -429,7 +429,7 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
+        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
       '@storybook/react-vite':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
@@ -450,13 +450,13 @@ importers:
         version: 6.0.3(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       '@vitest/browser':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       msw:
         specifier: 'catalog:'
-        version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
+        version: 2.15.0(@types/node@25.6.0)(typescript@6.0.3)
       openapi-typescript:
         specifier: 'catalog:'
         version: 7.13.0(typescript@6.0.3)
@@ -480,7 +480,7 @@ importers:
         version: 0.14.4(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
 
   playgrounds/photo-gallery:
     dependencies:
@@ -495,7 +495,7 @@ importers:
         version: 2.0.2
       openapi-msw:
         specifier: 'catalog:'
-        version: 2.0.0(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))
+        version: 2.0.0(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))
       react:
         specifier: 'catalog:'
         version: 19.2.7
@@ -505,7 +505,7 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
+        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
       '@storybook/react-vite':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
@@ -526,13 +526,13 @@ importers:
         version: 6.0.3(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       '@vitest/browser':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       msw:
         specifier: 'catalog:'
-        version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
+        version: 2.15.0(@types/node@25.6.0)(typescript@6.0.3)
       openapi-typescript:
         specifier: 'catalog:'
         version: 7.13.0(typescript@6.0.3)
@@ -556,7 +556,7 @@ importers:
         version: 0.14.4(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       vitest-browser-react:
         specifier: 'catalog:'
         version: 2.2.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(vitest@4.1.10)
@@ -574,7 +574,7 @@ importers:
         version: 2.0.2
       openapi-msw:
         specifier: 'catalog:'
-        version: 2.0.0(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))
+        version: 2.0.0(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))
       react:
         specifier: 'catalog:'
         version: 19.2.7
@@ -584,7 +584,7 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
+        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
       '@storybook/react-vite':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
@@ -605,13 +605,13 @@ importers:
         version: 6.0.3(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       '@vitest/browser':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       msw:
         specifier: 'catalog:'
-        version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
+        version: 2.15.0(@types/node@25.6.0)(typescript@6.0.3)
       openapi-typescript:
         specifier: 'catalog:'
         version: 7.13.0(typescript@6.0.3)
@@ -635,7 +635,7 @@ importers:
         version: 0.14.4(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
 
   playgrounds/reading-list:
     dependencies:
@@ -656,7 +656,7 @@ importers:
         version: 2.0.2
       openapi-msw:
         specifier: 'catalog:'
-        version: 2.0.0(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))
+        version: 2.0.0(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))
       react:
         specifier: 'catalog:'
         version: 19.2.7
@@ -672,7 +672,7 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
+        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
       '@storybook/react-vite':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
@@ -693,13 +693,13 @@ importers:
         version: 6.0.3(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       '@vitest/browser':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       msw:
         specifier: 'catalog:'
-        version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
+        version: 2.15.0(@types/node@25.6.0)(typescript@6.0.3)
       openapi-typescript:
         specifier: 'catalog:'
         version: 7.13.0(typescript@6.0.3)
@@ -723,7 +723,7 @@ importers:
         version: 0.14.4(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
 
   playgrounds/rice-catalog:
     dependencies:
@@ -738,7 +738,7 @@ importers:
         version: 2.0.2
       openapi-msw:
         specifier: 'catalog:'
-        version: 2.0.0(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))
+        version: 2.0.0(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))
       react:
         specifier: 'catalog:'
         version: 19.2.7
@@ -748,7 +748,7 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
+        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
       '@storybook/react-vite':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
@@ -769,13 +769,13 @@ importers:
         version: 6.0.3(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       '@vitest/browser':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       msw:
         specifier: 'catalog:'
-        version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
+        version: 2.15.0(@types/node@25.6.0)(typescript@6.0.3)
       openapi-typescript:
         specifier: 'catalog:'
         version: 7.13.0(typescript@6.0.3)
@@ -799,7 +799,7 @@ importers:
         version: 0.14.4(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
 
   playgrounds/team-cost-report:
     dependencies:
@@ -817,7 +817,7 @@ importers:
         version: 2.0.2
       openapi-msw:
         specifier: 'catalog:'
-        version: 2.0.0(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))
+        version: 2.0.0(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))
       react:
         specifier: 'catalog:'
         version: 19.2.7
@@ -836,7 +836,7 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
+        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
       '@storybook/react-vite':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
@@ -857,13 +857,13 @@ importers:
         version: 6.0.3(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       '@vitest/browser':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       msw:
         specifier: 'catalog:'
-        version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
+        version: 2.15.0(@types/node@25.6.0)(typescript@6.0.3)
       openapi-typescript:
         specifier: 'catalog:'
         version: 7.13.0(typescript@6.0.3)
@@ -887,7 +887,7 @@ importers:
         version: 0.14.4(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       vitest-browser-react:
         specifier: 'catalog:'
         version: 2.2.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(vitest@4.1.10)
@@ -912,7 +912,7 @@ importers:
     devDependencies:
       '@storybook/addon-vitest':
         specifier: 'catalog:'
-        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
+        version: 10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)
       '@storybook/react-vite':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rollup@4.60.3)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
@@ -933,16 +933,16 @@ importers:
         version: 6.0.3(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       '@vitest/browser':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       '@vitest/browser-playwright':
         specifier: 'catalog:'
-        version: 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+        version: 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       msw:
         specifier: 'catalog:'
-        version: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
+        version: 2.15.0(@types/node@25.6.0)(typescript@6.0.3)
       openapi-msw:
         specifier: 'catalog:'
-        version: 2.0.0(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))
+        version: 2.0.0(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))
       openapi-typescript:
         specifier: 'catalog:'
         version: 7.13.0(typescript@6.0.3)
@@ -966,7 +966,7 @@ importers:
         version: 0.14.4(typescript@6.0.3)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+        version: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
 
 packages:
 
@@ -2847,8 +2847,8 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  msw@2.14.6:
-    resolution: {integrity: sha512-ALe+N10S72cyx94cMcy3Zs4HhXCj35sgeAL4c+WTvKi0zWnbd8/h0lcFqv0mb2P+aSgAdD7p9HzvA0DiUPxsyg==}
+  msw@2.15.0:
+    resolution: {integrity: sha512-2wQAmKkQKxRuXvYJxVhPGG0wZNBQyD06oJvxqw90XqLvptdqxdlHrFUfEteKkpaNORX3Xzc+HtEl/q0nfmN2wQ==}
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
@@ -3224,15 +3224,8 @@ packages:
     resolution: {integrity: sha512-azl+t0z7pw/z958Gy9svOTuzqIk6xq+NSheJzn5MMWtWTFywIacg2wUlzKFGtt3cthx0r2SxMK0yzJOR0IES7Q==}
     engines: {node: '>=14.0.0'}
 
-  tldts-core@7.0.30:
-    resolution: {integrity: sha512-uiHN8PIB1VmWyS98eZYja4xzlYqeFZVjb4OuYlJQnZAuJhMw4PbKQOKgHKhBdJR3FE/t5mUQ1Kd80++B+qhD1Q==}
-
   tldts-core@7.4.8:
     resolution: {integrity: sha512-c1P7u0EhACHj7lPy4MJm8iTFEU8+nB0LCtddH0fhP7noaVoXAqafMtOOeX+ulpuPBqnrRgRhw494RICT3mbhnw==}
-
-  tldts@7.0.30:
-    resolution: {integrity: sha512-ELrFxuqsDdHUwoh0XxDbxuLD3Wnz49Z57IFvTtvWy1hJdcMZjXLIuonjilCiWHlT2GbE4Wlv1wKVTzDFnXH1aw==}
-    hasBin: true
 
   tldts@7.4.8:
     resolution: {integrity: sha512-htwgN/8KRB3z3vnC0BOETVh2m499g5GmyTK9Wq5JBLX3FNz6tSBveAd+fQhzy9hkjif8vy2jwDMR1sGhLtZl2A==}
@@ -3241,10 +3234,6 @@ packages:
   totalist@3.0.1:
     resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
     engines: {node: '>=6'}
-
-  tough-cookie@6.0.1:
-    resolution: {integrity: sha512-LktZQb3IeoUWB9lqR5EWTHgW/VTITCXg4D21M+lvybRVdylLrRMnqaIONLVb5mav8vM19m44HIcGq4qASeu2Qw==}
-    engines: {node: '>=16'}
 
   tough-cookie@6.0.2:
     resolution: {integrity: sha512-exgYmnmL/sJpR3upZfXG5PoatXQii55xAiXGXzY+sROLZ/Y+SLcp9PgJNI9Vz37HpQ74WvDcLT8eqm+kV3FzrA==}
@@ -4195,16 +4184,16 @@ snapshots:
 
   '@standard-schema/utils@0.3.0': {}
 
-  '@storybook/addon-vitest@10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)':
+  '@storybook/addon-vitest@10.4.6(@vitest/browser-playwright@4.1.10)(@vitest/browser@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10))(@vitest/runner@4.1.10)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vitest@4.1.10)':
     dependencies:
       '@storybook/global': 5.0.0
       '@storybook/icons': 2.0.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       storybook: 10.4.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
     optionalDependencies:
-      '@vitest/browser': 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
-      '@vitest/browser-playwright': 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+      '@vitest/browser': 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+      '@vitest/browser-playwright': 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       '@vitest/runner': 4.1.10
-      vitest: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+      vitest: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
     transitivePeerDependencies:
       - react
       - react-dom
@@ -4505,29 +4494,29 @@ snapshots:
       '@rolldown/pluginutils': 1.0.1
       vite: 8.1.4(@types/node@25.6.0)(jiti@2.7.0)
 
-  '@vitest/browser-playwright@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)':
+  '@vitest/browser-playwright@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)':
     dependencies:
-      '@vitest/browser': 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
-      '@vitest/mocker': 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+      '@vitest/browser': 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+      '@vitest/mocker': 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       playwright: 1.61.1
       tinyrainbow: 3.1.0
-      vitest: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+      vitest: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
     transitivePeerDependencies:
       - bufferutil
       - msw
       - utf-8-validate
       - vite
 
-  '@vitest/browser@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)':
+  '@vitest/browser@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)':
     dependencies:
       '@blazediff/core': 1.9.1
-      '@vitest/mocker': 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+      '@vitest/mocker': 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       '@vitest/utils': 4.1.10
       magic-string: 0.30.21
       pngjs: 7.0.0
       sirv: 3.0.2
       tinyrainbow: 3.1.0
-      vitest: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+      vitest: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       ws: 8.20.0
     transitivePeerDependencies:
       - bufferutil
@@ -4552,13 +4541,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))':
+  '@vitest/mocker@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))':
     dependencies:
       '@vitest/spy': 4.1.10
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      msw: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
+      msw: 2.15.0(@types/node@25.6.0)(typescript@6.0.3)
       vite: 8.1.4(@types/node@25.6.0)(jiti@2.7.0)
 
   '@vitest/pretty-format@3.2.4':
@@ -5083,7 +5072,7 @@ snapshots:
 
   ms@2.1.3: {}
 
-  msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3):
+  msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3):
     dependencies:
       '@inquirer/confirm': 6.0.12(@types/node@25.6.0)
       '@mswjs/interceptors': 0.41.8
@@ -5099,7 +5088,7 @@ snapshots:
       rettime: 0.11.11
       statuses: 2.0.2
       strict-event-emitter: 0.5.1
-      tough-cookie: 6.0.1
+      tough-cookie: 6.0.2
       type-fest: 5.6.0
       until-async: 3.0.2
       yargs: 17.7.2
@@ -5128,9 +5117,9 @@ snapshots:
       is-inside-container: 1.0.0
       wsl-utils: 0.1.0
 
-  openapi-msw@2.0.0(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3)):
+  openapi-msw@2.0.0(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3)):
     dependencies:
-      msw: 2.14.6(@types/node@25.6.0)(typescript@6.0.3)
+      msw: 2.15.0(@types/node@25.6.0)(typescript@6.0.3)
 
   openapi-typescript@7.13.0(typescript@6.0.3):
     dependencies:
@@ -5533,30 +5522,17 @@ snapshots:
 
   tinyspy@4.0.4: {}
 
-  tldts-core@7.0.30: {}
-
-  tldts-core@7.4.8:
-    optional: true
-
-  tldts@7.0.30:
-    dependencies:
-      tldts-core: 7.0.30
+  tldts-core@7.4.8: {}
 
   tldts@7.4.8:
     dependencies:
       tldts-core: 7.4.8
-    optional: true
 
   totalist@3.0.1: {}
-
-  tough-cookie@6.0.1:
-    dependencies:
-      tldts: 7.0.30
 
   tough-cookie@6.0.2:
     dependencies:
       tldts: 7.4.8
-    optional: true
 
   tr46@6.0.0:
     dependencies:
@@ -5655,15 +5631,15 @@ snapshots:
     dependencies:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
-      vitest: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+      vitest: 4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
     optionalDependencies:
       '@types/react': 19.2.17
       '@types/react-dom': 19.2.3(@types/react@19.2.17)
 
-  vitest@4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0)):
+  vitest@4.1.10(@types/node@25.6.0)(@vitest/browser-playwright@4.1.10)(jsdom@29.1.1)(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0)):
     dependencies:
       '@vitest/expect': 4.1.10
-      '@vitest/mocker': 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
+      '@vitest/mocker': 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))
       '@vitest/pretty-format': 4.1.10
       '@vitest/runner': 4.1.10
       '@vitest/snapshot': 4.1.10
@@ -5684,7 +5660,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 25.6.0
-      '@vitest/browser-playwright': 4.1.10(msw@2.14.6(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
+      '@vitest/browser-playwright': 4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.1.4(@types/node@25.6.0)(jiti@2.7.0))(vitest@4.1.10)
       jsdom: 29.1.1
     transitivePeerDependencies:
       - msw

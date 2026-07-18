@@ -15,10 +15,10 @@
   "dependencies": {
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
+    "ky": "catalog:",
     "openapi-msw": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:",
-    "ky": "catalog:"
+    "react-dom": "catalog:"
   },
   "devDependencies": {
     "@storybook/addon-vitest": "catalog:",
@@ -36,7 +36,7 @@
     "storybook": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "^6.0.3",
-    "vite": "^8.0.10",
+    "vite": "^8.1.4",
     "vite-plugin-checker": "catalog:",
     "vitest": "catalog:",
     "vitest-browser-react": "catalog:"

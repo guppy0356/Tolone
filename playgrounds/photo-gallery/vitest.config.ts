@@ -44,7 +44,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: "behavior",
-          include: ["src/**/*.test.tsx"],
+          include: ["src/**/*.test.{ts,tsx}"],
           browser: {
             enabled: true,
             provider: browserProvider,

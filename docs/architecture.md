@@ -810,7 +810,7 @@ test("submits a new todo", async () => {
 });
 ```
 
-The `*.test.tsx` files run in their own browser-mode Vitest project (globbing `*.test.tsx`, sharing the Playwright provider with the Storybook project). Wire that project + `vitest-browser-react` when a playground adds its first behavior test; `expect.element`'s matcher types come from a `/// <reference types="@vitest/browser/matchers" />` in `vite-env.d.ts`. Reference wiring: `playgrounds/team-cost-report/vitest.config.ts`.
+The behavior-test files run in their own browser-mode Vitest project (globbing `*.test.{ts,tsx}` — a pure-logic test may be a plain `.ts` file — sharing the Playwright provider with the Storybook project). Wire that project + `vitest-browser-react` when a playground adds its first behavior test; `expect.element`'s matcher types come from a `/// <reference types="@vitest/browser/matchers" />` in `vite-env.d.ts`. Reference wiring: `playgrounds/team-cost-report/vitest.config.ts`.
 
 ### Conventions
 

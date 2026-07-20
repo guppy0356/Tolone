@@ -817,6 +817,7 @@ The `*.test.tsx` files run in their own browser-mode Vitest project (globbing `*
 - **Story `title`**: `features/{Page}`
 - **Catalog args**: drive every state through `args`; action props take `fn()` from `storybook/test` (for the actions panel, not assertions). No live data in a story
 - **Behavior tests**: `expect` from `vitest`, `render` from `vitest-browser-react` (async — `await` it); query through the returned locators; assert on the DOM with the retrying `await expect.element(locator)`, and disambiguate repeated text (e.g. a chart legend) with `locator.first()`
+- **Hook tests own their responses** — a container-hook test registers its own handlers with `worker.use()` inside the test file, typed against the contract. The global `src/mocks/handlers.ts` is dev seed data for the browser, never a test fixture: tests must not depend on its contents
 - **Global setup** (CSS, providers): `.storybook/preview.ts` for stories; the test project's setup file for `.test.tsx`
 
 ### Anti-patterns
@@ -882,7 +883,7 @@ Commit after each step. Do not batch multiple steps into one commit.
 3. `src/api/{Resource}.api.ts` — import generated types + API function object → **commit**
 4. `src/api/{Resource}.queries.ts` — `{Resource}Queries` `queryOptions()` factory (`all` / `list` / `detail`) over the API functions → **commit**
 5. Create `src/features/{feature-name}/{Page}/` directory
-6. `{Page}.container.hook.ts` — `use{Page}Container` hook + `{Page}ContainerState` interface (one dedicated container hook per page; `useQuery(featureQueries.x())` + `useMutation`; pick the mutation side-effect pattern — optimistic vs invalidate-only — per the Container Hook Layer section); when the hook contains logic worth testing in isolation (error mapping, hook-scoped query params), add `{Page}.container.hook.test.tsx` (`renderHook` + MSW worker) in the same commit → **commit**
+6. `{Page}.container.hook.ts` — `use{Page}Container` hook + `{Page}ContainerState` interface (one dedicated container hook per page; `useQuery(featureQueries.x())` + `useMutation`; pick the mutation side-effect pattern — optimistic vs invalidate-only — per the Container Hook Layer section); when the hook contains logic worth testing in isolation (error mapping, hook-scoped query params), add `{Page}.container.hook.test.tsx` (`renderHook` + the MSW worker, with test-local `worker.use` handlers — see Writing Tests) in the same commit → **commit**
 7. `{Page}.schema.ts` — zod validation contract + `z.infer` form-values type, output pinned to the API input via `satisfies` (only when the page validates a form) → **commit**
 8. `{Page}.component.hook.ts` — `use{Page}Component` hook + `{Page}ComponentState` interface (skip this file entirely when the Component has no local state and nothing to derive) → **commit**
 9. `{Page}.component.tsx` — exported `{Page}Component` (container-state-typed props) + private memo'd body + private Skeleton

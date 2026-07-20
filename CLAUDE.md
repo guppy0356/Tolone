@@ -33,7 +33,7 @@ No linter is configured. Tests run in browser mode (Playwright Chromium): Storyb
 
 This is a pnpm monorepo for experimenting with a **Container + Presentational Component** architecture. Each playground in `playgrounds/` implements features using this architecture. The full specification lives in [docs/architecture.md](docs/architecture.md) — always read it before implementing features.
 
-Every playground is an implementation snapshot and drifts from the conventions over time — including the newest one — so **`docs/architecture.md` (with its inline examples) is the single source of truth**. When starting a new playground or feature, follow the docs; **do not copy an existing playground**, since any of them can lag the spec.
+Every playground is an implementation snapshot and drifts from the conventions over time — including the newest one — so **`docs/architecture.md` (with its inline examples) is the single source of truth**. When starting a new playground or feature, **develop from `docs/architecture.md` alone**: do not read, open, grep, or otherwise reference the source of other playgrounds for guidance (not even the newest one), and do not copy an existing playground. Any of them can lag the spec, so treating them as examples propagates drift. If the docs are unclear or silent on something, ask or fix the docs — do not resolve it by imitating another playground.
 
 <!--
 Intentionally a plain markdown link, NOT an `@docs/architecture.md` import.

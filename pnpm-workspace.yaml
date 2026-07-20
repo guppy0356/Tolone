@@ -26,6 +26,7 @@ catalog:
 
 onlyBuiltDependencies:
   - esbuild
+  - lefthook
   - msw
 
 minimumReleaseAge: 10080

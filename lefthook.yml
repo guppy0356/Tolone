@@ -1,0 +1,10 @@
+# Every commit must typecheck: run tsc for each playground with staged changes.
+pre-commit:
+  commands:
+    typecheck:
+      run: |
+        dirs=$(git diff --cached --name-only --diff-filter=d | grep '^playgrounds/' | cut -d/ -f1-2 | sort -u) || true
+        for dir in $dirs; do
+          [ -d "$dir" ] || continue
+          pnpm --filter "@tolone/$(basename "$dir")" exec tsc --noEmit -p . || exit 1
+        done

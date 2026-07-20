@@ -87,6 +87,8 @@ Storybook stories (`{Page}.component.stories.tsx`) are a **visual catalog** — 
 
 When implementing a new feature, **commit after each step** of the checklist in docs/architecture.md. Do not batch multiple steps into one commit.
 
+Every commit must typecheck — a Lefthook pre-commit hook runs `tsc --noEmit` for each changed playground.
+
 Typical commit sequence:
 1. Scaffold + openapi.yaml → commit
 2. generate:api (type generation) → commit

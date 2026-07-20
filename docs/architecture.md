@@ -876,7 +876,7 @@ pnpm --filter @tolone/todo generate:api
 
 ## Checklist for Adding a New Feature
 
-Commit after each step. Do not batch multiple steps into one commit.
+Commit after each step. Do not batch multiple steps into one commit. Every commit must pass the touched playground's typecheck (`pnpm --filter <pkg> exec tsc --noEmit -p .`) — enforced by the Lefthook pre-commit hook.
 
 1. Define endpoints and schemas in `src/openapi.yaml` → **commit**
 2. Run `pnpm generate:api` to generate types → **commit**

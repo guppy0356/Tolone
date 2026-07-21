@@ -216,6 +216,21 @@ export const todoQueries = {
 
 The same definition is consumed everywhere — `useQuery(todoQueries.list())`, `queryClient.invalidateQueries({ queryKey: todoQueries.list().queryKey })`, `prefetchQuery(todoQueries.detail(id))` — so the key and its data type never drift across call sites. It is the resource's shared cache layer, named `{Resource}` (singular) and kept in `src/api/` (imported via `@api`) precisely so any page — and any page's mutation, in any feature — reaches the same key without importing another feature's directory.
 
+**Parameterized lists.** The example above is the unparameterized shape, where `list()` is both leaf and prefix. When a list bakes filters / sort / pagination into its key, that level splits in two: a `lists()` **prefix** (`[...all(), "list"]`) that blanket-invalidates every variant, and a `list(params)` **leaf** (`[...lists(), params]`) that carries the query.
+
+```ts
+// Todo.queries.ts — if the list were filterable/paginated
+lists: () => [...todoQueries.all(), "list"] as const, // prefix: every variant
+list: (params: TodoListParams) =>
+  queryOptions({
+    queryKey: [...todoQueries.lists(), params], // leaf: one variant
+    queryFn: () => todoApi.getList(params),
+    placeholderData: keepPreviousData,
+  }),
+```
+
+After a write, `invalidateQueries({ queryKey: todoQueries.lists() })` catches every filter/page combination through the prefix. Add a prefix level **only where you actually invalidate at it**: a `detail(id)` you only ever touch one at a time (per-id `invalidateQueries`/`removeQueries`) needs no `details()` prefix, so don't add one for symmetry.
+
 ### 3. Container Hook Layer (`{Page}.container.hook.ts`)
 
 **Responsibility**: Server state management (fetching and mutating data)

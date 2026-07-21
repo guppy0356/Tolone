@@ -46,6 +46,20 @@ The component hook is always called **inside** the Component, never from outside
 
 The component hook does **not** call the container hook directly — it receives container-hook actions as params.
 
+### Where state lives
+
+Every piece of state in a feature has one home, fixed by what *kind* of state it is — not by which component renders it. This table is where that mapping is defined; the layer sections below only elaborate it.
+
+| State | Source of truth | Held / read / written |
+|---|---|---|
+| **Server data** | the server (mirrored in the TanStack Query cache) | container hook — `useQuery` / `useMutation` over the Queries layer |
+| **URL / route state** — path params, plus any filter / sort / pagination meant to survive reload, be shareable, or sit in history | the URL | **read** in the Container (`useParams` / `useSearch`), **written** in the Component (`navigate` / `Link`); the container hook stays URL-agnostic, receiving the parsed values as params like a detail hook receives an `id` |
+| **Hook-scoped query input** — an input that drives a query but is deliberately kept out of the URL (e.g. a form's typeahead keyword) | the container hook | `useState` in the container hook, exposing the value and its setter |
+| **Local UI state** — form fields, toggles, drafts | the component | component hook (a sub-component may own purely-local DOM mechanics itself) |
+| **Derived / view-model** | computed from the rows above | component hook |
+
+Two rows can both look like "a query parameter"; choose between them by **persistence, not mechanism**. Put it in the URL when the value should survive reload, be shareable, or participate in history (a list's filter/sort/page); keep it as hook-scoped `useState` when it is ephemeral and pointless to bookmark (a form's typeahead keyword). Either way the container hook never reads the URL itself — the Container reads it and injects the result, and where the Component also needs the value (to render the current controls and write them back) it arrives as an ordinary prop, never re-exported through the hook's return.
+
 ### File Placement
 
 The **shared cache layer** (`{Resource}.api.ts` + `{Resource}.queries.ts`, one pair per resource) lives in a top-level `src/api/` directory — a shared data layer, not feature-owned, imported everywhere through the `@api` alias (wired in each playground's `tsconfig.json`, `vite.config.ts`, and `vitest.config.ts`). Each feature folder holds only its UI: a **page directory per route** (`{Page}/`) with that page's container / container hook / component / component hook / stories, plus a nested `components/` for extracted sub-components. The cache layer is shared by every page and across features; a page directory is not (1 page = 1 container hook).
@@ -114,13 +128,10 @@ Each layer's full worked example lives once, in the Layer Details sections below
 ## Conventions
 
 - **1 page = 1 dedicated container hook** — each page (route) has its own container hook, called from its Container. It covers everything *that page* needs (a within-page "god" hook) and is **not shared across pages** — a list page and a create-form page for the same feature get separate container hooks, so neither fires the other's queries. Data needed by multiple pages is shared at the **cache** level: two container hooks calling `useQuery` with the same `queryKey` deduplicate through TanStack Query's global keyed cache. Sharing is a property of the cache, not of a shared hook.
-- **Container-hook-scoped state** — when the container hook needs a *query parameter* the UI mutates (e.g. search keyword, filter), hold it as `useState` inside the container hook. It exposes both the value and the setter; the Component drives them through the same controlled-state pair. This applies to inputs that reach the server — not to pure UI state (e.g. whether a dropdown is open), which stays in the component hook.
+- **Where state lives** — each kind of state (server / URL / hook-scoped query input / local UI / derived) has exactly one home; the mapping, and the URL-vs-`useState` choice for a query input, are defined once in [Where state lives](#where-state-lives).
 - **Loading flags follow query count** — name loading flags after the resource only when a container hook exposes more than one query. A single-query hook names them plainly (`isPending` / `isFetching`); a hook with two or more queries returns resource-named flags (`isReportsPending`, `isTeamsPending`) so each consumer knows which resource it waits on.
 - **Domain contract, not view model** — the API contract (OpenAPI schema) carries clean domain data. Shaping it for a specific view (e.g. a chart's row format, team-name-keyed columns) is the component hook's job, not the contract's. Keep the schema statically typed and transform in the component hook.
 - **Stable mutation dependency** — when wrapping a mutation in `useCallback`, depend on `mutation.mutateAsync` (a stable reference), never the mutation object (a new reference each render, which would defeat the `memo` that keeps the private body's props reference-stable).
-- **Routing hooks split**:
-  - `useParams` (read URL → drives a container-hook query) → called in **Container**
-  - `useNavigate` (action triggered by user interaction) → called in **Component**
 - **No spread** — the Container destructures the container state and passes each field as an individual prop; never `<Component {...state} />`. Discrete props keep the wiring visible, and the Component's destructured parameters already document what it consumes. Type the Component as its `{Page}ContainerState` interface. Use `Pick<{Page}ContainerState, ...>` only when the Component renders a strict subset of the container state — as the Todo example below does (4 of its 6 fields). Under 1 page = 1 container hook the state usually holds exactly what its page needs, so the interface is the common case and `Pick` the exception.
 - **Cross-resource data access** — when a container hook needs another resource's data, import its Queries factory from `@api` and call `useQuery(otherQueries.list())` directly. The cache layer is central (`src/api/`), so this is never reaching into another feature's directory; cache is shared by `queryKey` through the same factory definition, so the call sites cannot drift.
 - **Sub-component handling** — When the Component needs internal structure beyond the memo'd body and Skeleton, several independent decisions arise — chiefly naming, placement, and whether to apply `memo`:
@@ -221,7 +232,7 @@ The same definition is consumed everywhere — `useQuery(todoQueries.list())`, `
 - Return action functions + data + loading states
 - When wrapping a mutation in `useCallback`, depend on `mutation.mutateAsync` (stable), not the mutation object
 - Optimistic updates (`onMutate` / `onError` / `onSettled`) are for instant UI feedback — add them only when the user actually observes the cache update. If the page navigates away on success (e.g. a create form), skip the optimistic write and just invalidate; never fabricate fields the hook does not have
-- **Hook-scoped state**: when a query parameter is driven by the UI (e.g. a search keyword bound to an input), hold it as `useState` inside the container hook and include both the value and the setter on the returned interface. The hook becomes the source of truth for its own query inputs
+- **Hook-scoped query input**: a query parameter driven by the UI but deliberately kept out of the URL (a form's typeahead keyword) is held as `useState` here, with the value and setter on the returned interface. Anything shareable — a list's filter/sort/page — belongs in the URL instead and reaches the hook as a param (see [Where state lives](#where-state-lives))
 
 ```ts
 // Todo/Todo.container.hook.ts

@@ -1,0 +1,167 @@
+openapi: 3.1.0
+info:
+  title: Travel Expense Approval API
+  version: 0.0.1
+paths:
+  /api/travel-requests:
+    get:
+      summary: List received travel expense requests
+      responses:
+        "200":
+          description: Travel expense requests awaiting the approver
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TravelRequest"
+  /api/travel-requests/{id}:
+    get:
+      summary: Get one travel expense request with its expense breakdown
+      parameters:
+        - $ref: "#/components/parameters/TravelRequestId"
+      responses:
+        "200":
+          description: The travel expense request detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TravelRequestDetail"
+        "404":
+          description: No travel expense request with this id
+  /api/travel-requests/{id}/approve:
+    post:
+      summary: Approve the request and route it to the next superior
+      parameters:
+        - $ref: "#/components/parameters/TravelRequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApproveInput"
+      responses:
+        "200":
+          description: The updated request (completed once it holds two approvals)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TravelRequestDetail"
+        "404":
+          description: No travel expense request with this id
+  /api/travel-requests/{id}/reject:
+    post:
+      summary: Reject the request
+      parameters:
+        - $ref: "#/components/parameters/TravelRequestId"
+      responses:
+        "200":
+          description: The updated request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TravelRequestDetail"
+        "404":
+          description: No travel expense request with this id
+  /api/superiors:
+    get:
+      summary: List superiors selectable as the next approver
+      responses:
+        "200":
+          description: Superiors whose judgment can be requested next
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Superior"
+components:
+  parameters:
+    TravelRequestId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    TravelRequestStatus:
+      type: string
+      enum:
+        - pending
+        - completed
+        - rejected
+    TravelRequest:
+      type: object
+      required:
+        - id
+        - purpose
+        - startDate
+        - endDate
+        - totalAmount
+        - status
+        - approvalCount
+      properties:
+        id:
+          type: string
+        purpose:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        totalAmount:
+          type: integer
+          description: Total requested amount in JPY
+        status:
+          $ref: "#/components/schemas/TravelRequestStatus"
+        approvalCount:
+          type: integer
+          description: Approvals received so far; the request completes at 2
+    TravelRequestDetail:
+      allOf:
+        - $ref: "#/components/schemas/TravelRequest"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/ExpenseItem"
+    ExpenseItem:
+      type: object
+      required:
+        - id
+        - label
+        - amount
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        amount:
+          type: integer
+          description: Item amount in JPY
+    ApproveInput:
+      type: object
+      required:
+        - superiorId
+      properties:
+        superiorId:
+          type: string
+          description: The superior whose judgment is requested next
+    Superior:
+      type: object
+      required:
+        - id
+        - name
+        - title
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        title:
+          type: string

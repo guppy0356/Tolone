@@ -1,5 +1,5 @@
 import { memo, useEffect, useState } from "react";
-import type { RequestDetailView } from "../Approval.component.hook";
+import type { RequestDetailView } from "../TravelRequest.component.hook";
 
 export interface RequestDetailDrawerProps {
   detailView: RequestDetailView | undefined;

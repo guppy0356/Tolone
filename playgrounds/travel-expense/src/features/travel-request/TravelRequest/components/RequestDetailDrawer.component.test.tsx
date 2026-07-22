@@ -4,7 +4,7 @@ import {
   RequestDetailDrawer,
   type RequestDetailDrawerProps,
 } from "./RequestDetailDrawer.component";
-import type { RequestDetailView } from "../Approval.component.hook";
+import type { RequestDetailView } from "../TravelRequest.component.hook";
 
 const detailView: RequestDetailView = {
   id: "tr-1",

@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createOpenApiHttp } from "openapi-msw";
 import type { components, paths } from "../../../types/openapi";
 import { worker } from "../../../mocks/browser";
-import { useApprovalContainer } from "./Approval.container.hook";
+import { useTravelRequestContainer } from "./TravelRequest.container.hook";
 
 type TravelRequest = components["schemas"]["TravelRequest"];
 type TravelRequestDetail = components["schemas"]["TravelRequestDetail"];
@@ -35,7 +35,7 @@ function renderContainerHook() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return renderHook(() => useApprovalContainer(), {
+  return renderHook(() => useTravelRequestContainer(), {
     wrapper: ({ children }: { children: ReactNode }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     ),

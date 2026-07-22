@@ -1,9 +1,9 @@
 import { memo } from "react";
 import {
-  useApprovalComponent,
+  useTravelRequestComponent,
   type RequestRowView,
-} from "./Approval.component.hook";
-import type { ApprovalContainerState } from "./Approval.container.hook";
+} from "./TravelRequest.component.hook";
+import type { TravelRequestContainerState } from "./TravelRequest.container.hook";
 import type { TravelRequestStatus } from "@api/TravelRequest.api";
 import { RequestDetailDrawer } from "./components/RequestDetailDrawer.component";
 import { SuperiorSelectDrawer } from "./components/SuperiorSelectDrawer.component";
@@ -90,7 +90,7 @@ function RequestListSkeleton() {
   );
 }
 
-export function ApprovalComponent({
+export function TravelRequestComponent({
   requests,
   isRequestsPending,
   isRequestsRefetching,
@@ -102,7 +102,7 @@ export function ApprovalComponent({
   isSuperiorsPending,
   approve,
   reject,
-}: ApprovalContainerState) {
+}: TravelRequestContainerState) {
   const {
     rows,
     detailView,
@@ -116,7 +116,7 @@ export function ApprovalComponent({
     closeSuperiorDrawer,
     handleApprove,
     handleReject,
-  } = useApprovalComponent({
+  } = useTravelRequestComponent({
     requests,
     detail,
     selectedRequestId,

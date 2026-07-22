@@ -9,7 +9,7 @@ import {
 import { superiorQueries } from "@api/Superior.queries";
 import type { Superior } from "@api/Superior.api";
 
-export interface ApprovalContainerState {
+export interface TravelRequestContainerState {
   requests: TravelRequest[];
   isRequestsPending: boolean;
   isRequestsRefetching: boolean;
@@ -23,7 +23,7 @@ export interface ApprovalContainerState {
   reject: (id: string) => Promise<void>;
 }
 
-export function useApprovalContainer(): ApprovalContainerState {
+export function useTravelRequestContainer(): TravelRequestContainerState {
   const queryClient = useQueryClient();
 
   const {

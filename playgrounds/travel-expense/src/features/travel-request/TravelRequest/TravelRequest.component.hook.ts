@@ -4,7 +4,7 @@ import type {
   TravelRequestDetail,
   TravelRequestStatus,
 } from "@api/TravelRequest.api";
-import type { ApprovalContainerState } from "./Approval.container.hook";
+import type { TravelRequestContainerState } from "./TravelRequest.container.hook";
 
 export interface RequestRowView {
   id: string;
@@ -34,16 +34,16 @@ export interface RequestDetailView {
   items: ExpenseItemView[];
 }
 
-export interface ApprovalComponentParams {
+export interface TravelRequestComponentParams {
   requests: TravelRequest[];
   detail: TravelRequestDetail | undefined;
   selectedRequestId: string | null;
-  selectRequest: ApprovalContainerState["selectRequest"];
-  approve: ApprovalContainerState["approve"];
-  reject: ApprovalContainerState["reject"];
+  selectRequest: TravelRequestContainerState["selectRequest"];
+  approve: TravelRequestContainerState["approve"];
+  reject: TravelRequestContainerState["reject"];
 }
 
-export interface ApprovalComponentState {
+export interface TravelRequestComponentState {
   rows: RequestRowView[];
   detailView: RequestDetailView | undefined;
   hasPrev: boolean;
@@ -72,14 +72,14 @@ function formatPeriod(startDate: string, endDate: string): string {
   return `${startDate} – ${endDate}`;
 }
 
-export function useApprovalComponent({
+export function useTravelRequestComponent({
   requests,
   detail,
   selectedRequestId,
   selectRequest,
   approve,
   reject,
-}: ApprovalComponentParams): ApprovalComponentState {
+}: TravelRequestComponentParams): TravelRequestComponentState {
   const [isSuperiorDrawerOpen, setIsSuperiorDrawerOpen] = useState(false);
 
   const rows = useMemo(

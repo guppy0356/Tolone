@@ -1,7 +1,7 @@
-import { useApprovalContainer } from "./Approval.container.hook";
-import { ApprovalComponent } from "./Approval.component";
+import { useTravelRequestContainer } from "./TravelRequest.container.hook";
+import { TravelRequestComponent } from "./TravelRequest.component";
 
-export function ApprovalContainer() {
+export function TravelRequestContainer() {
   const {
     requests,
     isRequestsPending,
@@ -14,10 +14,10 @@ export function ApprovalContainer() {
     isSuperiorsPending,
     approve,
     reject,
-  } = useApprovalContainer();
+  } = useTravelRequestContainer();
 
   return (
-    <ApprovalComponent
+    <TravelRequestComponent
       requests={requests}
       isRequestsPending={isRequestsPending}
       isRequestsRefetching={isRequestsRefetching}

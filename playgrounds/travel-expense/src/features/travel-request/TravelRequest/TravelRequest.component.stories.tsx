@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { fn } from "storybook/test";
-import { ApprovalComponent } from "./Approval.component";
+import { TravelRequestComponent } from "./TravelRequest.component";
 import type {
   TravelRequest,
   TravelRequestDetail,
@@ -55,8 +55,8 @@ const sampleDetail: TravelRequestDetail = {
 };
 
 const meta = {
-  title: "features/Approval",
-  component: ApprovalComponent,
+  title: "features/TravelRequest",
+  component: TravelRequestComponent,
   args: {
     requests: [],
     isRequestsPending: false,
@@ -70,7 +70,7 @@ const meta = {
     approve: fn(),
     reject: fn(),
   },
-} satisfies Meta<typeof ApprovalComponent>;
+} satisfies Meta<typeof TravelRequestComponent>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

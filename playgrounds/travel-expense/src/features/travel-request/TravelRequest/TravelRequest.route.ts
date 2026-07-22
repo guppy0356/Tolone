@@ -1,9 +1,9 @@
 import { createRoute } from "@tanstack/react-router";
 import { rootRoute } from "../../../root.route";
-import { ApprovalContainer } from "./Approval.container";
+import { TravelRequestContainer } from "./TravelRequest.container";
 
-export const approvalRoute = createRoute({
+export const travelRequestRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: ApprovalContainer,
+  component: TravelRequestContainer,
 });

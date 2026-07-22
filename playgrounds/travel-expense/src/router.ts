@@ -1,8 +1,8 @@
 import { createRouter } from "@tanstack/react-router";
 import { rootRoute } from "./root.route";
-import { approvalRoute } from "./features/travel-request/Approval/Approval.route";
+import { travelRequestRoute } from "./features/travel-request/TravelRequest/TravelRequest.route";
 
-const routeTree = rootRoute.addChildren([approvalRoute]);
+const routeTree = rootRoute.addChildren([travelRequestRoute]);
 
 export const router = createRouter({ routeTree });
 

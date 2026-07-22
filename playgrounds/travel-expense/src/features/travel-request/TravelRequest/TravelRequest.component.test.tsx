@@ -1,7 +1,7 @@
 import { expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
-import { ApprovalComponent } from "./Approval.component";
-import type { ApprovalContainerState } from "./Approval.container.hook";
+import { TravelRequestComponent } from "./TravelRequest.component";
+import type { TravelRequestContainerState } from "./TravelRequest.container.hook";
 import type {
   TravelRequest,
   TravelRequestDetail,
@@ -53,8 +53,8 @@ const superiors: Superior[] = [
 ];
 
 function makeState(
-  overrides: Partial<ApprovalContainerState> = {},
-): ApprovalContainerState {
+  overrides: Partial<TravelRequestContainerState> = {},
+): TravelRequestContainerState {
   return {
     requests,
     isRequestsPending: false,
@@ -73,7 +73,7 @@ function makeState(
 
 test("clicking a row selects the request", async () => {
   const state = makeState();
-  const screen = await render(<ApprovalComponent {...state} />);
+  const screen = await render(<TravelRequestComponent {...state} />);
 
   await screen.getByText("Tech conference in Fukuoka").click();
 
@@ -82,7 +82,7 @@ test("clicking a row selects the request", async () => {
 
 test("the drawer titles with the purpose and shows the amount breakdown", async () => {
   const state = makeState({ selectedRequestId: "tr-1", detail });
-  const screen = await render(<ApprovalComponent {...state} />);
+  const screen = await render(<TravelRequestComponent {...state} />);
 
   const drawer = screen.getByRole("dialog", { name: "Travel expense detail" });
   await expect
@@ -98,7 +98,7 @@ test("the drawer titles with the purpose and shows the amount breakdown", async 
 
 test("approving asks for the next superior, then approves with the chosen one", async () => {
   const state = makeState({ selectedRequestId: "tr-1", detail });
-  const screen = await render(<ApprovalComponent {...state} />);
+  const screen = await render(<TravelRequestComponent {...state} />);
 
   const drawer = screen.getByRole("dialog", { name: "Travel expense detail" });
   await drawer.getByRole("button", { name: "Approve" }).click();
@@ -119,7 +119,7 @@ test("approving asks for the next superior, then approves with the chosen one", 
 
 test("rejecting from the drawer rejects the selected request", async () => {
   const state = makeState({ selectedRequestId: "tr-1", detail });
-  const screen = await render(<ApprovalComponent {...state} />);
+  const screen = await render(<TravelRequestComponent {...state} />);
 
   const drawer = screen.getByRole("dialog", { name: "Travel expense detail" });
   await drawer.getByRole("button", { name: "Reject" }).click();
@@ -132,7 +132,7 @@ test("next and previous move between requests", async () => {
     selectedRequestId: "tr-2",
     detail: { ...detail, ...requests[1] },
   });
-  const screen = await render(<ApprovalComponent {...state} />);
+  const screen = await render(<TravelRequestComponent {...state} />);
 
   await screen.getByRole("button", { name: "Next" }).click();
   expect(state.selectRequest).toHaveBeenCalledWith("tr-3");
@@ -143,7 +143,7 @@ test("next and previous move between requests", async () => {
 
 test("previous is disabled on the first request", async () => {
   const state = makeState({ selectedRequestId: "tr-1", detail });
-  const screen = await render(<ApprovalComponent {...state} />);
+  const screen = await render(<TravelRequestComponent {...state} />);
 
   await expect
     .element(screen.getByRole("button", { name: "Previous" }))
@@ -158,7 +158,7 @@ test("next is disabled on the last request", async () => {
     selectedRequestId: "tr-3",
     detail: { ...detail, ...requests[2] },
   });
-  const screen = await render(<ApprovalComponent {...state} />);
+  const screen = await render(<TravelRequestComponent {...state} />);
 
   await expect
     .element(screen.getByRole("button", { name: "Next" }))
@@ -173,7 +173,7 @@ test("a completed request offers no approve or reject actions", async () => {
     selectedRequestId: "tr-3",
     detail: { ...detail, ...requests[2] },
   });
-  const screen = await render(<ApprovalComponent {...state} />);
+  const screen = await render(<TravelRequestComponent {...state} />);
 
   const drawer = screen.getByRole("dialog", { name: "Travel expense detail" });
   await expect

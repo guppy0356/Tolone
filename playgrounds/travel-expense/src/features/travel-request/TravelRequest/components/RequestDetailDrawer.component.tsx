@@ -59,8 +59,8 @@ export const RequestDetailDrawer = memo(function RequestDetailDrawer({
       <aside
         role="dialog"
         aria-label="Travel expense detail"
-        className={`fixed inset-y-0 left-0 z-40 flex w-[28rem] max-w-full flex-col bg-white shadow-xl transition-transform duration-300 ${
-          isEntered ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 right-0 z-40 flex w-[28rem] max-w-full flex-col bg-white shadow-xl transition-transform duration-300 ${
+          isEntered ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <header className="flex items-start justify-between gap-4 border-b border-gray-200 p-4">

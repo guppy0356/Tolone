@@ -45,8 +45,8 @@ export const SuperiorSelectDrawer = memo(function SuperiorSelectDrawer({
       <aside
         role="dialog"
         aria-label="Select next approver"
-        className={`fixed inset-y-0 left-0 z-50 flex w-56 max-w-full flex-col bg-white shadow-xl transition-transform duration-300 ${
-          isEntered ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 right-0 z-50 flex w-56 max-w-full flex-col bg-white shadow-xl transition-transform duration-300 ${
+          isEntered ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <header className="flex items-center justify-between gap-2 border-b border-gray-200 p-4">

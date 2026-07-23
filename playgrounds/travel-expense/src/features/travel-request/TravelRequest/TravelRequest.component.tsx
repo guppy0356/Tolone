@@ -108,6 +108,7 @@ export function TravelRequestComponent({
     detailView,
     hasPrev,
     hasNext,
+    selectRow,
     goPrev,
     goNext,
     closeDetail,
@@ -138,7 +139,7 @@ export function TravelRequestComponent({
           <RequestList
             rows={rows}
             selectedRequestId={selectedRequestId}
-            onSelect={selectRequest}
+            onSelect={selectRow}
           />
         </div>
       )}

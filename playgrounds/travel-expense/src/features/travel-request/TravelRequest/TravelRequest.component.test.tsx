@@ -80,6 +80,19 @@ test("clicking a row selects the request", async () => {
   expect(state.selectRequest).toHaveBeenCalledWith("tr-2");
 });
 
+test("rows stay clickable while the drawer is open and switch the selection", async () => {
+  const state = makeState({ selectedRequestId: "tr-1", detail });
+  const screen = await render(<TravelRequestComponent {...state} />);
+
+  await expect
+    .element(screen.getByRole("dialog", { name: "Travel expense detail" }))
+    .toBeVisible();
+
+  await screen.getByText("Tech conference in Fukuoka").click();
+
+  expect(state.selectRequest).toHaveBeenCalledWith("tr-2");
+});
+
 test("the drawer titles with the purpose and shows the amount breakdown", async () => {
   const state = makeState({ selectedRequestId: "tr-1", detail });
   const screen = await render(<TravelRequestComponent {...state} />);

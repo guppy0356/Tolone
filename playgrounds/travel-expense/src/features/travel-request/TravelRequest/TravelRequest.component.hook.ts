@@ -48,6 +48,7 @@ export interface TravelRequestComponentState {
   detailView: RequestDetailView | undefined;
   hasPrev: boolean;
   hasNext: boolean;
+  selectRow: (id: string) => void;
   goPrev: () => void;
   goNext: () => void;
   closeDetail: () => void;
@@ -125,6 +126,14 @@ export function useTravelRequestComponent({
 
   // Moving to another request abandons any approval-in-selection, so the
   // stacked superior drawer closes alongside every selection change.
+  const selectRow = useCallback(
+    (id: string) => {
+      setIsSuperiorDrawerOpen(false);
+      selectRequest(id);
+    },
+    [selectRequest],
+  );
+
   const goPrev = useCallback(() => {
     if (selectedIndex > 0) {
       setIsSuperiorDrawerOpen(false);
@@ -171,6 +180,7 @@ export function useTravelRequestComponent({
     detailView,
     hasPrev,
     hasNext,
+    selectRow,
     goPrev,
     goNext,
     closeDetail,

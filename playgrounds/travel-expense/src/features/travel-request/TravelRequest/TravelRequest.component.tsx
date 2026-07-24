@@ -108,6 +108,8 @@ export function TravelRequestComponent({
     detailView,
     hasPrev,
     hasNext,
+    listRef,
+    detailDrawerRef,
     selectRow,
     goPrev,
     goNext,
@@ -134,6 +136,7 @@ export function TravelRequestComponent({
         <RequestListSkeleton />
       ) : (
         <div
+          ref={listRef}
           className={`transition-opacity ${isRequestsRefetching ? "opacity-50" : ""}`}
         >
           <RequestList
@@ -146,6 +149,7 @@ export function TravelRequestComponent({
 
       {selectedRequestId !== null && (
         <RequestDetailDrawer
+          ref={detailDrawerRef}
           detailView={detailView}
           isDetailPending={isDetailPending}
           hasPrev={hasPrev}

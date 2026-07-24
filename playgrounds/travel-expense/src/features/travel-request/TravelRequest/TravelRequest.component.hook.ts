@@ -1,4 +1,11 @@
-import { useCallback, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+} from "react";
 import type {
   TravelRequest,
   TravelRequestDetail,
@@ -48,6 +55,8 @@ export interface TravelRequestComponentState {
   detailView: RequestDetailView | undefined;
   hasPrev: boolean;
   hasNext: boolean;
+  listRef: RefObject<HTMLDivElement | null>;
+  detailDrawerRef: RefObject<HTMLElement | null>;
   selectRow: (id: string) => void;
   goPrev: () => void;
   goNext: () => void;
@@ -82,6 +91,8 @@ export function useTravelRequestComponent({
   reject,
 }: TravelRequestComponentParams): TravelRequestComponentState {
   const [isSuperiorDrawerOpen, setIsSuperiorDrawerOpen] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
+  const detailDrawerRef = useRef<HTMLElement>(null);
 
   const rows = useMemo(
     () =>
@@ -153,6 +164,22 @@ export function useTravelRequestComponent({
     selectRequest(null);
   }, [selectRequest]);
 
+  // Clicking outside closes the drawer — except inside the list, whose rows
+  // switch the selection instead of dismissing. While the superior drawer is
+  // open, its own backdrop owns dismissal, so this listener stands down.
+  useEffect(() => {
+    if (selectedRequestId === null || isSuperiorDrawerOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (listRef.current?.contains(target)) return;
+      if (detailDrawerRef.current?.contains(target)) return;
+      closeDetail();
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [selectedRequestId, isSuperiorDrawerOpen, closeDetail]);
+
   const openSuperiorDrawer = useCallback(() => {
     setIsSuperiorDrawerOpen(true);
   }, []);
@@ -180,6 +207,8 @@ export function useTravelRequestComponent({
     detailView,
     hasPrev,
     hasNext,
+    listRef,
+    detailDrawerRef,
     selectRow,
     goPrev,
     goNext,

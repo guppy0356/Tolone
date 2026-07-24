@@ -1,7 +1,8 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useState, type Ref } from "react";
 import type { RequestDetailView } from "../TravelRequest.component.hook";
 
 export interface RequestDetailDrawerProps {
+  ref?: Ref<HTMLElement>;
   detailView: RequestDetailView | undefined;
   isDetailPending: boolean;
   hasPrev: boolean;
@@ -30,6 +31,7 @@ function DrawerBodySkeleton() {
 }
 
 export const RequestDetailDrawer = memo(function RequestDetailDrawer({
+  ref,
   detailView,
   isDetailPending,
   hasPrev,
@@ -51,6 +53,7 @@ export const RequestDetailDrawer = memo(function RequestDetailDrawer({
 
   return (
     <aside
+      ref={ref}
       role="dialog"
       aria-label="Travel expense detail"
       className={`fixed inset-y-0 right-0 z-40 flex w-[28rem] max-w-full flex-col bg-white shadow-xl transition-transform duration-300 ${

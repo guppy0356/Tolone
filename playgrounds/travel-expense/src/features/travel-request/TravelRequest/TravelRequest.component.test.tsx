@@ -91,6 +91,27 @@ test("rows stay clickable while the drawer is open and switch the selection", as
   await screen.getByText("Tech conference in Fukuoka").click();
 
   expect(state.selectRequest).toHaveBeenCalledWith("tr-2");
+  expect(state.selectRequest).not.toHaveBeenCalledWith(null);
+});
+
+test("clicking outside the list and the drawer closes the drawer", async () => {
+  const state = makeState({ selectedRequestId: "tr-1", detail });
+  const screen = await render(<TravelRequestComponent {...state} />);
+
+  await screen
+    .getByRole("heading", { name: "Travel Expense Approvals" })
+    .click();
+
+  expect(state.selectRequest).toHaveBeenCalledWith(null);
+});
+
+test("clicking inside the drawer does not close it", async () => {
+  const state = makeState({ selectedRequestId: "tr-1", detail });
+  const screen = await render(<TravelRequestComponent {...state} />);
+
+  await screen.getByText("Expense breakdown").click();
+
+  expect(state.selectRequest).not.toHaveBeenCalled();
 });
 
 test("the drawer titles with the purpose and shows the amount breakdown", async () => {

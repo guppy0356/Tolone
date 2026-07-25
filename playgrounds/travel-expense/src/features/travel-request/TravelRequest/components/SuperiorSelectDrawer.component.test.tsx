@@ -15,6 +15,7 @@ function makeProps(
   overrides: Partial<SuperiorSelectDrawerProps> = {},
 ): SuperiorSelectDrawerProps {
   return {
+    isOpen: true,
     superiors,
     isSuperiorsPending: false,
     onSelect: vi.fn(),
@@ -60,4 +61,13 @@ test("the close button closes the drawer", async () => {
 
   await screen.getByRole("button", { name: "Close" }).click();
   expect(props.onClose).toHaveBeenCalled();
+});
+
+test("while closed the drawer is inert", async () => {
+  const screen = await render(
+    <SuperiorSelectDrawer {...makeProps({ isOpen: false })} />,
+  );
+
+  const aside = screen.container.querySelector<HTMLElement>("aside");
+  expect(aside?.inert).toBe(true);
 });

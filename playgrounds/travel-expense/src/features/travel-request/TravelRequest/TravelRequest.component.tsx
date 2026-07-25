@@ -106,6 +106,7 @@ export function TravelRequestComponent({
   const {
     rows,
     detailView,
+    isDetailDrawerOpen,
     hasPrev,
     hasNext,
     listRef,
@@ -130,26 +131,30 @@ export function TravelRequestComponent({
 
   return (
     <div className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-4 text-2xl font-bold">Travel Expense Approvals</h1>
+      {/* The superior drawer is modal: its backdrop blocks pointers, and
+          inert removes everything behind it — heading, list, detail drawer —
+          from the tab order and the accessibility tree while it is open. */}
+      <div inert={isSuperiorDrawerOpen}>
+        <h1 className="mb-4 text-2xl font-bold">Travel Expense Approvals</h1>
 
-      {isRequestsPending ? (
-        <RequestListSkeleton />
-      ) : (
-        <div
-          ref={listRef}
-          className={`transition-opacity ${isRequestsRefetching ? "opacity-50" : ""}`}
-        >
-          <RequestList
-            rows={rows}
-            selectedRequestId={selectedRequestId}
-            onSelect={selectRow}
-          />
-        </div>
-      )}
+        {isRequestsPending ? (
+          <RequestListSkeleton />
+        ) : (
+          <div
+            ref={listRef}
+            className={`transition-opacity ${isRequestsRefetching ? "opacity-50" : ""}`}
+          >
+            <RequestList
+              rows={rows}
+              selectedRequestId={selectedRequestId}
+              onSelect={selectRow}
+            />
+          </div>
+        )}
 
-      {selectedRequestId !== null && (
         <RequestDetailDrawer
           ref={detailDrawerRef}
+          isOpen={isDetailDrawerOpen}
           detailView={detailView}
           isDetailPending={isDetailPending}
           hasPrev={hasPrev}
@@ -160,16 +165,15 @@ export function TravelRequestComponent({
           onApproveClick={openSuperiorDrawer}
           onReject={handleReject}
         />
-      )}
+      </div>
 
-      {isSuperiorDrawerOpen && (
-        <SuperiorSelectDrawer
-          superiors={superiors}
-          isSuperiorsPending={isSuperiorsPending}
-          onSelect={handleApprove}
-          onClose={closeSuperiorDrawer}
-        />
-      )}
+      <SuperiorSelectDrawer
+        isOpen={isSuperiorDrawerOpen}
+        superiors={superiors}
+        isSuperiorsPending={isSuperiorsPending}
+        onSelect={handleApprove}
+        onClose={closeSuperiorDrawer}
+      />
     </div>
   );
 }

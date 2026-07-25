@@ -53,6 +53,7 @@ export interface TravelRequestComponentParams {
 export interface TravelRequestComponentState {
   rows: RequestRowView[];
   detailView: RequestDetailView | undefined;
+  isDetailDrawerOpen: boolean;
   hasPrev: boolean;
   hasNext: boolean;
   listRef: RefObject<HTMLDivElement | null>;
@@ -93,6 +94,8 @@ export function useTravelRequestComponent({
   const [isSuperiorDrawerOpen, setIsSuperiorDrawerOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const detailDrawerRef = useRef<HTMLElement>(null);
+
+  const isDetailDrawerOpen = selectedRequestId !== null;
 
   const rows = useMemo(
     () =>
@@ -205,6 +208,7 @@ export function useTravelRequestComponent({
   return {
     rows,
     detailView,
+    isDetailDrawerOpen,
     hasPrev,
     hasNext,
     listRef,

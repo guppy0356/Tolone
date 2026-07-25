@@ -148,7 +148,10 @@ test("approving asks for the next superior, then approves with the chosen one", 
   await superiorDrawer.getByText("Aiko Tanaka").click();
 
   expect(state.approve).toHaveBeenCalledWith("tr-1", "sup-1");
-  await expect.element(superiorDrawer).not.toBeInTheDocument();
+  const superiorAside = screen.container.querySelector<HTMLElement>(
+    'aside[aria-label="Select next approver"]',
+  );
+  await expect.poll(() => superiorAside?.inert).toBe(true);
 });
 
 test("rejecting from the drawer rejects the selected request", async () => {
@@ -200,6 +203,35 @@ test("next is disabled on the last request", async () => {
   await expect
     .element(screen.getByRole("button", { name: "Previous" }))
     .toBeEnabled();
+});
+
+test("closed drawers stay mounted but are inert", async () => {
+  const state = makeState();
+  const screen = await render(<TravelRequestComponent {...state} />);
+
+  expect(
+    screen.container.querySelector<HTMLElement>(
+      'aside[aria-label="Travel expense detail"]',
+    )?.inert,
+  ).toBe(true);
+  expect(
+    screen.container.querySelector<HTMLElement>(
+      'aside[aria-label="Select next approver"]',
+    )?.inert,
+  ).toBe(true);
+});
+
+test("while choosing an approver, the list and detail drawer are inert", async () => {
+  const state = makeState({ selectedRequestId: "tr-1", detail });
+  const screen = await render(<TravelRequestComponent {...state} />);
+
+  const drawer = screen.getByRole("dialog", { name: "Travel expense detail" });
+  await drawer.getByRole("button", { name: "Approve" }).click();
+
+  const detailAside = screen.container.querySelector<HTMLElement>(
+    'aside[aria-label="Travel expense detail"]',
+  );
+  await expect.poll(() => detailAside?.closest("[inert]")).not.toBeNull();
 });
 
 test("a completed request offers no approve or reject actions", async () => {

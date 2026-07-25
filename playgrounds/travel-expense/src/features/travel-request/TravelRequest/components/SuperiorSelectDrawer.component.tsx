@@ -1,7 +1,8 @@
-import { memo, useEffect, useState } from "react";
+import { memo } from "react";
 import type { Superior } from "@api/Superior.api";
 
 export interface SuperiorSelectDrawerProps {
+  isOpen: boolean;
   superiors: Superior[];
   isSuperiorsPending: boolean;
   onSelect: (superiorId: string) => void;
@@ -22,31 +23,31 @@ function SuperiorListSkeleton() {
 }
 
 export const SuperiorSelectDrawer = memo(function SuperiorSelectDrawer({
+  isOpen,
   superiors,
   isSuperiorsPending,
   onSelect,
   onClose,
 }: SuperiorSelectDrawerProps) {
-  // Purely-local slide-in mechanics: mount off-screen, then transition in.
-  const [isEntered, setIsEntered] = useState(false);
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => setIsEntered(true));
-    return () => cancelAnimationFrame(frame);
-  }, []);
-
   return (
     <>
+      {/* pointer-events-none while closed: the faded-out backdrop must not
+          swallow clicks meant for the list underneath */}
       <div
-        className="fixed inset-0 z-[45] bg-black/20"
+        className={`fixed inset-0 z-[45] bg-black/20 transition-opacity duration-300 ${
+          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
         onClick={onClose}
         aria-hidden="true"
       />
       {/* w-56: half the detail drawer's w-[28rem] */}
       <aside
         role="dialog"
+        aria-modal="true"
         aria-label="Select next approver"
+        inert={!isOpen}
         className={`fixed inset-y-0 right-0 z-50 flex w-56 max-w-full flex-col bg-white shadow-xl transition-transform duration-300 ${
-          isEntered ? "translate-x-0" : "translate-x-full"
+          isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <header className="flex items-center justify-between gap-2 border-b border-gray-200 p-4">

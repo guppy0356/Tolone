@@ -1,8 +1,9 @@
-import { memo, useEffect, useState, type Ref } from "react";
+import { memo, useState, type Ref } from "react";
 import type { RequestDetailView } from "../TravelRequest.component.hook";
 
 export interface RequestDetailDrawerProps {
   ref?: Ref<HTMLElement>;
+  isOpen: boolean;
   detailView: RequestDetailView | undefined;
   isDetailPending: boolean;
   hasPrev: boolean;
@@ -32,6 +33,7 @@ function DrawerBodySkeleton() {
 
 export const RequestDetailDrawer = memo(function RequestDetailDrawer({
   ref,
+  isOpen,
   detailView,
   isDetailPending,
   hasPrev,
@@ -42,22 +44,25 @@ export const RequestDetailDrawer = memo(function RequestDetailDrawer({
   onApproveClick,
   onReject,
 }: RequestDetailDrawerProps) {
-  // Purely-local slide-in mechanics: mount off-screen, then transition in.
-  const [isEntered, setIsEntered] = useState(false);
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => setIsEntered(true));
-    return () => cancelAnimationFrame(frame);
-  }, []);
+  // Closing clears the selection, which empties detailView while the drawer
+  // is still sliding out — retain the last view so the exit shows content,
+  // not a skeleton. While open, an empty detailView is a genuine load.
+  const [retainedView, setRetainedView] = useState(detailView);
+  if (detailView !== undefined && detailView !== retainedView) {
+    setRetainedView(detailView);
+  }
+  const view = detailView ?? (isOpen ? undefined : retainedView);
 
-  const isLoading = isDetailPending || detailView === undefined;
+  const isLoading = (isOpen && isDetailPending) || view === undefined;
 
   return (
     <aside
       ref={ref}
       role="dialog"
       aria-label="Travel expense detail"
+      inert={!isOpen}
       className={`fixed inset-y-0 right-0 z-40 flex w-[28rem] max-w-full flex-col bg-white shadow-xl transition-transform duration-300 ${
-        isEntered ? "translate-x-0" : "translate-x-full"
+        isOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >
       <header className="flex items-start justify-between gap-4 border-b border-gray-200 p-4">
@@ -68,8 +73,8 @@ export const RequestDetailDrawer = memo(function RequestDetailDrawer({
           </div>
         ) : (
           <div>
-            <h2 className="text-lg font-semibold">{detailView.purpose}</h2>
-            <p className="text-sm text-gray-500">{detailView.period}</p>
+            <h2 className="text-lg font-semibold">{view.purpose}</h2>
+            <p className="text-sm text-gray-500">{view.period}</p>
           </div>
         )}
         <button
@@ -89,12 +94,12 @@ export const RequestDetailDrawer = memo(function RequestDetailDrawer({
           <div className="flex-1 overflow-y-auto p-4">
             <div className="mb-4 flex items-center gap-2">
               <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClasses[detailView.status]}`}
+                className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClasses[view.status]}`}
               >
-                {detailView.statusLabel}
+                {view.statusLabel}
               </span>
               <span className="text-sm text-gray-500">
-                {detailView.approvalCount} / 2 approvals
+                {view.approvalCount} / 2 approvals
               </span>
             </div>
 
@@ -102,7 +107,7 @@ export const RequestDetailDrawer = memo(function RequestDetailDrawer({
               Expense breakdown
             </h3>
             <ul className="divide-y divide-gray-100">
-              {detailView.items.map((item) => (
+              {view.items.map((item) => (
                 <li
                   key={item.id}
                   className="flex items-center justify-between py-2"
@@ -114,12 +119,12 @@ export const RequestDetailDrawer = memo(function RequestDetailDrawer({
             </ul>
             <div className="mt-1 flex items-center justify-between border-t border-gray-200 pt-2 font-semibold">
               <span>Total</span>
-              <span className="tabular-nums">{detailView.totalAmount}</span>
+              <span className="tabular-nums">{view.totalAmount}</span>
             </div>
           </div>
 
           <div className="border-t border-gray-200 p-4">
-            {detailView.canJudge ? (
+            {view.canJudge ? (
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -138,7 +143,7 @@ export const RequestDetailDrawer = memo(function RequestDetailDrawer({
               </div>
             ) : (
               <p className="text-sm text-gray-500">
-                This request has been {detailView.statusLabel.toLowerCase()}.
+                This request has been {view.statusLabel.toLowerCase()}.
               </p>
             )}
           </div>

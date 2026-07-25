@@ -26,6 +26,7 @@ function makeProps(
   overrides: Partial<RequestDetailDrawerProps> = {},
 ): RequestDetailDrawerProps {
   return {
+    isOpen: true,
     detailView,
     isDetailPending: false,
     hasPrev: true,
@@ -115,4 +116,26 @@ test("the close button closes the drawer", async () => {
 
   await screen.getByRole("button", { name: "Close" }).click();
   expect(props.onClose).toHaveBeenCalled();
+});
+
+test("while closed it is inert and keeps the last view for the exit slide", async () => {
+  const screen = await render(<RequestDetailDrawer {...makeProps()} />);
+  await expect
+    .element(screen.getByRole("heading", { name: "Client visit in Osaka" }))
+    .toBeVisible();
+
+  // Closing clears the selection upstream: isOpen drops with detailView.
+  await screen.rerender(
+    <RequestDetailDrawer
+      {...makeProps({
+        isOpen: false,
+        detailView: undefined,
+        isDetailPending: true,
+      })}
+    />,
+  );
+
+  const aside = screen.container.querySelector<HTMLElement>("aside");
+  expect(aside?.inert).toBe(true);
+  expect(screen.container.textContent).toContain("Client visit in Osaka");
 });

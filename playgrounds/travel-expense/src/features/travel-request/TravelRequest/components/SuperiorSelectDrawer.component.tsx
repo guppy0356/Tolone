@@ -1,7 +1,8 @@
-import { memo } from "react";
+import { memo, type Ref } from "react";
 import type { Superior } from "@api/Superior.api";
 
 export interface SuperiorSelectDrawerProps {
+  ref?: Ref<HTMLElement>;
   isOpen: boolean;
   superiors: Superior[];
   isSuperiorsPending: boolean;
@@ -23,6 +24,7 @@ function SuperiorListSkeleton() {
 }
 
 export const SuperiorSelectDrawer = memo(function SuperiorSelectDrawer({
+  ref,
   isOpen,
   superiors,
   isSuperiorsPending,
@@ -31,17 +33,18 @@ export const SuperiorSelectDrawer = memo(function SuperiorSelectDrawer({
 }: SuperiorSelectDrawerProps) {
   return (
     <>
-      {/* pointer-events-none while closed: the faded-out backdrop must not
-          swallow clicks meant for the list underneath */}
+      {/* Decorative dim only — always pointer-events-none so outside clicks
+          reach the document, where the owner's outside-click listener
+          dismisses the drawer */}
       <div
-        className={`fixed inset-0 z-[45] bg-black/20 transition-opacity duration-300 ${
-          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        className={`pointer-events-none fixed inset-0 z-[45] bg-black/20 transition-opacity duration-300 ${
+          isOpen ? "opacity-100" : "opacity-0"
         }`}
-        onClick={onClose}
         aria-hidden="true"
       />
       {/* w-56: half the detail drawer's w-[28rem] */}
       <aside
+        ref={ref}
         role="dialog"
         aria-modal="true"
         aria-label="Select next approver"

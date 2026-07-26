@@ -58,6 +58,7 @@ export interface TravelRequestComponentState {
   hasNext: boolean;
   listRef: RefObject<HTMLDivElement | null>;
   detailDrawerRef: RefObject<HTMLElement | null>;
+  superiorDrawerRef: RefObject<HTMLElement | null>;
   selectRow: (id: string) => void;
   goPrev: () => void;
   goNext: () => void;
@@ -94,6 +95,7 @@ export function useTravelRequestComponent({
   const [isSuperiorDrawerOpen, setIsSuperiorDrawerOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const detailDrawerRef = useRef<HTMLElement>(null);
+  const superiorDrawerRef = useRef<HTMLElement>(null);
 
   const isDetailDrawerOpen = selectedRequestId !== null;
 
@@ -169,7 +171,9 @@ export function useTravelRequestComponent({
 
   // Clicking outside closes the drawer — except inside the list, whose rows
   // switch the selection instead of dismissing. While the superior drawer is
-  // open, its own backdrop owns dismissal, so this listener stands down.
+  // open, its own outside-click listener owns dismissal, so this one stands
+  // down: the first outside click closes only the superior drawer, the next
+  // one closes this drawer.
   useEffect(() => {
     if (selectedRequestId === null || isSuperiorDrawerOpen) return;
 
@@ -190,6 +194,21 @@ export function useTravelRequestComponent({
   const closeSuperiorDrawer = useCallback(() => {
     setIsSuperiorDrawerOpen(false);
   }, []);
+
+  // Everything behind the open superior drawer is inert, so clicks landing
+  // there target a non-inert ancestor and never activate what's underneath —
+  // the outside click only dismisses this drawer.
+  useEffect(() => {
+    if (!isSuperiorDrawerOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (superiorDrawerRef.current?.contains(target)) return;
+      closeSuperiorDrawer();
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [isSuperiorDrawerOpen, closeSuperiorDrawer]);
 
   const handleApprove = useCallback(
     async (superiorId: string) => {
@@ -213,6 +232,7 @@ export function useTravelRequestComponent({
     hasNext,
     listRef,
     detailDrawerRef,
+    superiorDrawerRef,
     selectRow,
     goPrev,
     goNext,

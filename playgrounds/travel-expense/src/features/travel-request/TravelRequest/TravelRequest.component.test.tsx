@@ -1,4 +1,5 @@
 import { expect, test, vi } from "vitest";
+import { page } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { TravelRequestComponent } from "./TravelRequest.component";
 import type { TravelRequestContainerState } from "./TravelRequest.container.hook";
@@ -152,6 +153,54 @@ test("approving asks for the next superior, then approves with the chosen one", 
     'aside[aria-label="Select next approver"]',
   );
   await expect.poll(() => superiorAside?.inert).toBe(true);
+});
+
+test("an outside click closes the superior drawer first, then the detail drawer", async () => {
+  const state = makeState({ selectedRequestId: "tr-1", detail });
+  const screen = await render(<TravelRequestComponent {...state} />);
+
+  const drawer = screen.getByRole("dialog", { name: "Travel expense detail" });
+  await drawer.getByRole("button", { name: "Approve" }).click();
+
+  const superiorAside = screen.container.querySelector<HTMLElement>(
+    'aside[aria-label="Select next approver"]',
+  );
+  await expect.poll(() => superiorAside?.inert).toBe(false);
+
+  // Everything behind the superior drawer is inert, so click the bare
+  // container area beside the list rather than a specific element.
+  await page
+    .elementLocator(screen.container)
+    .click({ position: { x: 8, y: 8 } });
+
+  await expect.poll(() => superiorAside?.inert).toBe(true);
+  expect(state.selectRequest).not.toHaveBeenCalled();
+
+  await screen
+    .getByRole("heading", { name: "Travel Expense Approvals" })
+    .click();
+
+  expect(state.selectRequest).toHaveBeenCalledWith(null);
+});
+
+test("clicking inside the superior drawer does not close it", async () => {
+  const state = makeState({ selectedRequestId: "tr-1", detail });
+  const screen = await render(<TravelRequestComponent {...state} />);
+
+  const drawer = screen.getByRole("dialog", { name: "Travel expense detail" });
+  await drawer.getByRole("button", { name: "Approve" }).click();
+
+  const superiorDrawer = screen.getByRole("dialog", {
+    name: "Select next approver",
+  });
+  await superiorDrawer
+    .getByRole("heading", { name: "Select next approver" })
+    .click();
+
+  const superiorAside = screen.container.querySelector<HTMLElement>(
+    'aside[aria-label="Select next approver"]',
+  );
+  expect(superiorAside?.inert).toBe(false);
 });
 
 test("rejecting from the drawer rejects the selected request", async () => {

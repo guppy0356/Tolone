@@ -111,6 +111,7 @@ export function TravelRequestComponent({
     hasNext,
     listRef,
     detailDrawerRef,
+    superiorDrawerRef,
     selectRow,
     goPrev,
     goNext,
@@ -131,9 +132,10 @@ export function TravelRequestComponent({
 
   return (
     <div className="mx-auto max-w-2xl p-6">
-      {/* The superior drawer is modal: its backdrop blocks pointers, and
-          inert removes everything behind it — heading, list, detail drawer —
-          from the tab order and the accessibility tree while it is open. */}
+      {/* While the superior drawer is open, inert removes everything behind
+          it — heading, list, detail drawer — from hit testing, the tab order,
+          and the accessibility tree, so an outside click can only dismiss the
+          superior drawer, never activate what it lands on. */}
       <div inert={isSuperiorDrawerOpen}>
         <h1 className="mb-4 text-2xl font-bold">Travel Expense Approvals</h1>
 
@@ -168,6 +170,7 @@ export function TravelRequestComponent({
       </div>
 
       <SuperiorSelectDrawer
+        ref={superiorDrawerRef}
         isOpen={isSuperiorDrawerOpen}
         superiors={superiors}
         isSuperiorsPending={isSuperiorsPending}

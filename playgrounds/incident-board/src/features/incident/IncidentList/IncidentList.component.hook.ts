@@ -12,19 +12,11 @@ import {
   INCIDENT_STATUSES,
   type IncidentListSearch,
 } from "../Incident.search";
-
-const STATUS_LABELS: Record<IncidentStatus, string> = {
-  open: "Open",
-  acknowledged: "Acknowledged",
-  resolved: "Resolved",
-};
-
-const SEVERITY_LABELS: Record<IncidentSeverity, string> = {
-  low: "Low",
-  medium: "Medium",
-  high: "High",
-  critical: "Critical",
-};
+import {
+  formatInstant,
+  SEVERITY_LABELS,
+  STATUS_LABELS,
+} from "../Incident.labels";
 
 const SORT_LABELS: Record<IncidentSort, string> = {
   "-openedAt": "Newest first",
@@ -34,13 +26,6 @@ const SORT_LABELS: Record<IncidentSort, string> = {
 };
 
 export const ANY_ASSIGNEE = "";
-
-// The contract's timestamps are UTC ISO strings. Formatting them through Intl
-// would make the rendered text depend on the runner's locale and ICU version,
-// so the view model states the zone instead of guessing one.
-function formatOpenedAt(openedAt: string): string {
-  return `${openedAt.slice(0, 10)} ${openedAt.slice(11, 16)} UTC`;
-}
 
 export interface IncidentRow {
   id: string;
@@ -103,7 +88,7 @@ export function useIncidentListComponent({
         severity: incident.severity,
         severityLabel: SEVERITY_LABELS[incident.severity],
         assigneeLabel: incident.assignee?.name ?? "Unassigned",
-        openedAtLabel: formatOpenedAt(incident.openedAt),
+        openedAtLabel: formatInstant(incident.openedAt),
       })),
     [incidents],
   );

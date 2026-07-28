@@ -75,6 +75,18 @@ export const incidentDetailSearchSchema = incidentListSearchSchema.extend({
 
 export type IncidentDetailSearch = z.infer<typeof incidentDetailSearchSchema>;
 
+/**
+ * The detail search minus what only the detail page means — i.e. the address
+ * of the list the reader came from. Projecting one schema onto the other is a
+ * property of the two contracts, so it lives with them.
+ */
+export function toListSearch({
+  tab: _tab,
+  ...listSearch
+}: IncidentDetailSearch): IncidentListSearch {
+  return listSearch;
+}
+
 // The route options that make a URL mean what this module says it means:
 // parsing on the way in, and dropping defaults on the way out, so that
 // /incidents and /incidents?status=[]&sort=-openedAt&page=1 are the same

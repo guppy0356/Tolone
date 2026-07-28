@@ -12,6 +12,10 @@ API → Queries → Container (+ container.hook) → Component (+ component.hook
 
 Two shared **cache-layer** files per resource (API + Queries), then per page a **Container** and a **Component**, each owning one hook. The container hook holds server state; the component hook holds local UI state and derived view-models.
 
+**This is not the classic Container/Presentational pattern.** The shape and the names are borrowed; the purpose is not. The classic Container was the component that *held state* — in 2015 there was no other way to hold it, so the split was between a stateful wrapper and a stateless view. Here the Container holds nothing. State lives in the container hook, and the Container exists for one reason: to call that hook **from outside the Component**. That keeps the Component renderable from container state alone, which is what makes the Storybook catalog (every state reachable through `args`) and props-only behavior tests work — a Component that called the container hook itself would drag a QueryClient and MSW into every story and test.
+
+What the boundary excludes is **server coupling**, not routing. `navigate` and `Link` are not container state, so they stay in the Component; pages that navigate pay a minimal router in their stories and tests, but never a server.
+
 | Layer | File | Responsibility | Form |
 |---|---|---|---|
 | API | `src/api/{Resource}.api.ts` | HTTP communication + types (from OpenAPI). No query keys — those live in the Queries layer | Plain function object |
@@ -58,7 +62,7 @@ Every piece of state in a feature has one home, fixed by what *kind* of state it
 | **Local UI state** — form fields, toggles, drafts | the component | component hook (a sub-component may own purely-local DOM mechanics itself) |
 | **Derived / view-model** | computed from the rows above | component hook |
 
-Two rows can both look like "a query parameter"; choose between them by **persistence, not mechanism**. Put it in the URL when the value should survive reload, be shareable, or participate in history (a list's filter/sort/page); keep it as hook-scoped `useState` when it is ephemeral and pointless to bookmark (a form's typeahead keyword). Either way the container hook never reads the URL itself — the Container reads it and injects the result, and where the Component also needs the value (to render the current controls and write them back) it arrives as an ordinary prop, never re-exported through the hook's return.
+Two rows can both look like "a query parameter"; choose between them by **persistence, not mechanism**. Put it in the URL when the value should survive reload, be shareable, or participate in history (a list's filter/sort/page); keep it as hook-scoped `useState` when it is ephemeral and pointless to bookmark (a form's typeahead keyword). Either way the container hook never reads the URL itself — the Container reads it and injects the result, and where the Component also needs the value (to render the current controls and write them back) it arrives as an ordinary prop, never re-exported through the hook's return. The read/write asymmetry follows from the props rule: a param read in the Container reaches the hook and never becomes a Component prop, while `navigate` could only reach the Component *as* a prop — so it is called there instead.
 
 ### File Placement
 
@@ -372,6 +376,8 @@ A mutation makes every cache that mirrors the changed data wrong. Invalidate (ma
 ### 4. Container Layer (`{Page}.container.tsx`)
 
 **Responsibility**: Wire the container hook to the Component. Resolve app-shell inputs (URL params) before calling the hook.
+
+Why this layer exists at all is stated once at the top: it is not "the stateful one" — it is the one outside the tested unit.
 
 **Rules**:
 - Calls the container hook (the only layer that does)

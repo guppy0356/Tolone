@@ -8,9 +8,10 @@ import { fileURLToPath } from "node:url";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Shared by both projects so the stories and the behavior tests run in the
-// same Playwright Chromium instance.
-const browser = {
+// Both projects run in Playwright Chromium. Each needs its own config object:
+// vitest stamps the resolved project name onto the shared `instances` entries,
+// so reusing one literal makes the two projects collide on a single name.
+const browserConfig = () => ({
   enabled: true,
   // pnpm resolves two vitest instances via peer graphs, splitting the
   // BrowserProviderOption type. Cast bridges them; runtime is unaffected.
@@ -18,7 +19,7 @@ const browser = {
   provider: playwright({}) as any,
   headless: true,
   instances: [{ browser: "chromium" }],
-};
+});
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -26,6 +27,9 @@ export default defineConfig({
     alias: {
       "@api": path.join(dirname, "src/api"),
     },
+    // vitest-browser-react bundles its own React; without this the router's
+    // hooks run against a second copy and every render throws.
+    dedupe: ["react", "react-dom"],
   },
   test: {
     projects: [
@@ -39,7 +43,7 @@ export default defineConfig({
         ],
         test: {
           name: "storybook",
-          browser,
+          browser: browserConfig(),
         },
       },
       {
@@ -48,7 +52,7 @@ export default defineConfig({
           name: "unit",
           include: ["src/**/*.test.{ts,tsx}"],
           setupFiles: [path.join(dirname, "src/test/setup.ts")],
-          browser,
+          browser: browserConfig(),
         },
       },
     ],

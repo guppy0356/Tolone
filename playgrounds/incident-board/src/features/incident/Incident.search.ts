@@ -1,3 +1,4 @@
+import { stripSearchParams } from "@tanstack/react-router";
 import { z } from "zod";
 import type {
   IncidentListParams,
@@ -73,3 +74,27 @@ export const incidentDetailSearchSchema = incidentListSearchSchema.extend({
 });
 
 export type IncidentDetailSearch = z.infer<typeof incidentDetailSearchSchema>;
+
+// The route options that make a URL mean what this module says it means:
+// parsing on the way in, and dropping defaults on the way out, so that
+// /incidents and /incidents?status=[]&sort=-openedAt&page=1 are the same
+// address. Route files spread these rather than restating them, and so does
+// the story/test router — a harness that skipped the middleware would be
+// exercising a URL the app never produces.
+export const incidentListSearchConfig = {
+  validateSearch: incidentListSearchSchema,
+  search: {
+    middlewares: [
+      stripSearchParams<IncidentListSearch>(incidentListSearchDefaults),
+    ],
+  },
+};
+
+export const incidentDetailSearchConfig = {
+  validateSearch: incidentDetailSearchSchema,
+  search: {
+    middlewares: [
+      stripSearchParams<IncidentDetailSearch>(incidentDetailSearchDefaults),
+    ],
+  },
+};

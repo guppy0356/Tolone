@@ -11,9 +11,8 @@ A pnpm monorepo for experimenting with the Container + Presentational Component 
 ├── packages/
 │   └── tailwind/             # Shared TailwindCSS package
 ├── playgrounds/
-│   ├── todo/                 # Todo app (single-page example)
-│   ├── team-cost-report/     # Multi-page app (reference for the current architecture)
-│   └── …                     # One app per experiment (blog, family-todo, novel, pat, …)
+│   ├── todo/                 # One app per experiment
+│   └── …                     # (blog, team-cost-report, travel-expense, …)
 └── scripts/
     └── new-playground.mjs    # Playground scaffold script
 ```
@@ -28,7 +27,7 @@ pnpm exec playwright install chromium
 The first command installs npm dependencies and runs MSW's postinstall to
 generate `mockServiceWorker.js` in each playground's `public/`. The second
 command downloads the Chromium binary to `~/Library/Caches/ms-playwright/`
-(or the OS-specific cache), which is used by Storybook play-function tests.
+(or the OS-specific cache), which is used by the browser-mode test run.
 Run it once per machine; the cache is shared by all playgrounds.
 
 ## Creating a Playground
@@ -82,7 +81,9 @@ pnpm --filter @tolone/<name> storybook
 ```
 
 Open `http://localhost:6006`. Each playground has its own `.storybook/`
-configuration and stories live next to features as `{Feature}.stories.tsx`.
+configuration and stories live next to their page as `{Page}.component.stories.tsx`.
+Stories are a visual catalog — states through `args`, no `play`. Behavior lives
+in `*.test.{ts,tsx}`, run by Vitest in browser mode.
 
 ## Running Tests
 
@@ -96,22 +97,27 @@ pnpm test
 
 ## Architecture
 
-Container + Presentational Component architecture. See [docs/architecture.md](./docs/architecture.md) for full details.
+Container + Presentational Component architecture. See [docs/architecture.md](./docs/architecture.md)
+for full details — it is the single source of truth. Every playground is an
+implementation snapshot and drifts from it over time, including the newest one,
+so develop from the guide rather than from another playground's source.
 
 ```
-API → Queries → Facade → Container → Component → Presenter
+API → Queries → Container (+ container.hook) → Component (+ component.hook)
 ```
 
 | Layer | File | Responsibility |
 |---|---|---|
-| API | `{Feature}.api.ts` | HTTP calls + type definitions |
-| Queries | `{Feature}.queries.ts` | Query definitions (`queryOptions()` factory) |
-| Facade | `{Feature}.facade.ts` | Server state (TanStack Query); one dedicated facade per page |
-| Container | `{Feature}.container.tsx` | Wires Facade to Component |
-| Component | `{Feature}.component.tsx` | Presentational rendering + loading UI |
-| Presenter | `{Feature}.presenter.ts` | Local UI state + view-model transforms |
+| API | `src/api/{Resource}.api.ts` | HTTP calls + type definitions |
+| Queries | `src/api/{Resource}.queries.ts` | Query definitions (`queryOptions()` factory) |
+| Container | `{Page}.container.tsx` | Wires the container hook to the Component |
+| Container hook | `{Page}.container.hook.ts` | Server state (TanStack Query); one per page |
+| Component | `{Page}.component.tsx` | Presentational rendering + loading UI |
+| Component hook | `{Page}.component.hook.ts` | Local UI state + view-model transforms |
 
-Features are placed under `src/features/{feature-name}/`.
+The shared cache layer (API + Queries) lives in a top-level `src/api/`, imported
+via the `@api` alias. Each page gets its own directory under
+`src/features/{feature-name}/{Page}/`.
 
 ## Sample Prompts for Claude
 
@@ -154,6 +160,6 @@ Then proceed in the confirmed order, one package at a time:
 - openapi-typescript (schema → type generation)
 - vite-plugin-checker (dev server type checking)
 - ky (HTTP client)
-- react-hook-form + zod (form validation, blog playground)
-- Vitest (browser-mode via @storybook/addon-vitest; no Testing Library / jsdom)
-- Storybook 10 + Playwright (component catalog; play-function tests run in Chromium via `@storybook/addon-vitest`)
+- react-hook-form + zod (form validation)
+- Vitest (browser-mode via @storybook/addon-vitest and vitest-browser-react; no jsdom)
+- Storybook 10 + Playwright (visual catalog; every story also runs as a render smoke test in Chromium via `@storybook/addon-vitest`)

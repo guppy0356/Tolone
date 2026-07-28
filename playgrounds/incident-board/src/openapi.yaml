@@ -1,0 +1,240 @@
+openapi: 3.1.0
+info:
+  title: Incident Board API
+  version: 1.0.0
+
+paths:
+  /api/incidents:
+    get:
+      summary: List incidents, filtered / sorted / paginated
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: Repeatable. Omitted means every status.
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/IncidentStatus"
+        - name: severity
+          in: query
+          required: false
+          description: Single choice. Omitted means every severity.
+          schema:
+            $ref: "#/components/schemas/IncidentSeverity"
+        - name: assignee
+          in: query
+          required: false
+          description: User id. Omitted means every assignee, unassigned included.
+          schema:
+            type: string
+        - name: sort
+          in: query
+          required: false
+          description: Signed sort key — a leading "-" means descending.
+          schema:
+            $ref: "#/components/schemas/IncidentSort"
+        - name: page
+          in: query
+          required: false
+          description: 1-based page number.
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+      responses:
+        "200":
+          description: One page of incidents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IncidentPage"
+
+  /api/incidents/{incidentId}:
+    get:
+      summary: Read one incident
+      parameters:
+        - name: incidentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The incident
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IncidentDetail"
+        "404":
+          description: No such incident
+
+  /api/incidents/{incidentId}/comments:
+    get:
+      summary: Read an incident's comments
+      parameters:
+        - name: incidentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The comments, oldest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
+        "404":
+          description: No such incident
+
+  /api/users:
+    get:
+      summary: List the users an incident can be assigned to
+      responses:
+        "200":
+          description: Every assignable user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+components:
+  schemas:
+    IncidentStatus:
+      type: string
+      enum: [open, acknowledged, resolved]
+
+    IncidentSeverity:
+      type: string
+      enum: [low, medium, high, critical]
+
+    IncidentSort:
+      type: string
+      enum: [openedAt, -openedAt, severity, -severity]
+
+    User:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    IncidentSummary:
+      type: object
+      required: [id, key, title, status, severity, assignee, openedAt]
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+          description: Human-facing identifier, e.g. INC-1043.
+        title:
+          type: string
+        status:
+          $ref: "#/components/schemas/IncidentStatus"
+        severity:
+          $ref: "#/components/schemas/IncidentSeverity"
+        assignee:
+          description: null when nobody has picked the incident up.
+          anyOf:
+            - $ref: "#/components/schemas/User"
+            - type: "null"
+        openedAt:
+          type: string
+          format: date-time
+
+    IncidentDetail:
+      type: object
+      required:
+        [
+          id,
+          key,
+          title,
+          status,
+          severity,
+          assignee,
+          openedAt,
+          description,
+          timeline,
+        ]
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+        title:
+          type: string
+        status:
+          $ref: "#/components/schemas/IncidentStatus"
+        severity:
+          $ref: "#/components/schemas/IncidentSeverity"
+        assignee:
+          anyOf:
+            - $ref: "#/components/schemas/User"
+            - type: "null"
+        openedAt:
+          type: string
+          format: date-time
+        description:
+          type: string
+        timeline:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimelineEvent"
+
+    TimelineEvent:
+      type: object
+      required: [id, at, kind, actor, message]
+      properties:
+        id:
+          type: string
+        at:
+          type: string
+          format: date-time
+        kind:
+          type: string
+          enum: [opened, acknowledged, resolved, note]
+        actor:
+          type: string
+        message:
+          type: string
+
+    Comment:
+      type: object
+      required: [id, author, body, postedAt]
+      properties:
+        id:
+          type: string
+        author:
+          type: string
+        body:
+          type: string
+        postedAt:
+          type: string
+          format: date-time
+
+    IncidentPage:
+      type: object
+      required: [items, page, perPage, total, totalPages]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/IncidentSummary"
+        page:
+          type: integer
+        perPage:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer

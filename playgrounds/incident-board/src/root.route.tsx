@@ -1,20 +1,23 @@
-import { createRootRoute, createRoute, Outlet } from "@tanstack/react-router";
+import {
+  createRootRoute,
+  createRoute,
+  Outlet,
+  redirect,
+} from "@tanstack/react-router";
 
 export const rootRoute = createRootRoute({
   component: () => (
-    <main>
+    <main className="min-h-screen bg-white text-gray-900">
       <Outlet />
     </main>
   ),
 });
 
-// Placeholder until the first feature page registers its own route.
+// The app has one entry point; "/" is a doorway to it.
 export const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => (
-    <div>
-      <h1>Incident-board Playground</h1>
-    </div>
-  ),
+  beforeLoad: () => {
+    throw redirect({ to: "/incidents" });
+  },
 });

@@ -1,5 +1,9 @@
 import { z } from "zod";
-import type { IncidentListParams } from "@api/Incident.api";
+import type {
+  IncidentListParams,
+  IncidentSort,
+  IncidentStatus,
+} from "@api/Incident.api";
 
 // The vocabulary of the incident URL. The generated OpenAPI types are types
 // only, so the enum members have to exist once as runtime values; the
@@ -16,22 +20,39 @@ export const INCIDENT_SORTS = [
 ] as const;
 export const INCIDENT_TABS = ["timeline", "comments"] as const;
 
-export const incidentListSearchDefaults = {
-  status: [],
-  sort: "-openedAt",
-  page: 1,
-} as const;
+export type IncidentTab = (typeof INCIDENT_TABS)[number];
 
-// `.catch` on every field: a URL is user-editable input, and a hand-mangled
-// query string should fall back to the default view rather than throw the page
-// away. `.default` never fires for a caught field, so the fallbacks are the
-// defaults themselves.
+// Not `as const`: these are also the argument to the router's
+// `stripSearchParams`, which expects the mutable search shape.
+export const incidentListSearchDefaults = {
+  status: [] as IncidentStatus[],
+  sort: "-openedAt" as IncidentSort,
+  page: 1,
+};
+
+// `.default` then `.catch` on every field, in that order and both of them:
+// `.default` is what makes the field optional on the way *in*, so a link may
+// name only the params it changes; `.catch` is what makes a hand-mangled URL
+// degrade to that default instead of throwing the page away.
 export const incidentListSearchSchema = z.object({
-  status: z.array(z.enum(INCIDENT_STATUSES)).catch(() => []),
+  status: z
+    .array(z.enum(INCIDENT_STATUSES))
+    .default(incidentListSearchDefaults.status)
+    .catch(incidentListSearchDefaults.status),
   severity: z.enum(INCIDENT_SEVERITIES).optional().catch(undefined),
   assignee: z.string().optional().catch(undefined),
-  sort: z.enum(INCIDENT_SORTS).catch(incidentListSearchDefaults.sort),
-  page: z.coerce.number().int().min(1).catch(incidentListSearchDefaults.page),
+  sort: z
+    .enum(INCIDENT_SORTS)
+    .default(incidentListSearchDefaults.sort)
+    .catch(incidentListSearchDefaults.sort),
+  // Not `z.coerce`: the router JSON-parses search values, so `?page=2` already
+  // arrives as a number, and coercion would widen the input type to `unknown`.
+  page: z
+    .number()
+    .int()
+    .min(1)
+    .default(incidentListSearchDefaults.page)
+    .catch(incidentListSearchDefaults.page),
 }) satisfies z.ZodType<IncidentListParams, unknown>;
 
 export type IncidentListSearch = z.infer<typeof incidentListSearchSchema>;
@@ -41,11 +62,14 @@ export type IncidentListSearch = z.infer<typeof incidentListSearchSchema>;
 // the source of truth for this state, so nothing else may remember it.
 export const incidentDetailSearchDefaults = {
   ...incidentListSearchDefaults,
-  tab: "timeline",
-} as const;
+  tab: "timeline" as IncidentTab,
+};
 
 export const incidentDetailSearchSchema = incidentListSearchSchema.extend({
-  tab: z.enum(INCIDENT_TABS).catch(incidentDetailSearchDefaults.tab),
+  tab: z
+    .enum(INCIDENT_TABS)
+    .default(incidentDetailSearchDefaults.tab)
+    .catch(incidentDetailSearchDefaults.tab),
 });
 
 export type IncidentDetailSearch = z.infer<typeof incidentDetailSearchSchema>;

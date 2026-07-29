@@ -76,7 +76,8 @@ src/
         ├── {Page}.container.tsx      ← wires the container hook to the Component
         ├── {Page}.container.hook.ts  ← server state (one per page)
         ├── {Page}.component.tsx      ← Component + private memo'd body + private Skeleton
-        ├── {Page}.component.hook.ts  ← local UI state + derived view-model
+        ├── {Page}.component.hook.ts  ← local UI state, memoization, handlers
+        ├── {Page}.view-model.ts      ← the shapes the Component receives, and how they are built
         ├── {Page}.schema.ts          ← zod validation contract (form pages only)
         ├── {Page}.component.stories.tsx
         └── components/               ← extracted sub-components (concern-named)
@@ -100,13 +101,14 @@ Typical commit sequence:
 5. URL contract (pages with URL state) + every route declared **without `component:`** and registered in `router.ts` → commit
 6. Container hook layer (+ hook test when worth it — error mapping, hook-scoped query params) → commit
 7. zod form schema (`{Page}.schema.ts`, form pages only) → commit
-8. Component hook layer → commit
-9. Component + stories + behavior tests (run `pnpm test` before committing) → commit
-10. MSW handlers → commit
-11. Container layer → commit
-12. Point each route at its Container (`component: {Page}Container`) → commit
+8. View model (`{Page}.view-model.ts`) — the Component's shapes + the pure functions that build them → commit
+9. Component hook layer → commit
+10. Component + stories + behavior tests (run `pnpm test` before committing) → commit
+11. MSW handlers → commit
+12. Container layer → commit
+13. Point each route at its Container (`component: {Page}Container`) → commit
 
-Steps 5 and 12 are one job split in two: `Link` / `useSearch({ from })` are typed against the registered route tree, so a navigating Component cannot typecheck before its routes exist — and the routes cannot name a Container that does not exist yet. Declare the URLs first, attach the Containers last.
+Steps 5 and 13 are one job split in two: `Link` / `useSearch({ from })` are typed against the registered route tree, so a navigating Component cannot typecheck before its routes exist — and the routes cannot name a Container that does not exist yet. Declare the URLs first, attach the Containers last.
 
 ## Future Work
 

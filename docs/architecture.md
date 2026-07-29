@@ -25,7 +25,7 @@ so develop from this document rather than from another playground's source.
 API → Queries → Container (+ container.hook) → Component (+ component.hook)
 ```
 
-Two shared **cache-layer** files per resource (API + Queries), then per page a **Container** and a **Component**, each owning one hook. The container hook holds server state; the component hook holds local UI state and derived view-models.
+Two shared **cache-layer** files per resource (API + Queries), then per page a **Container** and a **Component**, each owning one hook. The container hook holds server state; the component hook holds local UI state and assembles the page's view model from the pure functions beside it.
 
 ### Why this shape
 
@@ -42,7 +42,8 @@ What the boundary excludes is **server coupling**, not routing. `navigate` and `
 | Container | `{Page}.container.tsx` | Wires the container hook to the Component. Calls the container hook + app-shell read hooks (e.g. `useParams`, `useSearch`); destructures only fields the Component uses | React component |
 | Container hook | `{Page}.container.hook.ts` | Server state: `useQuery(featureQueries.x())` + `useMutation`; may hold hook-scoped `useState` for query params. **One dedicated container hook per page** | React hook |
 | Component | `{Page}.component.tsx` | Presentational rendering; loading UI (`isPending` skeleton / `isRefetching` opacity); calls the component hook; may call app-shell action hooks (e.g. `useNavigate`) bound to user interactions | React component |
-| Component hook | `{Page}.component.hook.ts` | Local UI state + derived display values (incl. view-model transforms from the domain contract); called inside the Component; receives container-hook actions as params | React hook |
+| Component hook | `{Page}.component.hook.ts` | Local UI state, memoization and handlers; called inside the Component; receives container-hook actions as params | React hook |
+| View model | `{Page}.view-model.ts` | The shapes the Component receives and the pure functions that build them from the contract | Plain module |
 
 The container hook is the page's server-state hook (what older Container/Presentational write-ups call a "facade"); the component hook is the page's local-state-and-derivation hook (a "presenter"). They are named by the layer that owns them, not by those role words.
 
@@ -79,7 +80,7 @@ Every piece of state in a feature has one home, fixed by what *kind* of state it
 | **URL / route state** — path params, plus any filter / sort / pagination / tab meant to survive reload, be shareable, or sit in history | the URL | the Container **reads** it (`useParams` / `useSearch`); the Component **changes** it (`navigate` / `Link`). The container hook never sees the URL — it receives the parsed values as params, like a detail hook receives an `id`. Its schema is [§5](#5-state-in-the-url) |
 | **Hook-scoped query input** — an input that drives a query but is deliberately kept out of the URL (e.g. a form's typeahead keyword) | the container hook | `useState` in the container hook, exposing the value and its setter |
 | **Local UI state** — form fields, toggles, drafts | the component | component hook (a sub-component may own purely-local DOM mechanics itself) |
-| **Derived / view-model** | computed from the rows above | component hook |
+| **Derived / view-model** | computed from the rows above | component hook, memoizing the pure functions in `{Page}.view-model.ts` |
 
 Two rows can both look like "a query parameter"; choose between them by **persistence, not mechanism**. Put it in the URL when the value should survive reload, be shareable, or participate in history (a list's filter/sort/page); keep it as hook-scoped `useState` when it is ephemeral and pointless to bookmark (a form's typeahead keyword).
 
@@ -115,7 +116,8 @@ src/
     │   ├── {Page}.container.tsx
     │   ├── {Page}.container.hook.ts        ← one dedicated container hook per page
     │   ├── {Page}.component.tsx            ← entry + private memo'd body + private Skeleton
-    │   ├── {Page}.component.hook.ts        ← local UI state + derived view-model
+    │   ├── {Page}.component.hook.ts        ← local UI state, memoization, handlers
+    │   ├── {Page}.view-model.ts            ← the shapes the Component receives, and how they are built
     │   ├── {Page}.schema.ts                ← zod form-validation contract (form pages only)
     │   ├── {Page}.component.stories.tsx
     │   └── components/
@@ -129,7 +131,7 @@ What lands at the feature root divides by whether the rest of the app **wires** 
 
 *Wired* is a contract: route files spread the URL module, and `satisfies` pins it to the API layer's params type, so changing it changes what other layers compile against. It sits directly at the feature root, named for the resource and its concern (`{Resource}.{concern}.ts`). The URL is the case this guide documents in full, because a sibling page is *required* to declare the same parameters (see [§5](#5-state-in-the-url)).
 
-*Called* is everything a hook simply invokes and nothing wires — the pure functions and lookup tables two pages share, such as display labels two pages must spell identically, where disagreeing is a defect no type catches. These go in `features/{feature-name}/helpers/`, one file per subject (`instant.ts`, `labels.ts`), named for what the file is about since the directory already says it is a helper. Nothing stateful belongs there — no hook, no component, and no contract — because a directory named for a kind of code rather than a subject accepts whatever is put in it, and the admission rule is the only thing standing in for a name that could refuse.
+*Called* is what a hook simply invokes and nothing wires: the pure functions two pages share, such as turning a contract instant into display text. They go in `features/{feature-name}/helpers/`, one file per subject (`instant.ts`), named for what the file is about since the directory already says it is a helper. It is not scaffolded — it appears the moment a second page calls the same function, and a directory that never exists empty is one nothing gets parked in, which is the only defense a name describing a kind of code rather than a subject has. Pure functions are all it takes: a lookup table is data rather than a call, and sits directly at the feature root under the resource's name (`Incident.labels.ts`), put there by the same sharing test.
 
 **Naming.** In `features/{feature-name}/{Page}/`, the two segments name different things. `{feature-name}` names the **domain** the pages operate over — the business area / resource group, singular kebab-case (`todo`, `report`, `travel-request`) — never an operation performed there (`approval`). `{Page}` names **what the page shows**: a feature's lone page is the bare resource (`Todo`, `Profile`), and when several pages sit over the same resource a kind suffix tells them apart (`ReportList` / `ReportDetail` / `ReportForm`). The suffix is a **discriminator, not a description** — a lone profile page is `Profile`, not `ProfileDetail`; the suffix appears once a sibling exists to distinguish from, so adding a second page renames the first. Operations (approve, submit, reject) surface as actions inside a page — they name buttons and handlers, never directories.
 
@@ -641,7 +643,9 @@ export function TodoComponent({
 - That leaves the branches where the hook cannot be called at all — a not-found page still needs the link back to where the reader came from. A derivation that must survive those branches is not hook work: write it as a plain function beside the contract it derives from (a projection of one URL schema onto another lives with the schemas) and call it from wherever it is needed. The rule is about *hooks* being unconditional, not about derivation being hook-only
 - Manage form input values, validation, UI toggles, etc.
 - Derive display values from container data (e.g. merging server-returned options with current selections)
-- Transform the domain contract into view-specific shapes here (e.g. pivot domain rows into a chart's dynamic-key format, map ids to display labels). The view model is a component-hook concern, never part of the API contract
+- **The view model is what the Component receives** — the shapes and actions of `{Page}ComponentState`, the page's own vocabulary rather than the wire's. Turning one contract value into one display value (`open` into `"Open"`, an ISO instant into text) is not the view model; it is what the view model is built out of. Both are UI work and neither belongs to the API contract, whose types are the server's word and stay unwrapped in the cache
+- **The building lives in `{Page}.view-model.ts`, the memoizing in the hook.** That file holds the shapes and one pure function per record (`toIncidentListRow(incident)`), so the hook reads `incidents.map(toIncidentListRow)` and keeps only `useMemo` / `useCallback`, state, and handlers. The mapping is the part with decisions in it — how an absent assignee reads, which fields the Component gets — so it is worth testing without rendering. A list that depends on neither server data nor current state (a sort control's options) is a plain constant in that file, not a memo with an empty dependency array
+- A shape belongs to one page: the row a list renders and the headline a detail renders are different, and a second page reading the same resource writes its own. Names follow — `IncidentListRow`, not `IncidentRow`, so that a screen's shape is never mistaken for the contract's `IncidentSummary` next to it in the same import block. What *is* shared is the material: a label table two pages must spell identically sits at the feature root, per [Feature-root modules](#file-placement)
 - **Derive the next URL here too.** The Component owns the `<Link>` and the `navigate` call, but *what the next search should be* is a derivation: which controls reset the page to 1, which do not, how a toggled value folds into an array. It crosses the boundary in whichever direction the Component needs — a control that navigates on change takes an `applySearch(next)` callback the Component passes in, while a `<Link>` has nothing to call and takes the **value**, so the hook returns the search object the link points at. Same derivation, two shapes; the choice is the Component's, not a second rule
 - **No `Intl` in formatting.** `Intl.DateTimeFormat` / `toLocaleString` resolve against the runner's locale and ICU build, so a behavior test asserting on their output breaks on a machine that differs. Build display strings explicitly (`2026-07-28 22:14 UTC`)
 - May have no `useState` when its job is purely derivation + handler wrapping — and when a Component has no local state and nothing to derive, it needs no component hook at all (an empty pass-through hook is ceremony; skip it)
@@ -1263,9 +1267,10 @@ Commit after each step. Do not batch multiple steps into one commit. Every commi
 6. **Routes before Components** — when any page keeps state in the URL, write its schema per [§5](#5-state-in-the-url). Then declare every route of the feature: `{Page}.route.ts` with path + spread route options and **no `component`**, registered in `router.ts`'s `addChildren` → **commit**
 7. `{Page}.container.hook.ts` — `use{Page}Container` hook + `{Page}ContainerState` interface (one dedicated container hook per page; `useQuery(featureQueries.x())` + `useMutation`; pick the mutation side-effect pattern — optimistic vs invalidate-only — per the Container Hook Layer section); when the hook contains logic worth testing in isolation (error mapping, hook-scoped query params), add `{Page}.container.hook.test.tsx` (`renderHook` + the MSW worker, with test-local `worker.use` handlers — see Writing Tests) in the same commit → **commit**
 8. `{Page}.schema.ts` — zod form-validation contract + `z.infer` form-values type, output pinned to the API input via `satisfies` (only when the page validates a form) → **commit**
-9. `{Page}.component.hook.ts` — `use{Page}Component` hook + `{Page}ComponentState` interface (skip this file entirely when the Component has no local state and nothing to derive) → **commit**
-10. `{Page}.component.tsx` — exported `{Page}Component` (props per [Component props](#2-type-patterns)) + private memo'd body + private Skeleton
-11. `{Page}.component.stories.tsx` — catalog states through `args` per the [state menu](#catalog-states-per-component), no `play` — and `{Page}.component.test.tsx` — behavior assertions per [Writing Tests](#8-writing-tests); navigating Components use the shared minimal router; run `pnpm test` to verify → **commit** (Component + stories + tests together)
-12. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
-13. `{Page}.container.tsx` — `{Page}Container` reads app-shell inputs, calls the container hook, passes fields to the Component → **commit**
-14. Point each route at its Container: add `component: {Page}Container` to the `{Page}.route.ts` written in step 6 → **commit**
+9. `{Page}.view-model.ts` — the shapes the Component receives (`{Page}Row`, `{Page}Headline`, …) + one pure function per record that builds them from the contract; constants for option lists that depend on nothing → **commit**
+10. `{Page}.component.hook.ts` — `use{Page}Component` hook + `{Page}ComponentState` interface, memoizing the view model's functions and wrapping handlers (skip this file entirely when the Component has no local state and nothing to derive) → **commit**
+11. `{Page}.component.tsx` — exported `{Page}Component` (props per [Component props](#2-type-patterns)) + private memo'd body + private Skeleton
+12. `{Page}.component.stories.tsx` — catalog states through `args` per the [state menu](#catalog-states-per-component), no `play` — and `{Page}.component.test.tsx` — behavior assertions per [Writing Tests](#8-writing-tests); navigating Components use the shared minimal router; run `pnpm test` to verify → **commit** (Component + stories + tests together)
+13. Add typed mock handlers to `src/mocks/handlers.ts` using `openapi-msw` → **commit**
+14. `{Page}.container.tsx` — `{Page}Container` reads app-shell inputs, calls the container hook, passes fields to the Component → **commit**
+15. Point each route at its Container: add `component: {Page}Container` to the `{Page}.route.ts` written in step 6 → **commit**

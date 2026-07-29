@@ -778,14 +778,13 @@ export const incidentListSearchConfig = {
 
 This is not tidiness. A test harness that restates the schema and omits the middleware exercises a URL the app can never produce — `?status=[]&sort=-openedAt&page=1` instead of `/incidents` — and passes while asserting something untrue. **A harness may choose its paths; it may not restate their contract.**
 
-### `.default()` then `.catch()`, on every field
+### Defaults, and what a malformed URL does
 
-Both, in that order, for a reason each:
+**`.default(x)` is forced.** It makes the field optional on the way *in*, and without it every `<Link>` and every `redirect({ to: "/incidents" })` has to name every parameter — omitting one is a compile error.
 
-- **`.default(x)`** makes the field optional on the way *in*. Without it every `<Link>` and every `redirect({ to: "/incidents" })` must name every parameter, and omitting one is a compile error.
-- **`.catch(x)`** makes a hand-edited URL degrade to that default instead of throwing the page away. The URL is user-editable input; `?page=banana` is a rendering concern, not a crash.
+That produces the asymmetry to keep in mind: **the input type is optional, the output type is required.** A link passes a partial search; the Container, the hook and the Component all receive the parsed output with every defaulted field present. Build a new search from the current parsed value (`{ ...search, page: 1 }`) rather than from an updater whose argument is the optional input type.
 
-This produces the one asymmetry to keep in mind: **the input type is optional, the output type is required.** A link passes a partial search; the Container, the hook and the Component all receive the parsed output with every defaulted field present. Build a new search from the current parsed value (`{ ...search, page: 1 }`) rather than from an updater whose argument is the optional input type.
+**What a malformed value does is a decision, not a default.** `?page=banana` can degrade to the field's default (`.catch(x)`) or fail the route. Degrading suits a URL that is ordinary user-editable text, where a typo or a stale bookmark should still render something. Failing suits a URL that *is* the meaning — an address someone was sent, where quietly rendering a different result is worse than rendering none. Decide it per contract and say which in the module; the two are indistinguishable until somebody edits a URL.
 
 `z.coerce` is not needed: the router JSON-parses search values, so `?page=2` already arrives as a number, and coercing would widen the input type to `unknown`.
 

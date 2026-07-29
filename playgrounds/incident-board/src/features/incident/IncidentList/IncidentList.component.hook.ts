@@ -12,11 +12,8 @@ import {
   INCIDENT_STATUSES,
   type IncidentListSearch,
 } from "../Incident.search";
-import {
-  formatInstant,
-  SEVERITY_LABELS,
-  STATUS_LABELS,
-} from "../Incident.labels";
+import { SEVERITY_LABELS, STATUS_LABELS } from "../Incident.labels";
+import { formatInstant } from "../helpers/instant";
 
 const SORT_LABELS: Record<IncidentSort, string> = {
   "-openedAt": "Newest first",

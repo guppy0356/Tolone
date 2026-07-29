@@ -5,7 +5,6 @@ import type {
   IncidentSummary,
 } from "@api/Incident.api";
 import type { User } from "@api/User.api";
-import { SEVERITY_LABELS, STATUS_LABELS } from "../Incident.labels";
 import { formatInstant } from "../helpers/instant";
 import {
   INCIDENT_SEVERITIES,
@@ -13,7 +12,24 @@ import {
   INCIDENT_STATUSES,
 } from "../Incident.search";
 
-// Only this page renders an ordering control, so its wording stays with it.
+// Each page spells the contract's vocabulary for itself. Both `Record`s are
+// exhaustive over the contract type, so a status added to the API breaks the
+// build here — the one place that notices, since the `as const` vocabulary
+// arrays accept a narrower list without complaint.
+const STATUS_LABELS: Record<IncidentStatus, string> = {
+  open: "Open",
+  acknowledged: "Acknowledged",
+  resolved: "Resolved",
+};
+
+const SEVERITY_LABELS: Record<IncidentSeverity, string> = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+  critical: "Critical",
+};
+
+
 const SORT_LABELS: Record<IncidentSort, string> = {
   "-openedAt": "Newest first",
   openedAt: "Oldest first",

@@ -1,13 +1,30 @@
 import type {
   IncidentComment,
   IncidentDetail,
+  IncidentSeverity,
+  IncidentStatus,
   TimelineEvent,
 } from "@api/Incident.api";
-import { SEVERITY_LABELS, STATUS_LABELS } from "../Incident.labels";
 import { formatInstant } from "../helpers/instant";
 import { INCIDENT_TABS, type IncidentTab } from "../Incident.search";
 
-// Only this page renders the tabs and the timeline, so their wording stays here.
+// Each page spells the contract's vocabulary for itself; the list's copy of
+// these two is not this page's business, and both are exhaustive over the
+// contract type, so a status added to the API breaks the build in both.
+const STATUS_LABELS: Record<IncidentStatus, string> = {
+  open: "Open",
+  acknowledged: "Acknowledged",
+  resolved: "Resolved",
+};
+
+const SEVERITY_LABELS: Record<IncidentSeverity, string> = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+  critical: "Critical",
+};
+
+
 const TAB_LABELS: Record<IncidentTab, string> = {
   timeline: "Timeline",
   comments: "Comments",

@@ -5,8 +5,8 @@ import type { IncidentListContainerState } from "./IncidentList.container.hook";
 import {
   useIncidentListComponent,
   type IncidentListComponentState,
-  type IncidentRow,
 } from "./IncidentList.component.hook";
+import type { IncidentListRow } from "./IncidentList.view-model";
 import type { IncidentListSearch } from "../Incident.search";
 
 const SEVERITY_TONES: Record<IncidentSeverity, string> = {
@@ -120,7 +120,7 @@ const IncidentTable = memo(function IncidentTable({
   rows,
   search,
 }: {
-  rows: IncidentRow[];
+  rows: IncidentListRow[];
   search: IncidentListSearch;
 }) {
   if (rows.length === 0) {

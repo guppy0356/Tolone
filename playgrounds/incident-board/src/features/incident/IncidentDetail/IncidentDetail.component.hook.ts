@@ -1,59 +1,16 @@
 import { useMemo } from "react";
-import type {
-  IncidentComment,
-  IncidentDetail,
-  TimelineEvent,
-} from "@api/Incident.api";
-import { formatInstant } from "../helpers/instant";
-import { SEVERITY_LABELS, STATUS_LABELS } from "../helpers/labels";
+import type { IncidentComment, IncidentDetail } from "@api/Incident.api";
+import type { IncidentDetailSearch } from "../Incident.search";
 import {
-  INCIDENT_TABS,
-  type IncidentDetailSearch,
-  type IncidentTab,
-} from "../Incident.search";
-
-const TAB_LABELS: Record<IncidentTab, string> = {
-  timeline: "Timeline",
-  comments: "Comments",
-};
-
-const KIND_LABELS: Record<TimelineEvent["kind"], string> = {
-  opened: "Opened",
-  acknowledged: "Acknowledged",
-  resolved: "Resolved",
-  note: "Note",
-};
-
-export interface IncidentHeadline {
-  key: string;
-  title: string;
-  description: string;
-  statusLabel: string;
-  severityLabel: string;
-  assigneeLabel: string;
-  openedAtLabel: string;
-}
-
-export interface IncidentTabLink {
-  value: IncidentTab;
-  label: string;
-  isActive: boolean;
-}
-
-export interface TimelineRow {
-  id: string;
-  atLabel: string;
-  kindLabel: string;
-  actor: string;
-  message: string;
-}
-
-export interface CommentRow {
-  id: string;
-  author: string;
-  postedAtLabel: string;
-  body: string;
-}
+  toCommentRow,
+  toIncidentDetailHeadline,
+  toTabLinks,
+  toTimelineRow,
+  type CommentRow,
+  type IncidentDetailHeadline,
+  type IncidentTabLink,
+  type TimelineRow,
+} from "./IncidentDetail.view-model";
 
 export interface IncidentDetailComponentParams {
   detail: IncidentDetail;
@@ -62,7 +19,7 @@ export interface IncidentDetailComponentParams {
 }
 
 export interface IncidentDetailComponentState {
-  headline: IncidentHeadline;
+  headline: IncidentDetailHeadline;
   tabs: IncidentTabLink[];
   timelineRows: TimelineRow[];
   commentRows: CommentRow[];
@@ -73,51 +30,16 @@ export function useIncidentDetailComponent({
   comments,
   search,
 }: IncidentDetailComponentParams): IncidentDetailComponentState {
-  const headline = useMemo<IncidentHeadline>(
-    () => ({
-      key: detail.key,
-      title: detail.title,
-      description: detail.description,
-      statusLabel: STATUS_LABELS[detail.status],
-      severityLabel: SEVERITY_LABELS[detail.severity],
-      assigneeLabel: detail.assignee?.name ?? "Unassigned",
-      openedAtLabel: formatInstant(detail.openedAt),
-    }),
-    [detail],
-  );
+  const headline = useMemo(() => toIncidentDetailHeadline(detail), [detail]);
 
-  const tabs = useMemo<IncidentTabLink[]>(
-    () =>
-      INCIDENT_TABS.map((value) => ({
-        value,
-        label: TAB_LABELS[value],
-        isActive: value === search.tab,
-      })),
-    [search.tab],
-  );
+  const tabs = useMemo(() => toTabLinks(search.tab), [search.tab]);
 
-  const timelineRows = useMemo<TimelineRow[]>(
-    () =>
-      detail.timeline.map((event) => ({
-        id: event.id,
-        atLabel: formatInstant(event.at),
-        kindLabel: KIND_LABELS[event.kind],
-        actor: event.actor,
-        message: event.message,
-      })),
+  const timelineRows = useMemo(
+    () => detail.timeline.map(toTimelineRow),
     [detail.timeline],
   );
 
-  const commentRows = useMemo<CommentRow[]>(
-    () =>
-      comments.map((comment) => ({
-        id: comment.id,
-        author: comment.author,
-        postedAtLabel: formatInstant(comment.postedAt),
-        body: comment.body,
-      })),
-    [comments],
-  );
+  const commentRows = useMemo(() => comments.map(toCommentRow), [comments]);
 
   return { headline, tabs, timelineRows, commentRows };
 }

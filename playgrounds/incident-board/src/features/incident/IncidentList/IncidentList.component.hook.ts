@@ -6,46 +6,18 @@ import type {
   IncidentSummary,
 } from "@api/Incident.api";
 import type { User } from "@api/User.api";
+import { INCIDENT_STATUSES, type IncidentListSearch } from "../Incident.search";
 import {
-  INCIDENT_SEVERITIES,
-  INCIDENT_SORTS,
-  INCIDENT_STATUSES,
-  type IncidentListSearch,
-} from "../Incident.search";
-import { formatInstant } from "../helpers/instant";
-import { SEVERITY_LABELS, STATUS_LABELS } from "../helpers/labels";
-
-const SORT_LABELS: Record<IncidentSort, string> = {
-  "-openedAt": "Newest first",
-  openedAt: "Oldest first",
-  "-severity": "Most severe first",
-  severity: "Least severe first",
-};
-
-export const ANY_ASSIGNEE = "";
-
-export interface IncidentRow {
-  id: string;
-  key: string;
-  title: string;
-  status: IncidentStatus;
-  statusLabel: string;
-  severity: IncidentSeverity;
-  severityLabel: string;
-  assigneeLabel: string;
-  openedAtLabel: string;
-}
-
-export interface StatusOption {
-  value: IncidentStatus;
-  label: string;
-  checked: boolean;
-}
-
-export interface SelectOption<Value extends string> {
-  value: Value;
-  label: string;
-}
+  ANY_ASSIGNEE,
+  SEVERITY_OPTIONS,
+  SORT_OPTIONS,
+  toAssigneeOptions,
+  toIncidentListRow,
+  toStatusOptions,
+  type IncidentListRow,
+  type SelectOption,
+  type StatusOption,
+} from "./IncidentList.view-model";
 
 export interface IncidentListComponentParams {
   incidents: IncidentSummary[];
@@ -56,7 +28,7 @@ export interface IncidentListComponentParams {
 }
 
 export interface IncidentListComponentState {
-  rows: IncidentRow[];
+  rows: IncidentListRow[];
   statusOptions: StatusOption[];
   severityOptions: SelectOption<IncidentSeverity | "">[];
   assigneeOptions: SelectOption<string>[];
@@ -74,55 +46,16 @@ export function useIncidentListComponent({
   search,
   applySearch,
 }: IncidentListComponentParams): IncidentListComponentState {
-  const rows = useMemo<IncidentRow[]>(
-    () =>
-      incidents.map((incident) => ({
-        id: incident.id,
-        key: incident.key,
-        title: incident.title,
-        status: incident.status,
-        statusLabel: STATUS_LABELS[incident.status],
-        severity: incident.severity,
-        severityLabel: SEVERITY_LABELS[incident.severity],
-        assigneeLabel: incident.assignee?.name ?? "Unassigned",
-        openedAtLabel: formatInstant(incident.openedAt),
-      })),
-    [incidents],
-  );
+  const rows = useMemo(() => incidents.map(toIncidentListRow), [incidents]);
 
-  const statusOptions = useMemo<StatusOption[]>(
-    () =>
-      INCIDENT_STATUSES.map((value) => ({
-        value,
-        label: STATUS_LABELS[value],
-        checked: search.status.includes(value),
-      })),
+  const statusOptions = useMemo(
+    () => toStatusOptions(search.status),
     [search.status],
   );
 
-  const severityOptions = useMemo<SelectOption<IncidentSeverity | "">[]>(
-    () => [
-      { value: "", label: "Any severity" },
-      ...INCIDENT_SEVERITIES.map((value) => ({
-        value,
-        label: SEVERITY_LABELS[value],
-      })),
-    ],
-    [],
-  );
-
-  // Server-returned options merged with the "no filter" choice.
-  const assigneeOptions = useMemo<SelectOption<string>[]>(
-    () => [
-      { value: ANY_ASSIGNEE, label: "Anyone" },
-      ...assignees.map((user) => ({ value: user.id, label: user.name })),
-    ],
+  const assigneeOptions = useMemo(
+    () => toAssigneeOptions(assignees),
     [assignees],
-  );
-
-  const sortOptions = useMemo<SelectOption<IncidentSort>[]>(
-    () => INCIDENT_SORTS.map((value) => ({ value, label: SORT_LABELS[value] })),
-    [],
   );
 
   // Narrowing the result set invalidates the current page number: page 4 of the
@@ -174,9 +107,9 @@ export function useIncidentListComponent({
   return {
     rows,
     statusOptions,
-    severityOptions,
+    severityOptions: SEVERITY_OPTIONS,
     assigneeOptions,
-    sortOptions,
+    sortOptions: SORT_OPTIONS,
     toggleStatus,
     selectSeverity,
     selectAssignee,

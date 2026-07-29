@@ -107,7 +107,9 @@ src/
 │   ├── query-client.tsx            ← QueryClientProvider wrapper for hook tests
 │   └── {feature}-router.tsx        ← minimal router for stories/tests of navigating Components
 └── features/{feature-name}/
-    ├── {Resource}.{concern}.ts     ← only what more than one page must agree on
+    ├── {Resource}.{concern}.ts     ← a contract other layers wire — the URL's, see §5
+    ├── helpers/                    ← called by more than one page, wired by nothing
+    │   └── {subject}.ts
     ├── {Page}/                     ← one directory per page/route
     │   ├── {Page}.route.ts                 ← the page's URL: path, search config, Container
     │   ├── {Page}.container.tsx
@@ -121,9 +123,13 @@ src/
     └── {OtherPage}/
 ```
 
-**Feature-root modules.** A page directory is private to its page, so anything two pages of the same feature must agree on cannot live in either. The test is the one that put the cache layer in `src/api/`: **shared by more than one page → out of the page directory** — but only up to the feature root, because it is that domain's vocabulary, not the app's. Name it for the resource and its concern (`{Resource}.{concern}.ts`).
+**Feature-root modules.** A page directory is private to its page, so anything two pages of the same feature must agree on cannot live in either. The test is the one that put the cache layer in `src/api/`: **shared by more than one page → out of the page directory** — but only as far as the sharing reaches, and it is measured in call sites that exist rather than ones a later feature might add. A single page's labels and formatting stay at module scope in that page's component hook and get no file of their own; a second page calling them is what moves them up to the feature root. Leaving the feature takes the same evidence one level higher — a second feature that actually calls them.
 
-A page's URL schema is the case this guide documents in full, because a sibling page is *required* to declare the same parameters (see [§5](#5-state-in-the-url)). Others follow the same test rather than a fixed slot: display vocabulary two pages must spell identically is one, and two pages disagreeing on a label is a defect no type catches.
+What lands at the feature root divides by whether the rest of the app **wires** it or merely **calls** it.
+
+*Wired* is a contract: route files spread the URL module, and `satisfies` pins it to the API layer's params type, so changing it changes what other layers compile against. It sits directly at the feature root, named for the resource and its concern (`{Resource}.{concern}.ts`). The URL is the case this guide documents in full, because a sibling page is *required* to declare the same parameters (see [§5](#5-state-in-the-url)).
+
+*Called* is everything a hook simply invokes and nothing wires — the pure functions and lookup tables two pages share, such as display labels two pages must spell identically, where disagreeing is a defect no type catches. These go in `features/{feature-name}/helpers/`, one file per subject (`instant.ts`, `labels.ts`), named for what the file is about since the directory already says it is a helper. Nothing stateful belongs there — no hook, no component, and no contract — because a directory named for a kind of code rather than a subject accepts whatever is put in it, and the admission rule is the only thing standing in for a name that could refuse.
 
 **Naming.** In `features/{feature-name}/{Page}/`, the two segments name different things. `{feature-name}` names the **domain** the pages operate over — the business area / resource group, singular kebab-case (`todo`, `report`, `travel-request`) — never an operation performed there (`approval`). `{Page}` names **what the page shows**: a feature's lone page is the bare resource (`Todo`, `Profile`), and when several pages sit over the same resource a kind suffix tells them apart (`ReportList` / `ReportDetail` / `ReportForm`). The suffix is a **discriminator, not a description** — a lone profile page is `Profile`, not `ProfileDetail`; the suffix appears once a sibling exists to distinguish from, so adding a second page renames the first. Operations (approve, submit, reject) surface as actions inside a page — they name buttons and handlers, never directories.
 

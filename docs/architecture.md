@@ -106,8 +106,7 @@ src/
 │   ├── worker.ts
 │   └── {feature}-router.tsx        ← minimal router for stories/tests of navigating Components
 └── features/{feature-name}/
-    ├── {Resource}.search.ts        ← URL contract, when more than one page shares it
-    ├── {Resource}.labels.ts        ← display vocabulary, when more than one page shares it
+    ├── {Resource}.search.ts        ← only when the feature has URL state — see §5
     ├── {Page}/                     ← one directory per page/route
     │   ├── {Page}.route.ts                 ← the page's URL: path, search config, Container
     │   ├── {Page}.container.tsx
@@ -121,12 +120,9 @@ src/
     └── {OtherPage}/
 ```
 
-**Feature-root modules.** A page directory is private to its page. When two pages of the same feature must agree on something that is neither cache nor UI structure, that module moves up to the feature root and is named for the resource and its concern:
+**Feature-root modules.** A page directory is private to its page, so anything two pages of the same feature must agree on cannot live in either. The test is the one that put the cache layer in `src/api/`: **shared by more than one page → out of the page directory** — but only up to the feature root, because it is that domain's vocabulary, not the app's. Name it for the resource and its concern (`{Resource}.{concern}.ts`).
 
-- `{Resource}.search.ts` — the URL contract, when a sibling page declares the same params (see [§5](#5-the-url-contract))
-- `{Resource}.labels.ts` — display vocabulary shared by pages: status labels, severity ordering, timestamp formatting. Two pages spelling "Acknowledged" differently is a defect no type catches
-
-The test is the same one that put the cache layer in `src/api/`: **shared by more than one page → out of the page directory.** It stays inside the feature because it is that domain's vocabulary, not the app's.
+The URL contract is the case this guide documents in full, because a sibling page is *required* to declare the same parameters (see [§5](#5-the-url-contract)). Others follow the same test rather than a fixed slot: display vocabulary two pages must spell identically is one, and two pages disagreeing on a label is a defect no type catches.
 
 **Naming.** In `features/{feature-name}/{Page}/`, the two segments name different things. `{feature-name}` names the **domain** the pages operate over — the business area / resource group, singular kebab-case (`todo`, `report`, `travel-request`) — never an operation performed there (`approval`). `{Page}` names **what the page shows**: a feature's lone page is the bare resource (`Todo`, `Profile`), and when several pages sit over the same resource a kind suffix tells them apart (`ReportList` / `ReportDetail` / `ReportForm`). The suffix is a **discriminator, not a description** — a lone profile page is `Profile`, not `ProfileDetail`; the suffix appears once a sibling exists to distinguish from, so adding a second page renames the first. Operations (approve, submit, reject) surface as actions inside a page — they name buttons and handlers, never directories.
 

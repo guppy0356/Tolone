@@ -69,8 +69,7 @@ src/
 │   └── {Resource}.queries.ts        ← queryOptions factory (all / list / detail)
 ├── test/                            ← test-only wiring: setup, MSW worker, minimal router
 └── features/{feature-name}/
-    ├── {Resource}.search.ts          ← URL contract, when >1 page shares it
-    ├── {Resource}.labels.ts          ← display vocabulary, when >1 page shares it
+    ├── {Resource}.search.ts          ← only when the feature has URL state
     └── {Page}/                       ← one directory per page/route
         ├── {Page}.route.ts           ← path + search config + Container (registered in src/router.ts)
         ├── {Page}.container.tsx      ← wires the container hook to the Component

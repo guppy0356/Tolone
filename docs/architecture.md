@@ -10,7 +10,7 @@ so develop from this document rather than from another playground's source.
 | 2 | [Type Patterns](#2-type-patterns) | writing any layer's published contract |
 | 3 | [Conventions](#3-conventions) | the rules that span layers |
 | 4 | [Layer Details](#4-layer-details) | implementing one specific layer |
-| 5 | [The URL Contract](#5-the-url-contract) | the page's filter / sort / pagination / tab lives in the URL |
+| 5 | [State in the URL](#5-state-in-the-url) | a page keeps its filters, sort, page or tab in the address bar |
 | 6 | [Wiring a Feature Together](#6-wiring-a-feature-together) | routing and bootstrap |
 | 7 | [Writing MSW Handlers](#7-writing-msw-handlers) | mocking the API |
 | 8 | [Writing Tests](#8-writing-tests) | stories, behavior tests, and their wiring |
@@ -76,7 +76,7 @@ Every piece of state in a feature has one home, fixed by what *kind* of state it
 | State | Source of truth | Held / read / written |
 |---|---|---|
 | **Server data** | the server (mirrored in the TanStack Query cache) | container hook — `useQuery` / `useMutation` over the Queries layer |
-| **URL / route state** — path params, plus any filter / sort / pagination / tab meant to survive reload, be shareable, or sit in history | the URL | **read** in the Container (`useParams` / `useSearch`), **written** in the Component (`navigate` / `Link`); the container hook stays URL-agnostic, receiving the parsed values as params like a detail hook receives an `id`. Its schema is [the URL contract](#5-the-url-contract) |
+| **URL / route state** — path params, plus any filter / sort / pagination / tab meant to survive reload, be shareable, or sit in history | the URL | the Container **reads** it (`useParams` / `useSearch`); the Component **changes** it (`navigate` / `Link`). The container hook never sees the URL — it receives the parsed values as params, like a detail hook receives an `id`. Its schema is [§5](#5-state-in-the-url) |
 | **Hook-scoped query input** — an input that drives a query but is deliberately kept out of the URL (e.g. a form's typeahead keyword) | the container hook | `useState` in the container hook, exposing the value and its setter |
 | **Local UI state** — form fields, toggles, drafts | the component | component hook (a sub-component may own purely-local DOM mechanics itself) |
 | **Derived / view-model** | computed from the rows above | component hook |
@@ -85,7 +85,7 @@ Two rows can both look like "a query parameter"; choose between them by **persis
 
 Either way the container hook never reads the URL itself — the Container reads it and injects the result, and where the Component also needs the value (to render the current controls and write them back) it arrives as an ordinary prop, never re-exported through the hook's return.
 
-The two halves are not asymmetric for the same reason. The read is hoisted so the container hook never sees the URL — it takes parsed values as params, the way a detail hook takes an `id`, and can therefore be tested without a router. The write is not hoisted because `<Link>` is JSX and cannot leave the Component; `navigate` could be passed down instead, but splitting URL writing across two layers buys nothing.
+Reading and changing sit in different layers, and not for one shared reason. **Reading** is lifted to the Container so the container hook never sees the URL — it takes parsed values as params, the way a detail hook takes an `id`, and can therefore be tested without a router. **Changing** stays in the Component because `<Link>` is JSX and cannot leave it; `navigate` alone could be passed down, but then one job — changing the address — would be split across two layers.
 
 ### File placement
 
@@ -122,7 +122,7 @@ src/
 
 **Feature-root modules.** A page directory is private to its page, so anything two pages of the same feature must agree on cannot live in either. The test is the one that put the cache layer in `src/api/`: **shared by more than one page → out of the page directory** — but only up to the feature root, because it is that domain's vocabulary, not the app's. Name it for the resource and its concern (`{Resource}.{concern}.ts`).
 
-The URL contract is the case this guide documents in full, because a sibling page is *required* to declare the same parameters (see [§5](#5-the-url-contract)). Others follow the same test rather than a fixed slot: display vocabulary two pages must spell identically is one, and two pages disagreeing on a label is a defect no type catches.
+A page's URL schema is the case this guide documents in full, because a sibling page is *required* to declare the same parameters (see [§5](#5-state-in-the-url)). Others follow the same test rather than a fixed slot: display vocabulary two pages must spell identically is one, and two pages disagreeing on a label is a defect no type catches.
 
 **Naming.** In `features/{feature-name}/{Page}/`, the two segments name different things. `{feature-name}` names the **domain** the pages operate over — the business area / resource group, singular kebab-case (`todo`, `report`, `travel-request`) — never an operation performed there (`approval`). `{Page}` names **what the page shows**: a feature's lone page is the bare resource (`Todo`, `Profile`), and when several pages sit over the same resource a kind suffix tells them apart (`ReportList` / `ReportDetail` / `ReportForm`). The suffix is a **discriminator, not a description** — a lone profile page is `Profile`, not `ProfileDetail`; the suffix appears once a sibling exists to distinguish from, so adding a second page renames the first. Operations (approve, submit, reject) surface as actions inside a page — they name buttons and handlers, never directories.
 
@@ -210,7 +210,7 @@ Each layer's full worked example lives once, in [Layer Details](#4-layer-details
 - **Rename on collision with a DOM global.** A contract schema called `Comment`, `Range`, `Selection` or `Event` re-exported under its own name shadows `lib.dom` only in files that import it — call sites that forget the import silently bind to the global instead, and neither spelling is a type error. Prefix with the resource: `IncidentComment`
 - No error handling (delegate to the caller)
 - No query keys or TanStack Query options — those live in the Queries layer
-- **Own the wire encoding.** When the URL's shape and the HTTP query string's shape differ (see [§5](#5-the-url-contract)), the conversion belongs here — building the request is this layer's job
+- **Own the wire encoding.** When the URL's shape and the HTTP query string's shape differ (see [§5](#5-state-in-the-url)), the conversion belongs here — building the request is this layer's job
 
 ```ts
 // Todo.api.ts
@@ -744,7 +744,7 @@ A non-text input is still a controlled field: ReportForm's team checkboxes drive
 
 ---
 
-## 5. The URL Contract
+## 5. State in the URL
 
 When a page's filter / sort / pagination / tab lives in the URL, that URL has a contract as real as the API's: a zod schema that parses it, the defaults that are omitted from it, and the route options that apply both. `{Page}.schema.ts` is the *form's* contract and does not cover this — a page can need a URL contract and have no form at all.
 
@@ -763,7 +763,7 @@ export function toListSearch({ tab: _tab, ...listSearch }: IncidentDetailSearch)
 }
 ```
 
-### Export one config object, never a loose schema
+### Export the route options, not just the schema
 
 The module exports the **route options**, not just the schema — `validateSearch` and the `search.middlewares` that strip defaults — as a single object that route files spread and stories and tests reuse:
 
@@ -782,13 +782,13 @@ This is not tidiness. A test harness that restates the schema and omits the midd
 
 **`.default(x)` is forced.** It makes the field optional on the way *in*, and without it every `<Link>` and every `redirect({ to: "/incidents" })` has to name every parameter — omitting one is a compile error.
 
-That produces the asymmetry to keep in mind: **the input type is optional, the output type is required.** A link passes a partial search; the Container, the hook and the Component all receive the parsed output with every defaulted field present. Build a new search from the current parsed value (`{ ...search, page: 1 }`) rather than from an updater whose argument is the optional input type.
+That splits the schema's two types apart, which is the one thing to keep in mind here: **going in, every field is optional; coming out, every field is present.** A link passes a partial search; the Container, the hook and the Component all receive the parsed output with every defaulted field present. Build a new search from the current parsed value (`{ ...search, page: 1 }`) rather than from an updater whose argument is the optional input type.
 
 **What a malformed value does is a decision, not a default.** `?page=banana` can degrade to the field's default (`.catch(x)`) or fail the route. Degrading suits a URL that is ordinary user-editable text, where a typo or a stale bookmark should still render something. Failing suits a URL that *is* the meaning — an address someone was sent, where quietly rendering a different result is worse than rendering none. Decide it per contract and say which in the module; the two are indistinguishable until somebody edits a URL.
 
 `z.coerce` is not needed: the router JSON-parses search values, so `?page=2` already arrives as a number, and coercing would widen the input type to `unknown`.
 
-### Pin it to the API, and know the limit
+### Tying it to the API types — and what that misses
 
 Generated OpenAPI types are types only, so a URL enum's members must also exist as runtime values. Declare each vocabulary once as an `as const` array — the schema and the Component's controls both read it — and pin the whole schema to the Queries layer's param type:
 
@@ -814,7 +814,7 @@ HTTP  /api/incidents?status=open&status=resolved ← OpenAPI style=form, explode
 
 The URL's shape is the router's business; the query string's shape is the API contract's. Convert in the **API layer**, where building the request already lives — ky's `searchParams` cannot express a repeated key from a plain record, so hand it a `URLSearchParams`.
 
-### Who touches it
+### Which layer does what
 
 Nothing new — the [Where state lives](#where-state-lives) rules applied to a richer value:
 
@@ -1109,7 +1109,7 @@ afterEach(() => worker.resetHandlers());
 afterAll(() => worker.stop());
 ```
 
-**The minimal router.** A Component that renders `<Link>` or calls `navigate` needs a router in its stories and tests. One factory in `src/test/{feature}-router.tsx` serves both: the feature's real paths, its real search config spread from [the URL contract](#5-the-url-contract), a memory history, and the component under test standing in for the page. It deliberately does **not** import the real route files — those pull in Containers, and with them a QueryClient and a server, which is what the Component boundary exists to keep out.
+**The minimal router.** A Component that renders `<Link>` or calls `navigate` needs a router in its stories and tests. One factory in `src/test/{feature}-router.tsx` serves both: the feature's real paths, its real route options spread from the page's URL schema ([§5](#5-state-in-the-url)), a memory history, and the component under test standing in for the page. It deliberately does **not** import the real route files — those pull in Containers, and with them a QueryClient and a server, which is what the Component boundary exists to keep out.
 
 ```tsx
 export function createIncidentRouter({ children, initialUrl = "/incidents" }) {
@@ -1186,7 +1186,7 @@ src/openapi.yaml → openapi-typescript → src/types/openapi.d.ts
 pnpm --filter @tolone/todo generate:api
 ```
 
-The generated module is **types only**. A value the runtime needs — an enum's members for a select or a URL vocabulary — must be declared separately and pinned back (see [§5](#5-the-url-contract)).
+The generated module is **types only**. A value the runtime needs — an enum's members for a select or a URL vocabulary — must be declared separately and pinned back (see [§5](#5-state-in-the-url)).
 
 **Type safety:** `vite-plugin-checker` runs `tsc` during dev, so mismatches between the schema and handler/API code surface as errors in the terminal and browser overlay.
 
@@ -1213,7 +1213,7 @@ Commit after each step. Do not batch multiple steps into one commit. Every commi
 3. `src/api/{Resource}.api.ts` — import generated types + API function object; rename anything that collides with a DOM global → **commit**
 4. `src/api/{Resource}.queries.ts` — `{Resource}Queries` `queryOptions()` factory (`all` / `list` / `detail`) over the API functions → **commit**
 5. Create `src/features/{feature-name}/{Page}/` directory
-6. **URL first** — when any page carries URL state, write its contract per [§5](#5-the-url-contract). Then declare every route of the feature: `{Page}.route.ts` with path + spread route options and **no `component`**, registered in `router.ts`'s `addChildren` → **commit**
+6. **Routes before Components** — when any page keeps state in the URL, write its schema per [§5](#5-state-in-the-url). Then declare every route of the feature: `{Page}.route.ts` with path + spread route options and **no `component`**, registered in `router.ts`'s `addChildren` → **commit**
 7. `{Page}.container.hook.ts` — `use{Page}Container` hook + `{Page}ContainerState` interface (one dedicated container hook per page; `useQuery(featureQueries.x())` + `useMutation`; pick the mutation side-effect pattern — optimistic vs invalidate-only — per the Container Hook Layer section); when the hook contains logic worth testing in isolation (error mapping, hook-scoped query params), add `{Page}.container.hook.test.tsx` (`renderHook` + the MSW worker, with test-local `worker.use` handlers — see Writing Tests) in the same commit → **commit**
 8. `{Page}.schema.ts` — zod form-validation contract + `z.infer` form-values type, output pinned to the API input via `satisfies` (only when the page validates a form) → **commit**
 9. `{Page}.component.hook.ts` — `use{Page}Component` hook + `{Page}ComponentState` interface (skip this file entirely when the Component has no local state and nothing to derive) → **commit**

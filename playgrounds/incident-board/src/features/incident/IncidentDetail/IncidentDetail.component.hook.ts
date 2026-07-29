@@ -4,8 +4,8 @@ import type {
   IncidentDetail,
   TimelineEvent,
 } from "@api/Incident.api";
-import { SEVERITY_LABELS, STATUS_LABELS } from "../Incident.labels";
 import { formatInstant } from "../helpers/instant";
+import { SEVERITY_LABELS, STATUS_LABELS } from "../helpers/labels";
 import {
   INCIDENT_TABS,
   type IncidentDetailSearch,

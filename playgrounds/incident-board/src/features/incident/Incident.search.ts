@@ -1,24 +1,16 @@
 import { stripSearchParams } from "@tanstack/react-router";
 import { z } from "zod";
-import type {
-  IncidentListParams,
-  IncidentSort,
-  IncidentStatus,
+import {
+  INCIDENT_SEVERITIES,
+  INCIDENT_SORTS,
+  INCIDENT_STATUSES,
+  type IncidentListParams,
+  type IncidentSort,
+  type IncidentStatus,
 } from "@api/Incident.api";
 
-// The vocabulary of the incident URL. The generated OpenAPI types are types
-// only, so the enum members have to exist once as runtime values; the
-// `satisfies` below is what keeps this list pinned to the contract. The
-// Component also renders its filter controls from these arrays, so there is
-// exactly one place where "the statuses" are written down.
-export const INCIDENT_STATUSES = ["open", "acknowledged", "resolved"] as const;
-export const INCIDENT_SEVERITIES = ["low", "medium", "high", "critical"] as const;
-export const INCIDENT_SORTS = [
-  "-openedAt",
-  "openedAt",
-  "-severity",
-  "severity",
-] as const;
+// `tab` is the one parameter the contract knows nothing about — it selects a
+// pane, not a query — so its members are written here rather than generated.
 export const INCIDENT_TABS = ["timeline", "comments"] as const;
 
 export type IncidentTab = (typeof INCIDENT_TABS)[number];

@@ -10,7 +10,7 @@
     "test": "vitest run",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "generate:api": "openapi-typescript src/openapi.yaml -o src/types/openapi.d.ts"
+    "generate:api": "openapi-typescript src/openapi.yaml --enum-values -o src/types/openapi.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "catalog:",

@@ -1,9 +1,24 @@
 import { api } from "../lib/api-client";
-import type { components, paths } from "../types/openapi";
+import {
+  incidentSeverityValues,
+  incidentSortValues,
+  incidentStatusValues,
+  type components,
+  type paths,
+} from "../types/openapi";
 
+// Generated types vanish at runtime, so the contract's enums are generated as
+// values too (`--enum-values`). Both are renamed here, in one place, into the
+// names the app uses — nothing downstream writes a member out by hand.
 export type IncidentStatus = components["schemas"]["IncidentStatus"];
+export const INCIDENT_STATUSES = incidentStatusValues;
+
 export type IncidentSeverity = components["schemas"]["IncidentSeverity"];
+export const INCIDENT_SEVERITIES = incidentSeverityValues;
+
 export type IncidentSort = components["schemas"]["IncidentSort"];
+export const INCIDENT_SORTS = incidentSortValues;
+
 export type IncidentSummary = components["schemas"]["IncidentSummary"];
 export type IncidentDetail = components["schemas"]["IncidentDetail"];
 export type IncidentPage = components["schemas"]["IncidentPage"];

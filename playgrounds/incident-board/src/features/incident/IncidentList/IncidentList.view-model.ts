@@ -5,12 +5,8 @@ import type {
   IncidentSummary,
 } from "@api/Incident.api";
 import type { User } from "@api/User.api";
+import { INCIDENT_SEVERITIES, INCIDENT_STATUSES } from "@api/Incident.api";
 import { formatInstant } from "../helpers/instant";
-import {
-  INCIDENT_SEVERITIES,
-  INCIDENT_SORTS,
-  INCIDENT_STATUSES,
-} from "../Incident.search";
 
 // Each page spells the contract's vocabulary for itself. Both `Record`s are
 // exhaustive over the contract type, so a status added to the API breaks the
@@ -103,6 +99,9 @@ export const SEVERITY_OPTIONS: SelectOption<IncidentSeverity | "">[] = [
   })),
 ];
 
-export const SORT_OPTIONS: SelectOption<IncidentSort>[] = INCIDENT_SORTS.map(
-  (value) => ({ value, label: SORT_LABELS[value] }),
-);
+// Read from the label table rather than from the contract's enum, because the
+// order the control offers is a display decision: the default (newest first)
+// belongs at the top, which is not where openapi.yaml happens to list it.
+export const SORT_OPTIONS: SelectOption<IncidentSort>[] = Object.entries(
+  SORT_LABELS,
+).map(([value, label]) => ({ value: value as IncidentSort, label }));

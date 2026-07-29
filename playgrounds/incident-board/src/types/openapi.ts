@@ -246,4 +246,16 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
+type FlattenedDeepRequired<T> = {
+    [K in keyof T]-?: FlattenedDeepRequired<T[K] extends unknown[] | undefined | null ? Extract<T[K], unknown[]>[number] : T[K]>;
+};
+type ReadonlyArray<T> = [
+    Exclude<T, undefined>
+] extends [
+    unknown[]
+] ? Readonly<Exclude<T, undefined>> : Readonly<Exclude<T, undefined>[]>;
+export const incidentStatusValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["IncidentStatus"]> = ["open", "acknowledged", "resolved"];
+export const incidentSeverityValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["IncidentSeverity"]> = ["low", "medium", "high", "critical"];
+export const incidentSortValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["IncidentSort"]> = ["openedAt", "-openedAt", "severity", "-severity"];
+export const timelineEventKindValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["TimelineEvent"]["kind"]> = ["opened", "acknowledged", "resolved", "note"];
 export type operations = Record<string, never>;

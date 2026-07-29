@@ -108,8 +108,8 @@ src/
 │   └── {feature}-router.tsx        ← minimal router for stories/tests of navigating Components
 └── features/{feature-name}/
     ├── {Resource}.{concern}.ts     ← a contract other layers wire — the URL's, see §5
-    ├── helpers/                    ← called by more than one page, wired by nothing
-    │   └── {subject}.ts
+    ├── helpers/                    ← called by more than one page and wired by nothing
+    │   └── {subject}.ts            ← what one page calls stays in its component hook
     ├── {Page}/                     ← one directory per page/route
     │   ├── {Page}.route.ts                 ← the page's URL: path, search config, Container
     │   ├── {Page}.container.tsx
@@ -123,7 +123,7 @@ src/
     └── {OtherPage}/
 ```
 
-**Feature-root modules.** A page directory is private to its page, so anything two pages of the same feature must agree on cannot live in either. The test is the one that put the cache layer in `src/api/`: **shared by more than one page → out of the page directory** — but only as far as the sharing reaches, and it is measured in call sites that exist rather than ones a later feature might add. A single page's labels and formatting stay at module scope in that page's component hook and get no file of their own; a second page calling them is what moves them up to the feature root. Leaving the feature takes the same evidence one level higher — a second feature that actually calls them.
+**Feature-root modules.** A page directory is private to its page, so anything two pages of the same feature must agree on cannot live in either. The test is the one that put the cache layer in `src/api/`: **shared by more than one page → out of the page directory** — but only as far as the sharing reaches, and it is measured in call sites that exist rather than ones a later feature might add. A single page's labels and formatting stay at module scope in that page's component hook and get no file of their own; a second page calling them is what moves them up to the feature root. Leaving the feature takes the same evidence one level higher — a second feature that actually calls them — and the slot above is defined when that happens rather than reserved now.
 
 What lands at the feature root divides by whether the rest of the app **wires** it or merely **calls** it.
 

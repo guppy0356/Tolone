@@ -103,7 +103,8 @@ src/
 │   └── {Resource}.queries.ts       ← queryOptions factory, consumed by every page
 ├── test/                           ← test-only wiring (see Writing Tests)
 │   ├── setup.ts
-│   ├── worker.ts
+│   ├── worker.ts                   ← MSW worker started with no handlers
+│   ├── query-client.tsx            ← QueryClientProvider wrapper for hook tests
 │   └── {feature}-router.tsx        ← minimal router for stories/tests of navigating Components
 └── features/{feature-name}/
     ├── {Resource}.{concern}.ts     ← only what more than one page must agree on
@@ -207,6 +208,7 @@ Each layer's full worked example lives once, in [Layer Details](#4-layer-details
 - Use the `api` client from `src/lib/api-client.ts`
 - Types are derived from the OpenAPI schema via `openapi-typescript` generated types
 - Re-export types as named aliases for use by other layers
+- **A parameterized endpoint's params type is declared here**, next to its response types, because this layer's own fetcher takes it. Everything upstream — the Queries layer's key, the container hook's argument, a URL schema pinned to it — imports it from here; the dependency only ever runs Queries → API
 - **Rename on collision with a DOM global.** A contract schema called `Comment`, `Range`, `Selection` or `Event` re-exported under its own name shadows `lib.dom` only in files that import it — call sites that forget the import silently bind to the global instead, and neither spelling is a type error. Prefix with the resource: `IncidentComment`
 - No error handling (delegate to the caller)
 - No query keys or TanStack Query options — those live in the Queries layer
@@ -270,6 +272,7 @@ The same definition is consumed everywhere — `useQuery(todoQueries.list())`, `
 
 ```ts
 // Todo.queries.ts — if the list were filterable/paginated
+// TodoListParams is declared in Todo.api.ts, alongside todoApi.getList
 lists: () => [...todoQueries.all(), "list"] as const, // prefix: every variant
 list: (params: TodoListParams) =>
   queryOptions({
@@ -291,7 +294,7 @@ After a write, `invalidateQueries({ queryKey: todoQueries.lists() })` catches ev
 - One dedicated container hook per page (not shared across pages)
 - Consume the Queries layer: `useQuery(featureQueries.list())`. Pass consumer-specific options (`enabled`, etc.) at this call site
 - Mutations use `useMutation` + `useQueryClient`; read the cache key from the same factory (`featureQueries.list().queryKey`) so it never drifts
-- **URL values arrive as params.** One value is a bare param (`{ todoId }`); several are **one object typed as the Queries layer's param type** (`{ params }: { params: IncidentListParams }`), so Container → hook → Queries passes the same shape end to end and no layer reshapes it in transit
+- **URL values arrive as params**, under the hook's own `{Page}ContainerParams` interface like every other hook input. Its field is the API layer's params type when the page has several — `interface IncidentListContainerParams { params: IncidentListParams }` — so Container → hook → Queries → API passes one shape end to end and no layer reshapes it in transit
 - No UI logic (forms, validation, etc.)
 - Export an explicit interface for the return type — `{Page}ContainerState`
 - Return action functions + data + loading states
@@ -541,10 +544,10 @@ The Component file contains three parts: the exported **Component** (handles loa
 
 **Private Skeleton rules**:
 - No props
-- For list pages: li-granular placeholder matching the body's `<li>` shape (header/empty state stay rendered, only list items become skeletons)
+- For list pages: li-granular placeholder matching the body's `<li>` shape. Everything that does not depend on the data — heading, filter controls, an add form — stays rendered, and only the items become skeletons, so the frame does not flash on first load
 - For non-list pages: page-level placeholder when the page layout depends on data that is not yet available
 
-**Why memo on the private body works**: `isFetching` flips on every background refetch, but only reaches the exported Component. The private body's props (e.g. `todos`, `addTodo`) are reference-stable thanks to TanStack Query's structural sharing and `useCallback`, so `memo` skips the re-render.
+**Why memo on the private body works**: `isFetching` flips on every background refetch, but only reaches the exported Component. The private body's props (e.g. `todos`) are reference-stable thanks to TanStack Query's structural sharing and `useCallback`, so `memo` skips the re-render.
 
 ```tsx
 // Todo/Todo.component.tsx
@@ -553,14 +556,41 @@ import { useTodoComponent } from "./Todo.component.hook";
 import type { TodoContainerState } from "./Todo.container.hook";
 import type { Todo } from "@api/Todo.api";
 
-// Private memo'd body
-const TodoList = memo(function TodoList({
+// Private memo'd body — the items, and nothing that survives loading
+const TodoList = memo(function TodoList({ todos }: { todos: Todo[] }) {
+  return (
+    <ul className="space-y-2">
+      {todos.map((todo) => (
+        <li key={todo.id} className="rounded border p-2">
+          {todo.title}
+        </li>
+      ))}
+    </ul>
+  );
+});
+
+// Private Skeleton — li-granular, standing in for the same <ul>
+function TodoListSkeleton() {
+  return (
+    <ul className="space-y-2">
+      {[0, 1, 2].map((i) => (
+        <li key={i} className="rounded border p-2">
+          <div className="h-5 w-32 animate-pulse rounded bg-gray-200" />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// Exported Component — Pick-narrowed container-state props.
+// The component hook is called here, not in the body: the form does not depend
+// on the todos, so it stays mounted while they load and its input keeps its value.
+export function TodoComponent({
   todos,
+  isPending,
+  isRefetching,
   addTodo,
-}: {
-  todos: Todo[];
-  addTodo: TodoContainerState["addTodo"];
-}) {
+}: Pick<TodoContainerState, "todos" | "isPending" | "isRefetching" | "addTodo">) {
   const { newTitle, setNewTitle, handleSubmit } = useTodoComponent({ addTodo });
 
   return (
@@ -587,43 +617,10 @@ const TodoList = memo(function TodoList({
         </button>
       </form>
 
-      <ul className="space-y-2">
-        {todos.map((todo) => (
-          <li key={todo.id} className="rounded border p-2">
-            {todo.title}
-          </li>
-        ))}
-      </ul>
+      <div className={`transition-opacity ${isRefetching ? "opacity-50" : ""}`}>
+        {isPending ? <TodoListSkeleton /> : <TodoList todos={todos} />}
+      </div>
     </>
-  );
-});
-
-// Private Skeleton (li-granular for list pages)
-function TodoListSkeleton() {
-  return (
-    <ul className="space-y-2">
-      {[0, 1, 2].map((i) => (
-        <li key={i} className="rounded border p-2">
-          <div className="h-5 w-32 animate-pulse rounded bg-gray-200" />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-// Exported Component — Pick-narrowed container-state props
-export function TodoComponent({
-  todos,
-  isPending,
-  isRefetching,
-  addTodo,
-}: Pick<TodoContainerState, "todos" | "isPending" | "isRefetching" | "addTodo">) {
-  if (isPending) return <TodoListSkeleton />;
-
-  return (
-    <div className={`transition-opacity ${isRefetching ? "opacity-50" : ""}`}>
-      <TodoList todos={todos} addTodo={addTodo} />
-    </div>
   );
 }
 ```
@@ -635,10 +632,11 @@ export function TodoComponent({
 **Rules**:
 - Receive content data/actions it needs as params (define own `{Page}ComponentParams` interface)
 - Params are **guaranteed non-undefined** — the Component handles the `undefined` / loading case before rendering the private memo'd body, which calls the hook
+- That leaves the branches where the hook cannot be called at all — a not-found page still needs the link back to where the reader came from. A derivation that must survive those branches is not hook work: write it as a plain function beside the contract it derives from (a projection of one URL schema onto another lives with the schemas) and call it from wherever it is needed. The rule is about *hooks* being unconditional, not about derivation being hook-only
 - Manage form input values, validation, UI toggles, etc.
 - Derive display values from container data (e.g. merging server-returned options with current selections)
 - Transform the domain contract into view-specific shapes here (e.g. pivot domain rows into a chart's dynamic-key format, map ids to display labels). The view model is a component-hook concern, never part of the API contract
-- **Derive the next URL here too.** The Component owns the `<Link>` and the `navigate` call, but *what the next search should be* is a derivation: which controls reset the page to 1, which do not, how a toggled value folds into an array. The Component passes one `applySearch(next)` callback in; the hook decides what `next` is
+- **Derive the next URL here too.** The Component owns the `<Link>` and the `navigate` call, but *what the next search should be* is a derivation: which controls reset the page to 1, which do not, how a toggled value folds into an array. It crosses the boundary in whichever direction the Component needs — a control that navigates on change takes an `applySearch(next)` callback the Component passes in, while a `<Link>` has nothing to call and takes the **value**, so the hook returns the search object the link points at. Same derivation, two shapes; the choice is the Component's, not a second rule
 - **No `Intl` in formatting.** `Intl.DateTimeFormat` / `toLocaleString` resolve against the runner's locale and ICU build, so a behavior test asserting on their output breaks on a machine that differs. Build display strings explicitly (`2026-07-28 22:14 UTC`)
 - May have no `useState` when its job is purely derivation + handler wrapping — and when a Component has no local state and nothing to derive, it needs no component hook at all (an empty pass-through hook is ceremony; skip it)
 - **No direct container-hook call** — receive container-hook actions as params
@@ -780,7 +778,9 @@ This is not tidiness. A test harness that restates the schema and omits the midd
 
 ### Defaults, and what a malformed URL does
 
-**`.default(x)` is forced.** It makes the field optional on the way *in*, and without it every `<Link>` and every `redirect({ to: "/incidents" })` has to name every parameter — omitting one is a compile error.
+**`.default(x)` is forced wherever there is a default at all.** It makes the field optional on the way *in*, and without it every `<Link>` and every `redirect({ to: "/incidents" })` has to name every parameter — omitting one is a compile error.
+
+Not every parameter has one. A filter whose absence *is* the value — no severity chosen means every severity — has nothing to fall back to: it is `.optional()`, it arrives as `undefined`, and it is left out of the object handed to the strip middleware, since there is no default there to strip. Reserve a default for a parameter that always means something, and let the rest be genuinely absent rather than inventing a sentinel to stand in for "unset".
 
 That splits the schema's two types apart, which is the one thing to keep in mind here: **going in, every field is optional; coming out, every field is present.** A link passes a partial search; the Container, the hook and the Component all receive the parsed output with every defaulted field present. Build a new search from the current parsed value (`{ ...search, page: 1 }`) rather than from an updater whose argument is the optional input type.
 
@@ -788,9 +788,17 @@ That splits the schema's two types apart, which is the one thing to keep in mind
 
 `z.coerce` is not needed: the router JSON-parses search values, so `?page=2` already arrives as a number, and coercing would widen the input type to `unknown`.
 
+### What omitting defaults shows up as
+
+Stripping keeps addresses short and makes `/incidents` and `/incidents?page=1` the same page. Two consequences follow from it, and both tend to be met as a bug rather than as a rule.
+
+**A reset is an absence, not a value.** Sending a list back to page 1 *removes* `page` from the URL. A test for "changing a filter returns to the first page" has to assert that the parameter is gone — reading the parsed search back shows `page: 1` either way, because the default fills it in again, so the obvious assertion passes whether or not the reset happened.
+
+**Sibling links all look active.** `<Link>` compares search parameters partially, so a link that omits a defaulted one matches *any* value of it. Two tabs written as `?tab=timeline` and `?tab=comments` therefore both report themselves current: the default-valued one carries no `tab` to disagree with. Pass `activeOptions={{ exact: true }}` on any link whose target differs from its sibling only by a search parameter.
+
 ### Tying it to the API types — and what that misses
 
-Generated OpenAPI types are types only, so a URL enum's members must also exist as runtime values. Declare each vocabulary once as an `as const` array — the schema and the Component's controls both read it — and pin the whole schema to the Queries layer's param type:
+Generated OpenAPI types are types only, so a URL enum's members must also exist as runtime values. Declare each vocabulary once as an `as const` array — the schema and the Component's controls both read it — and pin the whole schema to the API layer's params type:
 
 ```ts
 export const INCIDENT_STATUSES = ["open", "acknowledged", "resolved"] as const;
@@ -822,7 +830,7 @@ Nothing new — the [Where state lives](#where-state-lives) rules applied to a r
 |---|---|
 | Route file | spreads the config object |
 | Container | `useSearch({ from })`, passes the parsed value to the hook *and* to the Component |
-| Container hook | receives it as an ordinary param, typed as the Queries layer's params; never reads the URL |
+| Container hook | receives it as an ordinary param, typed as the API layer's params type; never reads the URL |
 | Component | renders the current controls from it, writes it back through `<Link>` / `navigate` |
 | Component hook | derives the *next* search — page resets, array toggles, ordering |
 
@@ -1109,6 +1117,26 @@ afterEach(() => worker.resetHandlers());
 afterAll(() => worker.stop());
 ```
 
+**Hook tests need a QueryClient.** A container hook *is* `useQuery`, so `renderHook` only runs inside a provider. Build the client per test rather than sharing one — a cache that outlives a test is a test depending on another's data — and turn retries off, or the first test that asserts a 404 sits through three attempts before it can.
+
+```tsx
+// src/test/query-client.tsx
+export function createQueryWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return function Wrapper({ children }: { children: ReactNode }) {
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  };
+}
+```
+
+```ts
+renderHook(() => useIncidentDetailContainer({ incidentId: "i1" }), {
+  wrapper: createQueryWrapper(),
+});
+```
+
 **The minimal router.** A Component that renders `<Link>` or calls `navigate` needs a router in its stories and tests. One factory in `src/test/{feature}-router.tsx` serves both: the feature's real paths, its real route options spread from the page's URL schema ([§5](#5-state-in-the-url)), a memory history, and the component under test standing in for the page. It deliberately does **not** import the real route files — those pull in Containers, and with them a QueryClient and a server, which is what the Component boundary exists to keep out.
 
 ```tsx
@@ -1126,6 +1154,14 @@ export function createIncidentRouter({ children, initialUrl = "/incidents" }) {
     routeTree,
     history: createMemoryHistory({ initialEntries: [initialUrl] }),
   });
+}
+```
+
+A test can drive that router directly, but a story's decorator has to return an element. Export the provider beside the factory so neither has to assemble it:
+
+```tsx
+export function IncidentRouterHarness(props: Parameters<typeof createIncidentRouter>[0]) {
+  return <RouterProvider router={createIncidentRouter(props)} />;
 }
 ```
 
@@ -1192,13 +1228,18 @@ The generated module is **types only**. A value the runtime needs — an enum's 
 
 ### Playground setup
 
-`pnpm new:playground <name>` scaffolds the app, one Storybook project, and a starter story. Three things it does not do, to add by hand as needed:
+`pnpm new:playground <name>` scaffolds the app, one Storybook project, and a starter story. What it leaves for you, to add when the rule that needs it applies:
 
 | | |
 |---|---|
 | `@api` alias | `tsconfig.json` `paths` + `vite.config.ts` and `vitest.config.ts` `resolve.alias` |
 | the `unit` Vitest project | when the playground gains its first `*.test.tsx` — see [Test wiring](#test-wiring) |
 | `resolve.dedupe: ["react", "react-dom"]` | required as soon as `vitest-browser-react` renders anything using React context |
+| `vitest-browser-react` | the dependency itself, with that first behavior test |
+| `zod` | as soon as a page validates a form ([§4.6](#form-validation-pageschemats)) or keeps state in the URL ([§5](#5-state-in-the-url)) |
+| `react-hook-form` + `@hookform/resolvers` | with the first form page |
+
+**When a `resolve` change does not take, clear the caches first.** Vite's dependency optimizer and Vitest keep the previous module graph under `node_modules/.vite` and `node_modules/.cache`, and a stale one fails in exactly the shapes a missing `dedupe` does — `Invalid hook call`, `Cannot read properties of null (reading 'useContext')`, a story failing to fetch a dynamically imported module. Reading the row above and editing config further is the wrong move when `dedupe` is already set: `rm -rf node_modules/.vite node_modules/.cache` and re-run before believing the symptom.
 
 ---
 
@@ -1206,7 +1247,7 @@ The generated module is **types only**. A value the runtime needs — an enum's 
 
 Commit after each step. Do not batch multiple steps into one commit. Every commit must pass the touched playground's typecheck (`pnpm --filter <pkg> exec tsc --noEmit -p .`) — enforced by the Lefthook pre-commit hook.
 
-**Why routes come early.** `Link`, `useSearch({ from })` and `useParams({ from })` are typed against the registered route tree, so a Component that navigates cannot typecheck before its routes exist — while the routes cannot name a Container that has not been written. The cycle breaks by splitting the route work: **declare the URLs first (path + search config, no `component`), attach the Containers last.** Steps 6 and 13 are the two halves.
+**Why routes come early.** `Link`, `useSearch({ from })` and `useParams({ from })` are typed against the registered route tree, so a Component that navigates cannot typecheck before its routes exist — while the routes cannot name a Container that has not been written. The cycle breaks by splitting the route work: **declare the URLs first (path + search config, no `component`), attach the Containers last.** Steps 6 and 14 are the two halves.
 
 1. Define endpoints and schemas in `src/openapi.yaml` → **commit**
 2. Run `pnpm generate:api` to generate types → **commit**

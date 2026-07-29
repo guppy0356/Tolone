@@ -67,7 +67,7 @@ src/
 ├── api/                             ← shared cache layer (all resources), imported via @api
 │   ├── {Resource}.api.ts
 │   └── {Resource}.queries.ts        ← queryOptions factory (all / list / detail)
-├── test/                            ← test-only wiring: setup, MSW worker, minimal router
+├── test/                            ← test-only wiring: setup, MSW worker, QueryClient wrapper, minimal router
 └── features/{feature-name}/
     ├── {Resource}.{concern}.ts       ← only what more than one page must agree on
     └── {Page}/                       ← one directory per page/route

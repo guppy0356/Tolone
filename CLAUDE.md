@@ -67,9 +67,12 @@ src/
 ├── api/                             ← shared cache layer (all resources), imported via @api
 │   ├── {Resource}.api.ts
 │   └── {Resource}.queries.ts        ← queryOptions factory (all / list / detail)
+├── test/                            ← test-only wiring: setup, MSW worker, minimal router
 └── features/{feature-name}/
+    ├── {Resource}.search.ts          ← URL contract, when >1 page shares it
+    ├── {Resource}.labels.ts          ← display vocabulary, when >1 page shares it
     └── {Page}/                       ← one directory per page/route
-        ├── {Page}.route.ts           ← route definition: path + Container (registered in src/router.ts)
+        ├── {Page}.route.ts           ← path + search config + Container (registered in src/router.ts)
         ├── {Page}.container.tsx      ← wires the container hook to the Component
         ├── {Page}.container.hook.ts  ← server state (one per page)
         ├── {Page}.component.tsx      ← Component + private memo'd body + private Skeleton
@@ -81,7 +84,7 @@ src/
 
 ### Testing approach
 
-Storybook stories (`{Page}.component.stories.tsx`) are a **visual catalog** — states via `args`, **no `play`**. **Behavior** lives in `*.test.{ts,tsx}`, run by Vitest in browser mode via `vitest-browser-react`. Entry `{Page}.component.tsx` gets a catalog story + a `.test.tsx`; `components/` sub-components get a `.test.tsx` only. `pnpm test` runs both. See [docs/architecture.md](./docs/architecture.md#writing-tests) for the full convention (state menu, placement, anti-patterns).
+Storybook stories (`{Page}.component.stories.tsx`) are a **visual catalog** — states via `args`, **no `play`**. **Behavior** lives in `*.test.{ts,tsx}`, run by Vitest in browser mode via `vitest-browser-react`. Entry `{Page}.component.tsx` gets a catalog story + a `.test.tsx`; `components/` sub-components get a `.test.tsx` only. `pnpm test` runs both. See [docs/architecture.md](./docs/architecture.md#8-writing-tests) for the full convention (state menu, placement, anti-patterns, and the Vitest/MSW/router wiring).
 
 ## Commit Strategy
 
@@ -94,13 +97,16 @@ Typical commit sequence:
 2. generate:api (type generation) → commit
 3. API layer → commit
 4. Queries layer → commit
-5. Container hook layer (+ hook test when worth it — error mapping, hook-scoped query params) → commit
-6. zod schema (`{Page}.schema.ts`, form pages only) → commit
-7. Component hook layer → commit
-8. Component + stories + behavior tests (run `pnpm test` before committing) → commit
-9. MSW handlers → commit
-10. Container layer → commit
-11. Route wiring ({Page}.route.ts + router.ts registration) → commit
+5. URL contract (`{Resource}.search.ts`, pages with URL state) + every route declared **without `component:`** and registered in `router.ts` → commit
+6. Container hook layer (+ hook test when worth it — error mapping, hook-scoped query params) → commit
+7. zod form schema (`{Page}.schema.ts`, form pages only) → commit
+8. Component hook layer → commit
+9. Component + stories + behavior tests (run `pnpm test` before committing) → commit
+10. MSW handlers → commit
+11. Container layer → commit
+12. Point each route at its Container (`component: {Page}Container`) → commit
+
+Steps 5 and 12 are one job split in two: `Link` / `useSearch({ from })` are typed against the registered route tree, so a navigating Component cannot typecheck before its routes exist — and the routes cannot name a Container that does not exist yet. Declare the URLs first, attach the Containers last.
 
 ## Future Work
 

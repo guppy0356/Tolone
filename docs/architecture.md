@@ -646,7 +646,7 @@ export function TodoComponent({
 - **The view model is what the Component receives** — the shapes and actions of `{Page}ComponentState`, the page's own vocabulary rather than the wire's. Turning one contract value into one display value (`open` into `"Open"`, an ISO instant into text) is not the view model; it is what the view model is built out of. Both are UI work and neither belongs to the API contract, whose types are the server's word and stay unwrapped in the cache
 - **The building lives in `{Page}.view-model.ts`, the memoizing in the hook.** That file holds the shapes and one pure function per record (`toIncidentListRow(incident)`), so the hook reads `incidents.map(toIncidentListRow)` and keeps only `useMemo` / `useCallback`, state, and handlers. The mapping is the part with decisions in it — how an absent assignee reads, which fields the Component gets — so it is worth testing without rendering. A list that depends on neither server data nor current state (a sort control's options) is a plain constant in that file, not a memo with an empty dependency array
 - A shape belongs to one page: the row a list renders and the headline a detail renders are different, and a second page reading the same resource writes its own. Names follow — `IncidentListRow`, not `IncidentRow`, so that a screen's shape is never mistaken for the contract's `IncidentSummary` next to it in the same import block
-- **Wording is the page's, and two pages repeat it.** A list and a detail rendering the same status each keep their own `Record<IncidentStatus, string>`, rather than reading one table from the feature root. The repetition is real and accepted: it buys a page whose display decisions are entirely its own, and it costs the guarantee that the two agree — nothing catches it if one starts saying `"Ack'd"`. What survives the split is the more valuable check, since each copy is exhaustive over the contract type, so a status added to the API breaks the build in both. The vocabulary arrays behind the URL do not catch that, and no other file does
+- **Wording is the page's, and two pages repeat it.** A list and a detail rendering the same status each keep their own `Record<IncidentStatus, string>`, rather than reading one table from the feature root. The repetition is real and accepted: it buys a page whose display decisions are entirely its own, and it costs the guarantee that the two agree — nothing catches it if one starts saying `"Ack'd"`. What survives the split is the more valuable check, since each copy is exhaustive over the contract type, so a status added to the API breaks the build in both. The generated enum arrays do not stop it: they take the new member and carry on, which is what a filter control wants and no use at all as a prompt to decide what the status is called
 - **Derive the next URL here too.** The Component owns the `<Link>` and the `navigate` call, but *what the next search should be* is a derivation: which controls reset the page to 1, which do not, how a toggled value folds into an array. It crosses the boundary in whichever direction the Component needs — a control that navigates on change takes an `applySearch(next)` callback the Component passes in, while a `<Link>` has nothing to call and takes the **value**, so the hook returns the search object the link points at. Same derivation, two shapes; the choice is the Component's, not a second rule
 - **No `Intl` in formatting.** `Intl.DateTimeFormat` / `toLocaleString` resolve against the runner's locale and ICU build, so a behavior test asserting on their output breaks on a machine that differs. Build display strings explicitly (`2026-07-28 22:14 UTC`)
 - May have no `useState` when its job is purely derivation + handler wrapping — and when a Component has no local state and nothing to derive, it needs no component hook at all (an empty pass-through hook is ceremony; skip it)
@@ -807,20 +807,39 @@ Stripping keeps addresses short and makes `/incidents` and `/incidents?page=1` t
 
 **Sibling links all look active.** `<Link>` compares search parameters partially, so a link that omits a defaulted one matches *any* value of it. Two tabs written as `?tab=timeline` and `?tab=comments` therefore both report themselves current: the default-valued one carries no `tab` to disagree with. Pass `activeOptions={{ exact: true }}` on any link whose target differs from its sibling only by a search parameter.
 
-### Tying it to the API types — and what that misses
+### Where the enum members come from
 
-Generated OpenAPI types are types only, so a URL enum's members must also exist as runtime values. Declare each vocabulary once as an `as const` array — the schema and the Component's controls both read it — and pin the whole schema to the API layer's params type:
+`z.enum()` needs the members as an array it can read while the program runs, and a generated type cannot supply one: `IncidentStatus` is `"open" | "acknowledged" | "resolved"` to the compiler and nothing at all by the time the page loads.
+
+Generate the members too, rather than typing them out a second time. `openapi-typescript --enum-values` writes an array per enum from the same `openapi.yaml`, into a `.ts` file — a `.d.ts` would declare the arrays and produce none of them, so every call site would compile and the page would find nothing there:
 
 ```ts
-export const INCIDENT_STATUSES = ["open", "acknowledged", "resolved"] as const;
+// src/types/openapi.ts — generated
+export const incidentStatusValues: ReadonlyArray<…> = ["open", "acknowledged", "resolved"];
+```
 
+The API layer renames them the way it already renames the types, so both halves of the contract enter the app in one file, and the schema reads the array from there — as does anything else that needs the members, such as a Component rendering one checkbox per status:
+
+```ts
+// src/api/Incident.api.ts
+export type IncidentStatus = components["schemas"]["IncidentStatus"];
+export const INCIDENT_STATUSES = incidentStatusValues;
+```
+
+```ts
+// the URL schema
 export const incidentListSearchSchema = z.object({
   status: z.array(z.enum(INCIDENT_STATUSES)).default([]).catch([]),
   // ...
 }) satisfies z.ZodType<IncidentListParams, unknown>;
 ```
 
-The same limit applies as for form schemas: `satisfies` catches renames, wrong types and removals, but **not a server-side widening** — narrowing is assignable. Adding a member to a contract enum means updating the vocabulary array by hand.
+Two things stay written by hand:
+
+- **A parameter the API does not have.** A `tab` choosing which pane to show is never sent anywhere, so there is no enum to generate from. Its members live with the URL schema
+- **The order the choices are offered in.** The generated array is in `openapi.yaml`'s order, which was never a decision about the UI — a sort control has to open on its own default. Take display order from the page's label table, and let the generated array answer only *which members exist*
+
+`satisfies z.ZodType<IncidentListParams, unknown>` checks the schema against the endpoint's params: a renamed field, a wrong type, a parameter the endpoint no longer takes. It does **not** notice a member added to an enum, because a narrower union is assignable to a wider one — the same limit as on a form schema's `satisfies`. Generating the members is what makes that harmless, since no second copy is left behind to fall out of date. What still asks for a decision when a status appears is the label table in each view model: `Record<IncidentStatus, string>` is exhaustive, so the build stops until the new status has been given a name.
 
 ### URL encoding is not wire encoding
 
@@ -1223,8 +1242,8 @@ Usage in the API layer:
 Each playground defines its API contract in `src/openapi.yaml`. Types are generated and used for both the API layer and MSW handlers.
 
 ```
-src/openapi.yaml → openapi-typescript → src/types/openapi.d.ts
-                                        ├── Todo.api.ts      (import types)
+src/openapi.yaml → openapi-typescript → src/types/openapi.ts
+                    --enum-values       ├── Todo.api.ts      (renames the types and the enum arrays)
                                         ├── Todo.queries.ts  (queryOptions over the api fns)
                                         └── handlers.ts      (openapi-msw: type-safe responses)
 ```
@@ -1233,7 +1252,7 @@ src/openapi.yaml → openapi-typescript → src/types/openapi.d.ts
 pnpm --filter @tolone/todo generate:api
 ```
 
-The generated module is **types only**. A value the runtime needs — an enum's members for a select or a URL vocabulary — must be declared separately and pinned back (see [§5](#5-state-in-the-url)).
+`--enum-values` makes the generated module carry each enum's members as an array as well as its type — what a `z.enum()` or a rendered set of choices needs at runtime — which is why the output is a `.ts` and not a `.d.ts`. The API layer renames both halves; see [§5](#5-state-in-the-url).
 
 **Type safety:** `vite-plugin-checker` runs `tsc` during dev, so mismatches between the schema and handler/API code surface as errors in the terminal and browser overlay.
 

@@ -106,7 +106,7 @@ src/
 │   ├── worker.ts
 │   └── {feature}-router.tsx        ← minimal router for stories/tests of navigating Components
 └── features/{feature-name}/
-    ├── {Resource}.search.ts        ← only when the feature has URL state — see §5
+    ├── {Resource}.{concern}.ts     ← only what more than one page must agree on
     ├── {Page}/                     ← one directory per page/route
     │   ├── {Page}.route.ts                 ← the page's URL: path, search config, Container
     │   ├── {Page}.container.tsx
@@ -750,7 +750,7 @@ When a page's filter / sort / pagination / tab lives in the URL, that URL has a 
 
 ### Where it lives
 
-`features/{feature-name}/{Resource}.search.ts` — the feature root, not a page directory, because the contract is usually shared. A detail page that a reader reaches from a filtered list must declare the list's parameters too: `validateSearch` drops what it does not declare, so an undeclared filter is stripped from the detail URL and the way back is lost. The detail schema therefore *extends* the list's, and the projection back down lives with them:
+With the page, when only that page's URL carries it. At the feature root — as a `{Resource}.{concern}.ts` module, per [Feature-root modules](#file-placement) — as soon as a second page declares any of the same parameters, which happens more often than it looks: a detail page a reader reaches from a filtered list must declare the list's parameters too. `validateSearch` drops what it does not declare, so an undeclared filter is stripped from the detail URL and the way back is lost. The detail schema then *extends* the list's, and the projection back down lives with them:
 
 ```ts
 export const incidentDetailSearchSchema = incidentListSearchSchema.extend({
@@ -1214,7 +1214,7 @@ Commit after each step. Do not batch multiple steps into one commit. Every commi
 3. `src/api/{Resource}.api.ts` — import generated types + API function object; rename anything that collides with a DOM global → **commit**
 4. `src/api/{Resource}.queries.ts` — `{Resource}Queries` `queryOptions()` factory (`all` / `list` / `detail`) over the API functions → **commit**
 5. Create `src/features/{feature-name}/{Page}/` directory
-6. **URL first** — when any page carries URL state, `features/{feature-name}/{Resource}.search.ts` per [§5](#5-the-url-contract). Then declare every route of the feature: `{Page}.route.ts` with path + spread search config and **no `component`**, registered in `router.ts`'s `addChildren` → **commit**
+6. **URL first** — when any page carries URL state, write its contract per [§5](#5-the-url-contract). Then declare every route of the feature: `{Page}.route.ts` with path + spread route options and **no `component`**, registered in `router.ts`'s `addChildren` → **commit**
 7. `{Page}.container.hook.ts` — `use{Page}Container` hook + `{Page}ContainerState` interface (one dedicated container hook per page; `useQuery(featureQueries.x())` + `useMutation`; pick the mutation side-effect pattern — optimistic vs invalidate-only — per the Container Hook Layer section); when the hook contains logic worth testing in isolation (error mapping, hook-scoped query params), add `{Page}.container.hook.test.tsx` (`renderHook` + the MSW worker, with test-local `worker.use` handlers — see Writing Tests) in the same commit → **commit**
 8. `{Page}.schema.ts` — zod form-validation contract + `z.infer` form-values type, output pinned to the API input via `satisfies` (only when the page validates a form) → **commit**
 9. `{Page}.component.hook.ts` — `use{Page}Component` hook + `{Page}ComponentState` interface (skip this file entirely when the Component has no local state and nothing to derive) → **commit**

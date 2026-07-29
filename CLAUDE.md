@@ -69,7 +69,7 @@ src/
 │   └── {Resource}.queries.ts        ← queryOptions factory (all / list / detail)
 ├── test/                            ← test-only wiring: setup, MSW worker, minimal router
 └── features/{feature-name}/
-    ├── {Resource}.search.ts          ← only when the feature has URL state
+    ├── {Resource}.{concern}.ts       ← only what more than one page must agree on
     └── {Page}/                       ← one directory per page/route
         ├── {Page}.route.ts           ← path + search config + Container (registered in src/router.ts)
         ├── {Page}.container.tsx      ← wires the container hook to the Component
@@ -96,7 +96,7 @@ Typical commit sequence:
 2. generate:api (type generation) → commit
 3. API layer → commit
 4. Queries layer → commit
-5. URL contract (`{Resource}.search.ts`, pages with URL state) + every route declared **without `component:`** and registered in `router.ts` → commit
+5. URL contract (pages with URL state) + every route declared **without `component:`** and registered in `router.ts` → commit
 6. Container hook layer (+ hook test when worth it — error mapping, hook-scoped query params) → commit
 7. zod form schema (`{Page}.schema.ts`, form pages only) → commit
 8. Component hook layer → commit

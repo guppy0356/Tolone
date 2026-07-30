@@ -89,6 +89,22 @@ test("the comments tab links to the same incident with tab=comments", async () =
   expect(href).toContain("tab=comments");
 });
 
+test("only the tab in the URL reports itself current", async () => {
+  const { screen } = await renderDetail({
+    initialUrl: "/incidents/1043?tab=comments",
+    search: { ...timelineSearch, tab: "comments" },
+  });
+
+  await expect
+    .element(screen.getByRole("link", { name: "Comments" }))
+    .toHaveAttribute("aria-current", "page");
+  // Timeline is the default and so is absent from the URL, which makes it match
+  // any tab at all unless the link asks for an exact comparison.
+  await expect
+    .element(screen.getByRole("link", { name: "Timeline" }))
+    .not.toHaveAttribute("aria-current");
+});
+
 test("renders the comments once the tab is the one in the URL", async () => {
   const { screen } = await renderDetail({
     comments,

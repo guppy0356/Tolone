@@ -71,6 +71,13 @@ const IncidentOverview = memo(function IncidentOverview({
             to="/incidents/$incidentId"
             params={{ incidentId: detail.id }}
             search={{ ...search, tab: tab.value }}
+            // The two tabs differ only by `tab`, and the default-valued one is
+            // stripped from the URL, so it has nothing to disagree with: without
+            // `exact` both links report themselves current.
+            activeOptions={{ exact: true }}
+            // A tab is not a place to come back to — replacing keeps the list
+            // one Back away however many tabs the reader opened.
+            replace
             className={`-mb-px border-b-2 px-3 py-2 text-sm ${
               tab.isActive
                 ? "border-blue-600 font-semibold text-blue-700"

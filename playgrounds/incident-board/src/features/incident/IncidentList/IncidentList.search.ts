@@ -11,7 +11,7 @@ import {
 
 // Not `as const`: these are also the argument to the router's
 // `stripSearchParams`, which expects the mutable search shape.
-export const incidentListSearchDefaults = {
+const incidentListSearchDefaults = {
   status: [] as IncidentStatus[],
   sort: "-openedAt" as IncidentSort,
   page: 1,
@@ -21,7 +21,7 @@ export const incidentListSearchDefaults = {
 // `.default` is what makes the field optional on the way *in*, so a link may
 // name only the params it changes; `.catch` is what makes a hand-mangled URL
 // degrade to that default instead of throwing the page away.
-export const incidentListSearchSchema = z.object({
+const incidentListSearchSchema = z.object({
   status: z
     .array(z.enum(INCIDENT_STATUSES))
     .default(incidentListSearchDefaults.status)
@@ -50,7 +50,7 @@ export type IncidentListSearch = z.infer<typeof incidentListSearchSchema>;
 // address. The route file spreads these rather than restating them, and so
 // does the story/test router — a harness that skipped the middleware would be
 // exercising a URL the app never produces.
-export const incidentListSearchConfig = {
+export const incidentListRouteOptions = {
   validateSearch: incidentListSearchSchema,
   search: {
     middlewares: [

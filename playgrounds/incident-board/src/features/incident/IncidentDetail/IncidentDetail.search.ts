@@ -11,11 +11,11 @@ export type IncidentTab = (typeof INCIDENT_TABS)[number];
 // stops there. Where the reader came from is not something this page shows, so
 // it is not this page's state — the browser's history holds it, and restores it
 // exactly, which is more than a copy in the URL could promise.
-export const incidentDetailSearchDefaults = {
+const incidentDetailSearchDefaults = {
   tab: "timeline" as IncidentTab,
 };
 
-export const incidentDetailSearchSchema = z.object({
+const incidentDetailSearchSchema = z.object({
   tab: z
     .enum(INCIDENT_TABS)
     .default(incidentDetailSearchDefaults.tab)
@@ -29,7 +29,7 @@ export type IncidentDetailSearch = z.infer<typeof incidentDetailSearchSchema>;
 // route file spreads these rather than restating them, and so does the
 // story/test router — a harness that skipped the middleware would be
 // exercising a URL the app never produces.
-export const incidentDetailSearchConfig = {
+export const incidentDetailRouteOptions = {
   validateSearch: incidentDetailSearchSchema,
   search: {
     middlewares: [

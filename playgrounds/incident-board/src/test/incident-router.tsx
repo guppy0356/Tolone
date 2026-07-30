@@ -5,8 +5,8 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
-import { incidentListSearchConfig } from "../features/incident/IncidentList/IncidentList.search";
-import { incidentDetailSearchConfig } from "../features/incident/IncidentDetail/IncidentDetail.search";
+import { incidentListRouteOptions } from "../features/incident/IncidentList/IncidentList.search";
+import { incidentDetailRouteOptions } from "../features/incident/IncidentDetail/IncidentDetail.search";
 
 /**
  * The "minimal router" a navigating Component needs in a story or a test: the
@@ -28,13 +28,13 @@ export function createIncidentRouter({
     createRoute({
       getParentRoute: () => rootRoute,
       path: "/incidents",
-      ...incidentListSearchConfig,
+      ...incidentListRouteOptions,
       component: () => children,
     }),
     createRoute({
       getParentRoute: () => rootRoute,
       path: "/incidents/$incidentId",
-      ...incidentDetailSearchConfig,
+      ...incidentDetailRouteOptions,
       component: () => children,
     }),
   ]);

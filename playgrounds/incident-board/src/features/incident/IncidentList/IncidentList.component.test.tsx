@@ -131,7 +131,7 @@ test("keeps default values out of the URL", async () => {
   });
 });
 
-test("carries the current filters into the incident's URL", async () => {
+test("an incident's URL says which incident, and nothing about the list", async () => {
   const { screen } = await renderList({
     search: { ...defaultSearch, severity: "critical", page: 2 },
   });
@@ -141,11 +141,7 @@ test("carries the current filters into the incident's URL", async () => {
     .element()
     .getAttribute("href");
 
-  expect(href).toContain("/incidents/1");
-  expect(href).toContain("severity=critical");
-  expect(href).toContain("page=2");
-  // The tab is at its default, so it stays out.
-  expect(href).not.toContain("tab=");
+  expect(href).toBe("/incidents/1");
 });
 
 test("skeletons the list but keeps the filters usable while loading", async () => {

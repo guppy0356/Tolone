@@ -118,10 +118,8 @@ const IncidentFilters = memo(function IncidentFilters({
 
 const IncidentTable = memo(function IncidentTable({
   rows,
-  search,
 }: {
   rows: IncidentListRow[];
-  search: IncidentListSearch;
 }) {
   if (rows.length === 0) {
     return (
@@ -138,9 +136,6 @@ const IncidentTable = memo(function IncidentTable({
           <Link
             to="/incidents/$incidentId"
             params={{ incidentId: row.id }}
-            // Carrying the filters into the detail URL is what lets the way
-            // back restore them without anything remembering them.
-            search={{ ...search, tab: "timeline" }}
             className="flex flex-wrap items-center gap-3"
           >
             <span className="font-mono text-xs text-gray-500">{row.key}</span>
@@ -265,7 +260,7 @@ export function IncidentListComponent({
         <div
           className={`transition-opacity ${isIncidentsRefetching ? "opacity-50" : ""}`}
         >
-          <IncidentTable rows={rows} search={search} />
+          <IncidentTable rows={rows} />
           <IncidentPager
             page={search.page}
             total={total}

@@ -3,23 +3,20 @@ import { Link } from "@tanstack/react-router";
 import type { IncidentComment, IncidentDetail } from "@api/Incident.api";
 import type { IncidentDetailContainerState } from "./IncidentDetail.container.hook";
 import { useIncidentDetailComponent } from "./IncidentDetail.component.hook";
-import {
-  toListSearch,
-  type IncidentDetailSearch,
-  type IncidentListSearch,
-} from "../Incident.search";
+import type { IncidentDetailSearch } from "../Incident.search";
 
 export interface IncidentDetailComponentProps
   extends IncidentDetailContainerState {
   search: IncidentDetailSearch;
 }
 
-function BackToList({ search }: { search: IncidentListSearch }) {
+function ListLink() {
   return (
-    // The filters travelled here in the URL, so the way back is just a link —
-    // nothing had to remember them.
-    <Link to="/incidents" search={search} className="text-sm text-blue-700">
-      ← Back to incidents
+    // Not a way *back*: the reader may have arrived by a link somebody sent
+    // them, and this goes to the list itself rather than to wherever they were.
+    // Retracing a filtered list is the browser's Back, which restores it whole.
+    <Link to="/incidents" className="text-sm text-blue-700">
+      All incidents
     </Link>
   );
 }
@@ -146,12 +143,10 @@ export function IncidentDetailComponent({
   isCommentsLoading,
   search,
 }: IncidentDetailComponentProps) {
-  const listSearch = toListSearch(search);
-
   return (
     <div className="p-6">
       <div className="mb-4">
-        <BackToList search={listSearch} />
+        <ListLink />
       </div>
 
       {isDetailPending ? (

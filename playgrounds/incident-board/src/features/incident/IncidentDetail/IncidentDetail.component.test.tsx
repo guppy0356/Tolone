@@ -119,36 +119,21 @@ test("renders the comments once the tab is the one in the URL", async () => {
     .not.toBeInTheDocument();
 });
 
-test("carries the list's filters back into the back link", async () => {
+test("the link out goes to the list itself, whatever brought the reader here", async () => {
   const { screen } = await renderDetail({
-    search: {
-      status: ["open"],
-      severity: "critical",
-      assignee: "u1",
-      sort: "-severity",
-      page: 3,
-      tab: "timeline",
-    },
+    initialUrl: "/incidents/1043?tab=comments",
+    search: { ...timelineSearch, tab: "comments" },
   });
 
-  const href = decodeURIComponent(
-    screen
-      .getByRole("link", { name: /Back to incidents/ })
-      .element()
-      .getAttribute("href") ?? "",
-  );
+  const href = screen
+    .getByRole("link", { name: "All incidents" })
+    .element()
+    .getAttribute("href");
 
-  expect(href).toContain("/incidents?");
-  expect(href).toContain('status=["open"]');
-  expect(href).toContain("severity=critical");
-  expect(href).toContain("assignee=u1");
-  expect(href).toContain("sort=-severity");
-  expect(href).toContain("page=3");
-  // `tab` belongs to this page only.
-  expect(href).not.toContain("tab=");
+  expect(href).toBe("/incidents");
 });
 
-test("says so when the incident is gone, and still offers the way back", async () => {
+test("says so when the incident is gone, and still offers the way out", async () => {
   const { screen } = await renderDetail({
     detail: undefined,
     isDetailNotFound: true,
@@ -158,7 +143,7 @@ test("says so when the incident is gone, and still offers the way back", async (
     .element(screen.getByText("That incident no longer exists."))
     .toBeInTheDocument();
   await expect
-    .element(screen.getByRole("link", { name: /Back to incidents/ }))
+    .element(screen.getByRole("link", { name: "All incidents" }))
     .toBeInTheDocument();
 });
 

@@ -104,19 +104,6 @@ export const NotFound: Story = {
   args: { detail: undefined, isDetailNotFound: true },
 };
 
-export const ReachedFromAFilteredList: Story = {
-  args: {
-    search: {
-      status: ["open", "acknowledged"],
-      severity: "critical",
-      assignee: "u1",
-      sort: "-severity",
-      page: 3,
-      tab: "timeline",
-    },
-  },
-};
-
 export const Unassigned: Story = {
   args: {
     detail: {

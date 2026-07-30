@@ -3,7 +3,7 @@ import { expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 import type { IncidentComment, IncidentDetail } from "@api/Incident.api";
 import { createIncidentRouter } from "../../../test/incident-router";
-import type { IncidentDetailSearch } from "../Incident.search";
+import type { IncidentDetailSearch } from "./IncidentDetail.search";
 import {
   IncidentDetailComponent,
   type IncidentDetailComponentProps,

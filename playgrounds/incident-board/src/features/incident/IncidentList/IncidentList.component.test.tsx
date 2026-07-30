@@ -4,7 +4,7 @@ import { render } from "vitest-browser-react";
 import type { IncidentSummary } from "@api/Incident.api";
 import type { User } from "@api/User.api";
 import { createIncidentRouter } from "../../../test/incident-router";
-import type { IncidentListSearch } from "../Incident.search";
+import type { IncidentListSearch } from "./IncidentList.search";
 import {
   IncidentListComponent,
   type IncidentListComponentProps,

@@ -7,7 +7,7 @@ import type {
 } from "@api/Incident.api";
 import type { User } from "@api/User.api";
 import { INCIDENT_STATUSES } from "@api/Incident.api";
-import type { IncidentListSearch } from "../Incident.search";
+import type { IncidentListSearch } from "./IncidentList.search";
 import {
   ANY_ASSIGNEE,
   SEVERITY_OPTIONS,

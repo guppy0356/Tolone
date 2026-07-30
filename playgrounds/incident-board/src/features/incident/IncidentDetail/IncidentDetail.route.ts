@@ -1,6 +1,6 @@
 import { createRoute } from "@tanstack/react-router";
 import { rootRoute } from "../../../root.route";
-import { incidentDetailSearchConfig } from "../Incident.search";
+import { incidentDetailSearchConfig } from "./IncidentDetail.search";
 import { IncidentDetailContainer } from "./IncidentDetail.container";
 
 export const incidentDetailRoute = createRoute({

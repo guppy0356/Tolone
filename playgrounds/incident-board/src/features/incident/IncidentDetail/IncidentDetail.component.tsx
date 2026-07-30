@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import type { IncidentComment, IncidentDetail } from "@api/Incident.api";
 import type { IncidentDetailContainerState } from "./IncidentDetail.container.hook";
 import { useIncidentDetailComponent } from "./IncidentDetail.component.hook";
-import type { IncidentDetailSearch } from "../Incident.search";
+import type { IncidentDetailSearch } from "./IncidentDetail.search";
 
 export interface IncidentDetailComponentProps
   extends IncidentDetailContainerState {

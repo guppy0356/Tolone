@@ -5,10 +5,8 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
-import {
-  incidentDetailSearchConfig,
-  incidentListSearchConfig,
-} from "../features/incident/Incident.search";
+import { incidentListSearchConfig } from "../features/incident/IncidentList/IncidentList.search";
+import { incidentDetailSearchConfig } from "../features/incident/IncidentDetail/IncidentDetail.search";
 
 /**
  * The "minimal router" a navigating Component needs in a story or a test: the

@@ -9,12 +9,6 @@ import {
   type IncidentStatus,
 } from "@api/Incident.api";
 
-// `tab` is the one parameter the contract knows nothing about — it selects a
-// pane, not a query — so its members are written here rather than generated.
-export const INCIDENT_TABS = ["timeline", "comments"] as const;
-
-export type IncidentTab = (typeof INCIDENT_TABS)[number];
-
 // Not `as const`: these are also the argument to the router's
 // `stripSearchParams`, which expects the mutable search shape.
 export const incidentListSearchDefaults = {
@@ -50,43 +44,17 @@ export const incidentListSearchSchema = z.object({
 
 export type IncidentListSearch = z.infer<typeof incidentListSearchSchema>;
 
-// The detail URL says which incident (in the path) and which pane (here), and
-// stops there. Where the reader came from is not something this page shows, so
-// it is not this page's state — the browser's history holds it, and restores it
-// exactly, which is more than a copy in the URL could promise.
-export const incidentDetailSearchDefaults = {
-  tab: "timeline" as IncidentTab,
-};
-
-export const incidentDetailSearchSchema = z.object({
-  tab: z
-    .enum(INCIDENT_TABS)
-    .default(incidentDetailSearchDefaults.tab)
-    .catch(incidentDetailSearchDefaults.tab),
-});
-
-export type IncidentDetailSearch = z.infer<typeof incidentDetailSearchSchema>;
-
 // The route options that make a URL mean what this module says it means:
 // parsing on the way in, and dropping defaults on the way out, so that
 // /incidents and /incidents?status=[]&sort=-openedAt&page=1 are the same
-// address. Route files spread these rather than restating them, and so does
-// the story/test router — a harness that skipped the middleware would be
+// address. The route file spreads these rather than restating them, and so
+// does the story/test router — a harness that skipped the middleware would be
 // exercising a URL the app never produces.
 export const incidentListSearchConfig = {
   validateSearch: incidentListSearchSchema,
   search: {
     middlewares: [
       stripSearchParams<IncidentListSearch>(incidentListSearchDefaults),
-    ],
-  },
-};
-
-export const incidentDetailSearchConfig = {
-  validateSearch: incidentDetailSearchSchema,
-  search: {
-    middlewares: [
-      stripSearchParams<IncidentDetailSearch>(incidentDetailSearchDefaults),
     ],
   },
 };

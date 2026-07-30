@@ -6,7 +6,7 @@ import type {
   TimelineEvent,
 } from "@api/Incident.api";
 import { formatInstant } from "../helpers/instant";
-import { INCIDENT_TABS, type IncidentTab } from "../Incident.search";
+import { INCIDENT_TABS, type IncidentTab } from "./IncidentDetail.search";
 
 // Each page spells the contract's vocabulary for itself; the list's copy of
 // these two is not this page's business, and both are exhaustive over the

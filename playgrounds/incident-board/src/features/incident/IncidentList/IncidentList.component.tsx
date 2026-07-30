@@ -7,7 +7,7 @@ import {
   type IncidentListComponentState,
 } from "./IncidentList.component.hook";
 import type { IncidentListRow } from "./IncidentList.view-model";
-import type { IncidentListSearch } from "../Incident.search";
+import type { IncidentListSearch } from "./IncidentList.search";
 
 const SEVERITY_TONES: Record<IncidentSeverity, string> = {
   low: "bg-slate-100 text-slate-700",

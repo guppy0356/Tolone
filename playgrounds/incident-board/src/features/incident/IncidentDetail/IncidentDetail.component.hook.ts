@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { IncidentComment, IncidentDetail } from "@api/Incident.api";
-import type { IncidentDetailSearch } from "../Incident.search";
+import type { IncidentDetailSearch } from "./IncidentDetail.search";
 import {
   toCommentRow,
   toIncidentDetailHeadline,

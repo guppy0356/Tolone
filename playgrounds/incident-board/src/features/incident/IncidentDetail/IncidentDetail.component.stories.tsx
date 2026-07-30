@@ -66,7 +66,7 @@ const meta = {
     isDetailPending: false,
     isDetailNotFound: false,
     isCommentsLoading: false,
-    search: { status: [], sort: "-openedAt", page: 1, tab: "timeline" },
+    search: { tab: "timeline" },
   },
 } satisfies Meta<typeof IncidentDetailComponent>;
 
@@ -78,21 +78,21 @@ export const Timeline: Story = {};
 export const Comments: Story = {
   args: {
     comments,
-    search: { status: [], sort: "-openedAt", page: 1, tab: "comments" },
+    search: { tab: "comments" },
   },
 };
 
 export const CommentsLoading: Story = {
   args: {
     isCommentsLoading: true,
-    search: { status: [], sort: "-openedAt", page: 1, tab: "comments" },
+    search: { tab: "comments" },
   },
 };
 
 export const CommentsEmpty: Story = {
   args: {
     comments: [],
-    search: { status: [], sort: "-openedAt", page: 1, tab: "comments" },
+    search: { tab: "comments" },
   },
 };
 

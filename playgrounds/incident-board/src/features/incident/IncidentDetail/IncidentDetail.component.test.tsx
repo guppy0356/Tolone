@@ -38,12 +38,7 @@ const comments: IncidentComment[] = [
   },
 ];
 
-const timelineSearch: IncidentDetailSearch = {
-  status: [],
-  sort: "-openedAt",
-  page: 1,
-  tab: "timeline",
-};
+const timelineSearch: IncidentDetailSearch = { tab: "timeline" };
 
 async function renderDetail({
   initialUrl = "/incidents/1043",

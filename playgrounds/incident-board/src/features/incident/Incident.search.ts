@@ -50,15 +50,15 @@ export const incidentListSearchSchema = z.object({
 
 export type IncidentListSearch = z.infer<typeof incidentListSearchSchema>;
 
-// The detail page carries the list's filters as well as its own tab, so that
-// returning to the list restores the filters from the URL alone — the URL is
-// the source of truth for this state, so nothing else may remember it.
+// The detail URL says which incident (in the path) and which pane (here), and
+// stops there. Where the reader came from is not something this page shows, so
+// it is not this page's state — the browser's history holds it, and restores it
+// exactly, which is more than a copy in the URL could promise.
 export const incidentDetailSearchDefaults = {
-  ...incidentListSearchDefaults,
   tab: "timeline" as IncidentTab,
 };
 
-export const incidentDetailSearchSchema = incidentListSearchSchema.extend({
+export const incidentDetailSearchSchema = z.object({
   tab: z
     .enum(INCIDENT_TABS)
     .default(incidentDetailSearchDefaults.tab)
@@ -66,18 +66,6 @@ export const incidentDetailSearchSchema = incidentListSearchSchema.extend({
 });
 
 export type IncidentDetailSearch = z.infer<typeof incidentDetailSearchSchema>;
-
-/**
- * The detail search minus what only the detail page means — i.e. the address
- * of the list the reader came from. Projecting one schema onto the other is a
- * property of the two contracts, so it lives with them.
- */
-export function toListSearch({
-  tab: _tab,
-  ...listSearch
-}: IncidentDetailSearch): IncidentListSearch {
-  return listSearch;
-}
 
 // The route options that make a URL mean what this module says it means:
 // parsing on the way in, and dropping defaults on the way out, so that

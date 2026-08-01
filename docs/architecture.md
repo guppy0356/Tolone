@@ -755,6 +755,8 @@ A non-text input is still a controlled field: ReportForm's team checkboxes drive
 
 When a page's filter / sort / pagination / tab lives in the URL, that URL has a contract as real as the API's: a zod schema that parses it, the defaults that are omitted from it, and the route options that apply both — one module of the page's own, beside the route file that spreads it ([§1](#file-placement)). `{Page}.schema.ts` is the *form's* contract and does not cover this — a page can need a URL contract and have no form at all.
 
+The router splits the URL's two variable parts, and the split is typed. **`params`** are the path's segments (`/incidents/$incidentId`): the router reads their names out of the path string itself, so every route knows its own statically, and their values are always strings. **`search`** is the query string: it has no shape until the route declares one in `validateSearch`, and its values are JSON, so an array or a number survives the trip as itself. The API layer's `IncidentListParams` is a third thing — the HTTP query contract — sharing nothing but the word; in routing vocabulary, `params` always means the path.
+
 ### What a page's URL carries
 
 What the page is showing — the path names the record, the search holds the view state the page itself renders — and nothing about how the reader got there. An address is handed around: bookmarked, pasted into a chat, opened by someone who has never seen the screen it was copied from. State describing the reader's journey turns a shared URL into a lie — a detail URL that carried the list's filters would offer everyone who receives it a way "back" to a list only its sender ever saw.

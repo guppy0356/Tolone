@@ -769,20 +769,26 @@ So the way back is not the page's state. A reader who came from a filtered list 
 
 Declaring a search parameter is what makes it readable, not what keeps it alive. The router parses the whole query string and spreads `validateSearch`'s output over it, so a parameter no route declares still rides the URL untouched — invisible to the page, because `useSearch({ from })` is typed by the declaration alone. Declare exactly what the page reads: the detail page declares its `tab` and nothing of the list's, and `/incidents/1043?severity=medium` renders the same detail as its unadorned address, for everyone.
 
-### Export the route options, not just the schema
+### Export the route options, and nothing else
 
-The module exports the **route options**, not just the schema — `validateSearch` and the `search.middlewares` that strip defaults — as a single object that route files spread and stories and tests reuse:
+The module exports the **route options** — `validateSearch` and the `search.middlewares` that strip defaults, the slice of `createRoute`'s argument that concerns the query string, pre-filled for the route file and the [story/test router](#test-wiring) to spread — plus the parsed search type the page's props are written against. The schema and the defaults stay private:
 
 ```ts
-export const incidentListSearchConfig = {
+export type IncidentListSearch = z.infer<typeof incidentListSearchSchema>;
+
+// Parsing on the way in, stripping defaults on the way out, so that /incidents
+// and /incidents?status=[]&sort=-openedAt&page=1 are one address.
+export const incidentListRouteOptions = {
   validateSearch: incidentListSearchSchema,
   search: {
-    middlewares: [stripSearchParams<IncidentListSearch>(incidentListSearchDefaults)],
+    middlewares: [
+      stripSearchParams<IncidentListSearch>(incidentListSearchDefaults),
+    ],
   },
 };
 ```
 
-This is not tidiness. A test harness that restates the schema and omits the middleware exercises a URL the app can never produce — `?status=[]&sort=-openedAt&page=1` instead of `/incidents` — and passes while asserting something untrue. **A harness may choose its paths; it may not restate their contract.**
+This is not tidiness. A test harness that restates the schema and omits the middleware exercises a URL the app can never produce — `?status=[]&sort=-openedAt&page=1` instead of `/incidents` — and passes while asserting something untrue; exporting the parts is what would make that assembly possible, so nothing but the one object leaves the module. **A harness may choose its paths; it may not restate their contract.**
 
 ### Defaults, and what a malformed URL does
 
@@ -824,8 +830,8 @@ export const INCIDENT_STATUSES = incidentStatusValues;
 ```
 
 ```ts
-// the URL schema
-export const incidentListSearchSchema = z.object({
+// the URL schema — module-private; only the route options leave the file
+const incidentListSearchSchema = z.object({
   status: z.array(z.enum(INCIDENT_STATUSES)).default([]).catch([]),
   // ...
 }) satisfies z.ZodType<IncidentListParams, unknown>;
@@ -855,7 +861,7 @@ Nothing new — the [Where state lives](#where-state-lives) rules applied to a r
 
 | | |
 |---|---|
-| Route file | spreads the config object |
+| Route file | spreads the route options |
 | Container | `useSearch({ from })`, passes the parsed value to the hook *and* to the Component |
 | Container hook | receives it as an ordinary param, typed as the API layer's params type; never reads the URL |
 | Component | renders the current controls from it, writes it back through `<Link>` / `navigate` |
@@ -865,7 +871,7 @@ Nothing new — the [Where state lives](#where-state-lives) rules applied to a r
 
 ## 6. Wiring a Feature Together
 
-Routing is code-based and page-owned. Each page directory declares its own URL in `{Page}.route.ts`: the path, the page's search config when it has one, and the Container — and nothing else. Data stays in the Queries layer and container hooks. Three `src/`-level modules divide the rest: `root.route.tsx` owns the app shell (layout + redirects) and imports no page code — page route files import `rootRoute` back, so an import in the other direction is a cycle (chrome like `Nav` is safe: it never imports a route). `router.ts` composes every page route into the tree — its `addChildren` list is the app's page-granular sitemap — and registers the router type, which is what makes `Link` / `useNavigate` / `useParams({ from })` / `useSearch({ from })` strings type-checked against the tree. `main.tsx` only bootstraps. Why code-based rather than the file-based default: [ADR 0001](adr/0001-route-definition-placement.md).
+Routing is code-based and page-owned. Each page directory declares its own URL in `{Page}.route.ts`: the path, the spread route options when the page keeps state in the URL, and the Container — and nothing else. Data stays in the Queries layer and container hooks. Three `src/`-level modules divide the rest: `root.route.tsx` owns the app shell (layout + redirects) and imports no page code — page route files import `rootRoute` back, so an import in the other direction is a cycle (chrome like `Nav` is safe: it never imports a route). `router.ts` composes every page route into the tree — its `addChildren` list is the app's page-granular sitemap — and registers the router type, which is what makes `Link` / `useNavigate` / `useParams({ from })` / `useSearch({ from })` strings type-checked against the tree. `main.tsx` only bootstraps. Why code-based rather than the file-based default: [ADR 0001](adr/0001-route-definition-placement.md).
 
 ```tsx
 // root.route.tsx
@@ -897,13 +903,13 @@ export const todoRoute = createRoute({
 // features/incident/IncidentList/IncidentList.route.ts — page with URL state
 import { createRoute } from "@tanstack/react-router";
 import { rootRoute } from "../../../root.route";
-import { incidentListSearchConfig } from "../Incident.search";
+import { incidentListRouteOptions } from "./IncidentList.search";
 import { IncidentListContainer } from "./IncidentList.container";
 
 export const incidentListRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/incidents",
-  ...incidentListSearchConfig,
+  ...incidentListRouteOptions,
   component: IncidentListContainer,
 });
 ```
@@ -1164,7 +1170,7 @@ renderHook(() => useIncidentDetailContainer({ incidentId: "i1" }), {
 });
 ```
 
-**The minimal router.** A Component that renders `<Link>` or calls `navigate` needs a router in its stories and tests. One factory in `src/test/{feature}-router.tsx` serves both: the feature's real paths, its real route options spread from the page's URL schema ([§5](#5-state-in-the-url)), a memory history, and the component under test standing in for the page. It deliberately does **not** import the real route files — those pull in Containers, and with them a QueryClient and a server, which is what the Component boundary exists to keep out.
+**The minimal router.** A Component that renders `<Link>` or calls `navigate` needs a router in its stories and tests. One factory in `src/test/{feature}-router.tsx` serves both: the feature's real paths, its real route options spread from the page's URL contract ([§5](#5-state-in-the-url)), a memory history, and the component under test standing in for the page. It deliberately does **not** import the real route files — those pull in Containers, and with them a QueryClient and a server, which is what the Component boundary exists to keep out.
 
 ```tsx
 export function createIncidentRouter({ children, initialUrl = "/incidents" }) {
@@ -1173,7 +1179,7 @@ export function createIncidentRouter({ children, initialUrl = "/incidents" }) {
     createRoute({
       getParentRoute: () => rootRoute,
       path: "/incidents",
-      ...incidentListSearchConfig, // spread, never restated
+      ...incidentListRouteOptions, // spread, never restated
       component: () => children,
     }),
   ]);
@@ -1207,7 +1213,7 @@ export function IncidentRouterHarness(props: Parameters<typeof createIncidentRou
 - ❌ Storying the Container / container hook / component hook / API — non-UI or pure wiring
 - ❌ Calling the container hook from a story or a component test — pass container-state props directly; if a test truly needs data, consume the Queries factory (`useQuery(featureQueries.list())`), never a hand-written key
 - ❌ Rebuilding container hook wiring in a component test harness — hook-scoped behavior (e.g. a search keyword reaching the query key and triggering a server-filtered refetch) is tested on the hook itself via `renderHook` + the MSW worker; duplicating that wiring in a test harness drifts from the real hook
-- ❌ **Restating a route's contract in a harness** — spread the exported search config. A harness missing `stripSearchParams` asserts against URLs the app never produces
+- ❌ **Restating a route's contract in a harness** — spread the exported route options. A harness missing `stripSearchParams` asserts against URLs the app never produces
 
 ### Browser-mode caveats
 
@@ -1274,14 +1280,14 @@ pnpm --filter @tolone/todo generate:api
 
 Commit after each step. Do not batch multiple steps into one commit. Every commit must pass the touched playground's typecheck (`pnpm --filter <pkg> exec tsc --noEmit -p .`) — enforced by the Lefthook pre-commit hook.
 
-**Why routes come early.** `Link`, `useSearch({ from })` and `useParams({ from })` are typed against the registered route tree, so a Component that navigates cannot typecheck before its routes exist — while the routes cannot name a Container that has not been written. The cycle breaks by splitting the route work: **declare the URLs first (path + search config, no `component`), attach the Containers last.** Steps 6 and 14 are the two halves.
+**Why routes come early.** `Link`, `useSearch({ from })` and `useParams({ from })` are typed against the registered route tree, so a Component that navigates cannot typecheck before its routes exist — while the routes cannot name a Container that has not been written. The cycle breaks by splitting the route work: **declare the URLs first (path + spread route options, no `component`), attach the Containers last.** Steps 6 and 14 are the two halves.
 
 1. Define endpoints and schemas in `src/openapi.yaml` → **commit**
 2. Run `pnpm generate:api` to generate types → **commit**
 3. `src/api/{Resource}.api.ts` — import generated types + API function object; rename anything that collides with a DOM global → **commit**
 4. `src/api/{Resource}.queries.ts` — `{Resource}Queries` `queryOptions()` factory (`all` / `list` / `detail`) over the API functions → **commit**
 5. Create `src/features/{feature-name}/{Page}/` directory
-6. **Routes before Components** — when any page keeps state in the URL, write its schema per [§5](#5-state-in-the-url). Then declare every route of the feature: `{Page}.route.ts` with path + spread route options and **no `component`**, registered in `router.ts`'s `addChildren` → **commit**
+6. **Routes before Components** — when any page keeps state in the URL, write its URL contract per [§5](#5-state-in-the-url). Then declare every route of the feature: `{Page}.route.ts` with path + spread route options and **no `component`**, registered in `router.ts`'s `addChildren` → **commit**
 7. `{Page}.container.hook.ts` — `use{Page}Container` hook + `{Page}ContainerState` interface (one dedicated container hook per page; `useQuery(featureQueries.x())` + `useMutation`; pick the mutation side-effect pattern — optimistic vs invalidate-only — per the Container Hook Layer section); when the hook contains logic worth testing in isolation (error mapping, hook-scoped query params), add `{Page}.container.hook.test.tsx` (`renderHook` + the MSW worker, with test-local `worker.use` handlers — see Writing Tests) in the same commit → **commit**
 8. `{Page}.schema.ts` — zod form-validation contract + `z.infer` form-values type, output pinned to the API input via `satisfies` (only when the page validates a form) → **commit**
 9. `{Page}.view-model.ts` — the shapes the Component receives (`{Page}Row`, `{Page}Headline`, …) + one pure function per record that builds them from the contract; constants for option lists that depend on nothing → **commit**

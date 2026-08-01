@@ -71,7 +71,7 @@ src/
 └── features/{feature-name}/
     ├── helpers/{subject}.ts          ← called by >1 page, wired by nothing (1 page → its component hook)
     └── {Page}/                       ← one directory per page/route
-        ├── {Page}.route.ts           ← path + search config + Container (registered in src/router.ts)
+        ├── {Page}.route.ts           ← path + spread route options + Container (registered in src/router.ts)
         ├── {Page}.{concern}.ts       ← the URL's contract when the page keeps state there — see §5
         ├── {Page}.container.tsx      ← wires the container hook to the Component
         ├── {Page}.container.hook.ts  ← server state (one per page)

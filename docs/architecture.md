@@ -108,11 +108,11 @@ src/
 │   ├── query-client.tsx            ← QueryClientProvider wrapper for hook tests
 │   └── {feature}-router.tsx        ← minimal router for stories/tests of navigating Components
 └── features/{feature-name}/
-    ├── {Resource}.{concern}.ts     ← a contract other layers wire — the URL's, see §5
     ├── helpers/                    ← called by more than one page and wired by nothing
     │   └── {subject}.ts            ← what one page calls stays in its component hook
     ├── {Page}/                     ← one directory per page/route
-    │   ├── {Page}.route.ts                 ← the page's URL: path, search config, Container
+    │   ├── {Page}.route.ts                 ← the page's URL: path, spread route options, Container
+    │   ├── {Page}.{concern}.ts             ← the URL's contract when the page keeps state there — named for what it carries, see §5
     │   ├── {Page}.container.tsx
     │   ├── {Page}.container.hook.ts        ← one dedicated container hook per page
     │   ├── {Page}.component.tsx            ← entry + private memo'd body + private Skeleton
@@ -127,9 +127,7 @@ src/
 
 **Feature-root modules.** A page directory is private to its page, so anything two pages of the same feature must agree on cannot live in either. The test is the one that put the cache layer in `src/api/`: **shared by more than one page → out of the page directory** — but only as far as the sharing reaches, and it is measured in call sites that exist rather than ones a later feature might add. A single page's labels and formatting stay at module scope in that page's component hook and get no file of their own; a second page calling them is what moves them up to the feature root. Leaving the feature takes the same evidence one level higher — a second feature that actually calls them — and the slot above is defined when that happens rather than reserved now.
 
-What lands at the feature root divides by whether the rest of the app **wires** it or merely **calls** it.
-
-*Wired* is a contract: route files spread the URL module, and `satisfies` pins it to the API layer's params type, so changing it changes what other layers compile against. It sits directly at the feature root, named for the resource and its concern (`{Resource}.{concern}.ts`). The URL is the case this guide documents in full, because a sibling page is *required* to declare the same parameters (see [§5](#5-state-in-the-url)).
+Whether a module may land there at all divides by whether the rest of the app **wires** it or merely **calls** it. *Wired* is a contract — route options a route file spreads, a schema `satisfies` pins to the API layer's params type — so changing it changes what other layers compile against. A contract lives beside the file that wires it, and every wirer is a page's file, so the contract is that page's too: the form's in `{Page}.schema.ts`, the URL's beside the route that spreads it ([§5](#5-state-in-the-url)). The feature root shares only what is *called*.
 
 *Called* is what a hook simply invokes and nothing wires: the pure functions two pages share, such as turning a contract instant into display text. They go in `features/{feature-name}/helpers/`, one file per subject (`instant.ts`), named for what the file is about since the directory already says it is a helper. It is not scaffolded — it appears the moment a second page calls the same function, and a directory that never exists empty is one nothing gets parked in, which is the only defense a name describing a kind of code rather than a subject has. Pure functions are all it takes. A lookup table is not one, and does not come up here at all: display wording belongs to the page that renders it, in that page's view model, even when a sibling renders the same values.
 
@@ -640,7 +638,7 @@ export function TodoComponent({
 **Rules**:
 - Receive content data/actions it needs as params (define own `{Page}ComponentParams` interface)
 - Params are **guaranteed non-undefined** — the Component handles the `undefined` / loading case before rendering the private memo'd body, which calls the hook
-- That leaves the branches where the hook cannot be called at all — a not-found page still needs the link back to where the reader came from. A derivation that must survive those branches is not hook work: write it as a plain function beside the contract it derives from (a projection of one URL schema onto another lives with the schemas) and call it from wherever it is needed. The rule is about *hooks* being unconditional, not about derivation being hook-only
+- That leaves the branches where the hook cannot be called at all — a not-found page renders too. A derivation that must survive those branches is not hook work: write it as a plain function beside the contract it derives from and call it from wherever it is needed. The rule is about *hooks* being unconditional, not about derivation being hook-only
 - Manage form input values, validation, UI toggles, etc.
 - Derive display values from container data (e.g. merging server-returned options with current selections)
 - **The view model is what the Component receives** — the shapes and actions of `{Page}ComponentState`, the page's own vocabulary rather than the wire's. Turning one contract value into one display value (`open` into `"Open"`, an ISO instant into text) is not the view model; it is what the view model is built out of. Both are UI work and neither belongs to the API contract, whose types are the server's word and stay unwrapped in the cache
@@ -755,22 +753,19 @@ A non-text input is still a controlled field: ReportForm's team checkboxes drive
 
 ## 5. State in the URL
 
-When a page's filter / sort / pagination / tab lives in the URL, that URL has a contract as real as the API's: a zod schema that parses it, the defaults that are omitted from it, and the route options that apply both. `{Page}.schema.ts` is the *form's* contract and does not cover this — a page can need a URL contract and have no form at all.
+When a page's filter / sort / pagination / tab lives in the URL, that URL has a contract as real as the API's: a zod schema that parses it, the defaults that are omitted from it, and the route options that apply both — one module of the page's own, beside the route file that spreads it ([§1](#file-placement)). `{Page}.schema.ts` is the *form's* contract and does not cover this — a page can need a URL contract and have no form at all.
 
-### Where it lives
+### What a page's URL carries
 
-With the page, when only that page's URL carries it. At the feature root — as a `{Resource}.{concern}.ts` module, per [Feature-root modules](#file-placement) — as soon as a second page declares any of the same parameters, which happens more often than it looks: a detail page a reader reaches from a filtered list must declare the list's parameters too. `validateSearch` drops what it does not declare, so an undeclared filter is stripped from the detail URL and the way back is lost. The detail schema then *extends* the list's, and the projection back down lives with them:
+What the page is showing — the path names the record, the search holds the view state the page itself renders — and nothing about how the reader got there. An address is handed around: bookmarked, pasted into a chat, opened by someone who has never seen the screen it was copied from. State describing the reader's journey turns a shared URL into a lie — a detail URL that carried the list's filters would offer everyone who receives it a way "back" to a list only its sender ever saw.
 
-```ts
-export const incidentDetailSearchSchema = incidentListSearchSchema.extend({
-  tab: z.enum(INCIDENT_TABS).default("timeline").catch("timeline"),
-});
+So the way back is not the page's state. A reader who came from a filtered list retraces it with the browser's Back button, which restores that list exactly — more than any link could promise. Two things follow:
 
-/** The detail search minus what only the detail page means. */
-export function toListSearch({ tab: _tab, ...listSearch }: IncidentDetailSearch) {
-  return listSearch;
-}
-```
+**A link out names its destination, not the journey.** The detail page's link to the list carries no `search` and is labeled for where it goes — `All incidents`, not `Back` — because for a reader who arrived by a sent link there is no back to go to. The list's row links shed their `search` by the same reading in reverse: a row is the address of an incident, not a description of the list around it.
+
+**A pane is not a destination.** A tab held in the search navigates with `replace`, so switching tabs stacks nothing on the history and the list stays one Back away, whichever tab is showing. The current tab still belongs in the URL — it is what the page is showing, reload-safe and shareable — it just never becomes a place the reader is sent back to.
+
+Declaring a search parameter is what makes it readable, not what keeps it alive. The router parses the whole query string and spreads `validateSearch`'s output over it, so a parameter no route declares still rides the URL untouched — invisible to the page, because `useSearch({ from })` is typed by the declaration alone. Declare exactly what the page reads: the detail page declares its `tab` and nothing of the list's, and `/incidents/1043?severity=medium` renders the same detail as its unadorned address, for everyone.
 
 ### Export the route options, not just the schema
 

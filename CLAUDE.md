@@ -69,10 +69,10 @@ src/
 │   └── {Resource}.queries.ts        ← queryOptions factory (all / list / detail)
 ├── test/                            ← test-only wiring: setup, MSW worker, QueryClient wrapper, minimal router
 └── features/{feature-name}/
-    ├── {Resource}.{concern}.ts       ← a contract other layers wire — the URL's, see §5
     ├── helpers/{subject}.ts          ← called by >1 page, wired by nothing (1 page → its component hook)
     └── {Page}/                       ← one directory per page/route
         ├── {Page}.route.ts           ← path + search config + Container (registered in src/router.ts)
+        ├── {Page}.{concern}.ts       ← the URL's contract when the page keeps state there — see §5
         ├── {Page}.container.tsx      ← wires the container hook to the Component
         ├── {Page}.container.hook.ts  ← server state (one per page)
         ├── {Page}.component.tsx      ← Component + private memo'd body + private Skeleton

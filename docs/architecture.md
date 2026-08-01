@@ -127,7 +127,7 @@ src/
 
 **Feature-root modules.** A page directory is private to its page, so anything two pages of the same feature must agree on cannot live in either. The test is the one that put the cache layer in `src/api/`: **shared by more than one page → out of the page directory** — but only as far as the sharing reaches, and it is measured in call sites that exist rather than ones a later feature might add. A single page's labels and formatting stay at module scope in that page's component hook and get no file of their own; a second page calling them is what moves them up to the feature root. Leaving the feature takes the same evidence one level higher — a second feature that actually calls them — and the slot above is defined when that happens rather than reserved now.
 
-Whether a module may land there at all divides by whether the rest of the app **wires** it or merely **calls** it. *Wired* is a contract — route options a route file spreads, a schema `satisfies` pins to the API layer's params type — so changing it changes what other layers compile against. A contract lives beside the file that wires it, and every wirer is a page's file, so the contract is that page's too: the form's in `{Page}.schema.ts`, the URL's beside the route that spreads it ([§5](#5-state-in-the-url)). The feature root shares only what is *called*.
+Whether a module may land there at all divides by whether the rest of the app **wires** it or merely **calls** it. *Wired* is a contract — route options a route file spreads, a schema `satisfies` pins to the API layer's params type — so changing it changes what other layers compile against. A contract lives beside the file that wires it, and in the app that file is always a page's, so the contract is that page's too: the form's in `{Page}.schema.ts`, the URL's beside the route that spreads it ([§5](#5-state-in-the-url)). The feature root shares only what is *called*.
 
 *Called* is what a hook simply invokes and nothing wires: the pure functions two pages share, such as turning a contract instant into display text. They go in `features/{feature-name}/helpers/`, one file per subject (`instant.ts`), named for what the file is about since the directory already says it is a helper. It is not scaffolded — it appears the moment a second page calls the same function, and a directory that never exists empty is one nothing gets parked in, which is the only defense a name describing a kind of code rather than a subject has. Pure functions are all it takes. A lookup table is not one, and does not come up here at all: display wording belongs to the page that renders it, in that page's view model, even when a sibling renders the same values.
 
@@ -638,7 +638,7 @@ export function TodoComponent({
 **Rules**:
 - Receive content data/actions it needs as params (define own `{Page}ComponentParams` interface)
 - Params are **guaranteed non-undefined** — the Component handles the `undefined` / loading case before rendering the private memo'd body, which calls the hook
-- That leaves the branches where the hook cannot be called at all — a not-found page renders too. A derivation that must survive those branches is not hook work: write it as a plain function beside the contract it derives from and call it from wherever it is needed. The rule is about *hooks* being unconditional, not about derivation being hook-only
+- That leaves the branches that render without the hook — a not-found page renders too, with no params to call it with. A derivation that must survive those branches is not hook work: write it as a plain function beside the contract it derives from and call it from wherever it is needed. The rule is about *hooks* being unconditional, not about derivation being hook-only
 - Manage form input values, validation, UI toggles, etc.
 - Derive display values from container data (e.g. merging server-returned options with current selections)
 - **The view model is what the Component receives** — the shapes and actions of `{Page}ComponentState`, the page's own vocabulary rather than the wire's. Turning one contract value into one display value (`open` into `"Open"`, an ISO instant into text) is not the view model; it is what the view model is built out of. Both are UI work and neither belongs to the API contract, whose types are the server's word and stay unwrapped in the cache
@@ -755,21 +755,21 @@ A non-text input is still a controlled field: ReportForm's team checkboxes drive
 
 When a page's filter / sort / pagination / tab lives in the URL, that URL has a contract as real as the API's: a zod schema that parses it, the defaults that are omitted from it, and the route options that apply both — one module of the page's own, beside the route file that spreads it ([§1](#file-placement)). `{Page}.schema.ts` is the *form's* contract and does not cover this — a page can need a URL contract and have no form at all.
 
-The router splits the URL's two variable parts, and the split is typed. **`params`** are the path's segments (`/incidents/$incidentId`): the router reads their names out of the path string itself, so every route knows its own statically, and their values are always strings. **`search`** is the query string: it has no shape until the route declares one in `validateSearch`, and its values are JSON, so an array or a number survives the trip as itself. The API layer's `IncidentListParams` is a third thing — the HTTP query contract — sharing nothing but the word; in routing vocabulary, `params` always means the path.
+The router splits the URL's two variable parts, and the split is typed. **`params`** are the path's segments (`/incidents/$incidentId`): the router reads their names out of the path string itself, so every route knows its own statically, and their values arrive as strings. **`search`** is the query string: it has no shape until the route declares one in `validateSearch`, and its values are JSON, so an array or a number survives the trip as itself. The API layer's `IncidentListParams` puts the word to a third use — the HTTP query contract, the thing a list's *search* schema is pinned to — so in routing vocabulary, `params` always means the path.
 
 ### What a page's URL carries
 
-What the page is showing — the path names the record, the search holds the view state the page itself renders — and nothing about how the reader got there. An address is handed around: bookmarked, pasted into a chat, opened by someone who has never seen the screen it was copied from. State describing the reader's journey turns a shared URL into a lie — a detail URL that carried the list's filters would offer everyone who receives it a way "back" to a list only its sender ever saw.
+What the page is showing — the path names its subject, the search holds the view state the page itself renders — and nothing about how the reader got there. An address is handed around: bookmarked, pasted into a chat, opened by someone who has never seen the screen it was copied from. State describing the reader's journey turns a shared URL into a lie — a detail URL that carried the list's filters would offer everyone who receives it a way "back" to a list only its sender ever saw.
 
-So the way back is not the page's state. A reader who came from a filtered list retraces it with the browser's Back button, which restores that list exactly — more than any link could promise. Two things follow:
+So the way back is not the page's state. A reader who came from a filtered list retraces it with the browser's Back button, which restores that list exactly — the history entry itself, not a reconstruction from whatever the URL still carried. Two things follow:
 
 **A link out names its destination, not the journey.** The detail page's link to the list carries no `search` and is labeled for where it goes — `All incidents`, not `Back` — because for a reader who arrived by a sent link there is no back to go to. The list's row links shed their `search` by the same reading in reverse: a row is the address of an incident, not a description of the list around it.
 
 **A pane is not a destination.** A tab held in the search navigates with `replace`, so switching tabs stacks nothing on the history and the list stays one Back away, whichever tab is showing. The current tab still belongs in the URL — it is what the page is showing, reload-safe and shareable — it just never becomes a place the reader is sent back to.
 
-Declaring a search parameter is what makes it readable, not what keeps it alive. The router parses the whole query string and spreads `validateSearch`'s output over it, so a parameter no route declares still rides the URL untouched — invisible to the page, because `useSearch({ from })` is typed by the declaration alone. Declare exactly what the page reads: the detail page declares its `tab` and nothing of the list's, and `/incidents/1043?severity=medium` renders the same detail as its unadorned address, for everyone.
+Declaring a search parameter is what makes it readable, not what keeps it alive. On the way in, the router parses the whole query string and spreads `validateSearch`'s output over it, so a parameter no route declares survives into the match — invisible to the types, since `useSearch({ from })` is typed by the declared schema. On the way out it lives only as long as every link spreads the current search: the first `navigate` handed a fresh object drops it. Neither direction is a channel for another page's state. Declare exactly what the page reads: the detail page declares its `tab` and nothing of the list's, and `/incidents/1043?severity=medium` renders the same detail as its unadorned address, for everyone.
 
-### Export the route options, and nothing else
+### Export the route options, not the schema and defaults
 
 The module exports the **route options** — `validateSearch` and the `search.middlewares` that strip defaults, the slice of `createRoute`'s argument that concerns the query string, pre-filled for the route file and the [story/test router](#test-wiring) to spread — plus the parsed search type the page's props are written against. The schema and the defaults stay private:
 
@@ -788,7 +788,7 @@ export const incidentListRouteOptions = {
 };
 ```
 
-This is not tidiness. A test harness that restates the schema and omits the middleware exercises a URL the app can never produce — `?status=[]&sort=-openedAt&page=1` instead of `/incidents` — and passes while asserting something untrue; exporting the parts is what would make that assembly possible, so nothing but the one object leaves the module. **A harness may choose its paths; it may not restate their contract.**
+This is not tidiness. A test harness that restates the schema and omits the middleware exercises a URL the app can never produce — `?status=[]&sort=-openedAt&page=1` instead of `/incidents` — and passes while asserting something untrue; exporting the parts is what would make that assembly possible. **A harness may choose its paths; it may not restate their contract.**
 
 ### Defaults, and what a malformed URL does
 
@@ -830,7 +830,7 @@ export const INCIDENT_STATUSES = incidentStatusValues;
 ```
 
 ```ts
-// the URL schema — module-private; only the route options leave the file
+// the URL schema — module-private
 const incidentListSearchSchema = z.object({
   status: z.array(z.enum(INCIDENT_STATUSES)).default([]).catch([]),
   // ...
@@ -1182,6 +1182,12 @@ export function createIncidentRouter({ children, initialUrl = "/incidents" }) {
       ...incidentListRouteOptions, // spread, never restated
       component: () => children,
     }),
+    createRoute({
+      getParentRoute: () => rootRoute,
+      path: "/incidents/$incidentId",
+      ...incidentDetailRouteOptions,
+      component: () => children,
+    }),
   ]);
   return createRouter({
     routeTree,
@@ -1280,7 +1286,7 @@ pnpm --filter @tolone/todo generate:api
 
 Commit after each step. Do not batch multiple steps into one commit. Every commit must pass the touched playground's typecheck (`pnpm --filter <pkg> exec tsc --noEmit -p .`) — enforced by the Lefthook pre-commit hook.
 
-**Why routes come early.** `Link`, `useSearch({ from })` and `useParams({ from })` are typed against the registered route tree, so a Component that navigates cannot typecheck before its routes exist — while the routes cannot name a Container that has not been written. The cycle breaks by splitting the route work: **declare the URLs first (path + spread route options, no `component`), attach the Containers last.** Steps 6 and 14 are the two halves.
+**Why routes come early.** `Link`, `useSearch({ from })` and `useParams({ from })` are typed against the registered route tree, so a Component that navigates cannot typecheck before its routes exist — while the routes cannot name a Container that has not been written. The cycle breaks by splitting the route work: **declare the URLs first (path + spread route options, no `component`), attach the Containers last.** Steps 6 and 15 are the two halves.
 
 1. Define endpoints and schemas in `src/openapi.yaml` → **commit**
 2. Run `pnpm generate:api` to generate types → **commit**

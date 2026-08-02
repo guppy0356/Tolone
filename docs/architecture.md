@@ -112,7 +112,7 @@ src/
     │   └── {subject}.ts            ← what one page calls stays in its component hook
     ├── {Page}/                     ← one directory per page/route
     │   ├── {Page}.route.ts                 ← the page's URL: path, spread route options, Container
-    │   ├── {Page}.{concern}.ts             ← the URL's contract when the page keeps state there — named for what it carries, see §5
+    │   ├── {Page}.{concern}.ts             ← the URL's contract when the page keeps state there — see §5
     │   ├── {Page}.container.tsx
     │   ├── {Page}.container.hook.ts        ← one dedicated container hook per page
     │   ├── {Page}.component.tsx            ← entry + private memo'd body + private Skeleton

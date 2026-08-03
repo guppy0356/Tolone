@@ -6,6 +6,8 @@ A pnpm monorepo for experimenting with the Container + Presentational Component 
 
 ```
 .
+├── .claude/
+│   └── skills/               # Repo workflows, loaded on demand
 ├── docs/
 │   └── architecture.md       # Full architecture guide (6 layers)
 ├── packages/
@@ -137,18 +139,14 @@ and implement following docs/architecture.md.
 ### Update packages
 
 ```
-Check for outdated packages with `pnpm outdated -r`.
-
-First, present a full impact assessment of all outdated packages
-(patch/minor and major) and the proposed update order with reasons.
-Wait for confirmation before starting any updates.
-
-Then proceed in the confirmed order, one package at a time:
-- Research release notes and assess impact on this codebase
-- Update, verify with `pnpm test` and `pnpm -r build`, then commit
-- Exception: packages that must be updated together (e.g. vite +
-  vitest + @vitejs/plugin-react) are treated as a single unit
+Update the outdated packages.
 ```
+
+This picks up the `update-dependencies` skill, which owns the procedure: collect
+with `pnpm outdated -r`, read the release notes for every direct and transitive
+bump, present an impact assessment and wait for confirmation, then execute one
+candidate at a time, verifying with `pnpm test` and `pnpm -r build` before each
+commit. See [.claude/skills/update-dependencies/SKILL.md](.claude/skills/update-dependencies/SKILL.md).
 
 
 ## Tech Stack

@@ -1,22 +1,53 @@
 # Tolone
 
-A pnpm monorepo for experimenting with the Container + Presentational Component pattern in React.
+A pnpm monorepo for working out one React architecture — Container + Presentational
+Component — by building against it.
 
-## Project Structure
+**The deliverable is [docs/architecture.md](./docs/architecture.md), not the apps.**
+Each playground under `playgrounds/` is a small application built to put the guide
+under pressure: a list whose filters live in the URL, a form that navigates away on
+save, a page reading two resources at once. Where a build hesitates, the guide was
+unclear — so the guide is revised, and sometimes a rule is retracted. A decision a
+reader would want to challenge gets an [ADR](./docs/adr/) carrying the options
+considered and the conditions for revisiting it.
+
+Two things follow:
+
+- **Every playground lags the guide, including the newest one.** Each is a snapshot
+  of what the guide said when it was built. Develop from the guide; never copy a
+  playground.
+- **A gap found while building belongs in the guide** — written once, as a
+  principle — not in a comment, a second example, or a warning.
+
+## Architecture
+
+```
+API → Queries → Container (+ container.hook) → Component (+ component.hook)
+```
+
+Two shared cache-layer files per resource live in a top-level `src/api/`, imported
+through the `@api` alias. Everything else is page-owned: one directory per route
+under `src/features/{feature-name}/{Page}/`, holding that page's route, container,
+component and their hooks.
+
+The Container holds no state. It exists to call the container hook from *outside*
+the Component, which keeps the Component renderable from props alone — and therefore
+catalogable in Storybook and testable without a QueryClient or a server.
+
+The layer table, the wiring rules and the conventions are in
+[docs/architecture.md](./docs/architecture.md).
+
+## Layout
 
 ```
 .
-├── .claude/
-│   └── skills/               # Repo workflows, loaded on demand
+├── .claude/skills/           # Repo workflows, loaded on demand
 ├── docs/
-│   └── architecture.md       # Full architecture guide (6 layers)
-├── packages/
-│   └── tailwind/             # Shared TailwindCSS package
-├── playgrounds/
-│   ├── todo/                 # One app per experiment
-│   └── …                     # (blog, team-cost-report, travel-expense, …)
-└── scripts/
-    └── new-playground.mjs    # Playground scaffold script
+│   ├── architecture.md       # The guide — single source of truth
+│   └── adr/                  # Why a rule is what it is, and when to revisit it
+├── packages/tailwind/        # Shared TailwindCSS base styles
+├── playgrounds/              # One app per experiment (todo, blog, incident-board, …)
+└── scripts/new-playground.mjs
 ```
 
 ## Setup
@@ -32,94 +63,24 @@ command downloads the Chromium binary to `~/Library/Caches/ms-playwright/`
 (or the OS-specific cache), which is used by the browser-mode test run.
 Run it once per machine; the cache is shared by all playgrounds.
 
-## Creating a Playground
+## Commands
 
 ```bash
-pnpm new:playground <name>
+pnpm --filter @tolone/<name> dev         # dev server → http://localhost:5173
+pnpm --filter @tolone/<name> storybook   # story catalog → http://localhost:6006
+pnpm --filter @tolone/<name> test        # one playground
+pnpm test                                # every playground
+pnpm new:playground <name>               # scaffold a new one
 ```
 
-This generates the following structure:
+Stories are a visual catalog — every state through `args`, no `play`. Behavior lives
+in `*.test.{ts,tsx}`, run by Vitest in browser mode (Playwright Chromium, no jsdom).
+`pnpm test` runs both.
 
-```
-playgrounds/<name>/
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-├── vitest.config.ts                  # Browser-mode Vitest via @storybook/addon-vitest
-├── index.html
-├── .storybook/
-│   ├── main.ts                       # Storybook config + addon-vitest
-│   └── preview.ts                    # Tailwind import
-└── src/
-    ├── main.tsx                      # MSW initialization + React render
-    ├── app.css                       # Tailwind import
-    ├── vite-env.d.ts
-    ├── lib/
-    │   └── api-client.ts             # ky instance
-    ├── features/
-    │   └── welcome/
-    │       └── Welcome.stories.tsx   # Starter story; delete once you have a real feature
-    └── mocks/
-        ├── handlers.ts               # MSW handlers
-        └── browser.ts                # MSW worker
-```
-
-## Dev Server
-
-```bash
-# Start a specific playground
-pnpm --filter @tolone/<name> dev
-
-# Example: todo
-pnpm --filter @tolone/todo dev
-```
-
-Open `http://localhost:5173` in your browser.
-
-## Storybook
-
-```bash
-pnpm --filter @tolone/<name> storybook
-```
-
-Open `http://localhost:6006`. Each playground has its own `.storybook/`
-configuration and stories live next to their page as `{Page}.component.stories.tsx`.
-Stories are a visual catalog — states through `args`, no `play`. Behavior lives
-in `*.test.{ts,tsx}`, run by Vitest in browser mode.
-
-## Running Tests
-
-```bash
-# Single playground
-pnpm --filter @tolone/<name> test
-
-# All playgrounds
-pnpm test
-```
-
-## Architecture
-
-Container + Presentational Component architecture. See [docs/architecture.md](./docs/architecture.md)
-for full details — it is the single source of truth. Every playground is an
-implementation snapshot and drifts from it over time, including the newest one,
-so develop from the guide rather than from another playground's source.
-
-```
-API → Queries → Container (+ container.hook) → Component (+ component.hook)
-```
-
-| Layer | File | Responsibility |
-|---|---|---|
-| API | `src/api/{Resource}.api.ts` | HTTP calls + type definitions |
-| Queries | `src/api/{Resource}.queries.ts` | Query definitions (`queryOptions()` factory) |
-| Container | `{Page}.container.tsx` | Wires the container hook to the Component |
-| Container hook | `{Page}.container.hook.ts` | Server state (TanStack Query); one per page |
-| Component | `{Page}.component.tsx` | Presentational rendering + loading UI |
-| Component hook | `{Page}.component.hook.ts` | Local UI state + view-model transforms |
-
-The shared cache layer (API + Queries) lives in a top-level `src/api/`, imported
-via the `@api` alias. Each page gets its own directory under
-`src/features/{feature-name}/{Page}/`.
+`new:playground` writes the Vite app, one Storybook project and a starter story.
+What it deliberately leaves for you — the `@api` alias, the `unit` Vitest project,
+`zod`, `react-hook-form` — is listed under
+[Playground setup](./docs/architecture.md#playground-setup).
 
 ## Sample Prompts for Claude
 
@@ -147,7 +108,6 @@ with `pnpm outdated -r`, read the release notes for every direct and transitive
 bump, present an impact assessment and wait for confirmation, then execute one
 candidate at a time, verifying with `pnpm test` and `pnpm -r build` before each
 commit. See [.claude/skills/update-dependencies/SKILL.md](.claude/skills/update-dependencies/SKILL.md).
-
 
 ## Tech Stack
 

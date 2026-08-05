@@ -55,7 +55,10 @@ Once a feature is working end-to-end, if a single Component contains multiple di
 
 Every bump — patch, minor, or major — follows the `update-dependencies` skill exactly, even trivial patches.
 
-## Reference Docs
+## Workspace Layout
 
+- `playgrounds/` — feature playgrounds (each is a Vite React app)
+- `packages/tailwind/` — shared TailwindCSS base styles
+- `scripts/` — scaffold generators
 - `docs/architecture.md` — full architecture specification (authoritative reference)
 - `docs/adr/` — architecture decision records (why a convention is what it is; revisit triggers)

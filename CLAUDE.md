@@ -1,34 +1,5 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Commands
-
-```bash
-# Dev server (all playgrounds)
-pnpm dev
-
-# Single playground dev
-pnpm --filter @tolone/todo dev
-
-# Tests (all)
-pnpm test
-
-# Single playground tests
-pnpm --filter @tolone/todo test
-
-# Storybook dev server (single playground)
-pnpm --filter @tolone/todo storybook
-
-# Scaffold a new playground
-pnpm new:playground <name>
-
-# Generate OpenAPI types (after editing openapi.yaml)
-pnpm --filter @tolone/todo generate:api
-```
-
-No linter is configured. Tests run in browser mode (Playwright Chromium): Storybook stories are a visual catalog (no `play`), and behavior lives in `*.test.{ts,tsx}` run by Vitest via `vitest-browser-react`. No jsdom.
-
 ## Architecture
 
 This is a pnpm monorepo for experimenting with a **Container + Presentational Component** architecture. Each playground in `playgrounds/` implements features using this architecture. The full specification lives in [docs/architecture.md](docs/architecture.md) — always read it before implementing features.
@@ -45,47 +16,13 @@ Keep this a plain link.
 -->
 
 
-### Layers: API → Queries → Container (+ container.hook) → Component (+ component.hook)
-
-| Layer | File | Form | Responsibility |
-|---|---|---|---|
-| API | `src/api/{Resource}.api.ts` | Plain object of functions | HTTP calls via `ky` + type definitions. No query keys |
-| Queries | `src/api/{Resource}.queries.ts` | Plain object of factory functions | Query definitions via `queryOptions()` — key + queryFn + shared options, hierarchical (`all` / `list` / `detail`) |
-| Container | `{Page}.container.tsx` | React component | Wires the container hook to the Component. Calls the container hook + app-shell read hooks (e.g. `useParams`); destructures only fields the Component uses |
-| Container hook | `{Page}.container.hook.ts` | React hook | Server state: `useQuery(featureQueries.x())` + `useMutation`; may hold hook-scoped `useState` for query params. One dedicated container hook per page. Returns `{Page}ContainerState` |
-| Component | `{Page}.component.tsx` | React component (Presentational) | Renders UI; handles loading UI (`isPending` skeleton / `isRefetching` opacity); calls the component hook; calls app-shell action hooks (e.g. `useNavigate`) bound to user interactions |
-| Component hook | `{Page}.component.hook.ts` | React hook | Local UI state + derived display values; called inside Component; receives container-hook actions as params (does not call the container hook directly). Returns `{Page}ComponentState` |
-
 ### Wiring rules & conventions
 
 The detailed wiring rules (Container/Component/hook responsibilities, routing-hook placement, Pick-over-spread) and conventions (1 page = 1 container hook, Queries-layer keys, loading-flag naming, optimistic-update policy, sub-component naming/placement/memo, no View suffix) are **not duplicated here** — they live in [docs/architecture.md](docs/architecture.md), the single source of truth. Read it before implementing a feature.
 
-### Feature file structure
-
-```
-src/
-├── api/                             ← shared cache layer (all resources), imported via @api
-│   ├── {Resource}.api.ts
-│   └── {Resource}.queries.ts        ← queryOptions factory (all / list / detail)
-├── test/                            ← test-only wiring: setup, MSW worker, QueryClient wrapper, minimal router
-└── features/{feature-name}/
-    ├── helpers/{subject}.ts          ← called by >1 page, wired by nothing (1 page → its component hook)
-    └── {Page}/                       ← one directory per page/route
-        ├── {Page}.route.ts           ← path + spread route options + Container (registered in src/router.ts)
-        ├── {Page}.{concern}.ts       ← the URL's contract when the page keeps state there — see §5
-        ├── {Page}.container.tsx      ← wires the container hook to the Component
-        ├── {Page}.container.hook.ts  ← server state (one per page)
-        ├── {Page}.component.tsx      ← Component + private memo'd body + private Skeleton
-        ├── {Page}.component.hook.ts  ← local UI state, memoization, handlers
-        ├── {Page}.view-model.ts      ← the shapes the Component receives, and how they are built
-        ├── {Page}.schema.ts          ← zod validation contract (form pages only)
-        ├── {Page}.component.stories.tsx
-        └── components/               ← extracted sub-components (concern-named)
-```
-
 ### Testing approach
 
-Storybook stories (`{Page}.component.stories.tsx`) are a **visual catalog** — states via `args`, **no `play`**. **Behavior** lives in `*.test.{ts,tsx}`, run by Vitest in browser mode via `vitest-browser-react`. Entry `{Page}.component.tsx` gets a catalog story + a `.test.tsx`; `components/` sub-components get a `.test.tsx` only. `pnpm test` runs both. See [docs/architecture.md](./docs/architecture.md#8-writing-tests) for the full convention (state menu, placement, anti-patterns, and the Vitest/MSW/router wiring).
+No linter is configured. Tests run in browser mode (Playwright Chromium) — no jsdom. Storybook stories are a **visual catalog** — states via `args`, **no `play`** — and behavior lives in `*.test.{ts,tsx}`. See [docs/architecture.md](./docs/architecture.md#8-writing-tests) for the full convention.
 
 ## Commit Strategy
 
@@ -116,16 +53,9 @@ Once a feature is working end-to-end, if a single Component contains multiple di
 
 ## Updating Dependencies
 
-Every bump — patch, minor, or major — is investigated against its release notes before execution, one candidate at a time, with the impact assessment presented for confirmation before anything is installed. The full procedure is the `update-dependencies` skill. It is deliberately strict so the decisions are reproducible: today they are made by hand, but the same rules will later drive an automated bot (PR creation, auto-merge for safe bumps, human discussion for impactful ones). Follow it exactly even for trivial patches.
+Every bump — patch, minor, or major — follows the `update-dependencies` skill exactly, even trivial patches.
 
-## Tech Stack
+## Reference Docs
 
-React 19, TanStack Query 5, TanStack Router 1, Vite 8, Vitest 4, Storybook 10 (+ `@storybook/addon-vitest`), Playwright 1, TailwindCSS 4, MSW 2, openapi-msw 2, openapi-typescript 7, ky 2, zod 4, react-hook-form 7 (+ `@hookform/resolvers`), TypeScript 6, vite-plugin-checker
-
-## Workspace Layout
-
-- `playgrounds/` — feature playgrounds (each is a Vite React app)
-- `packages/tailwind/` — shared TailwindCSS base styles
-- `scripts/` — scaffold generators
 - `docs/architecture.md` — full architecture specification (authoritative reference)
 - `docs/adr/` — architecture decision records (why a convention is what it is; revisit triggers)

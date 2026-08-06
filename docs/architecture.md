@@ -112,7 +112,7 @@ src/
     │   └── {subject}.ts            ← what one page calls stays in its component hook
     ├── {Page}/                     ← one directory per page/route
     │   ├── {Page}.route.ts                 ← the page's URL: path, spread route options, Container
-    │   ├── {Page}.{concern}.ts             ← the URL's contract when the page keeps state there — see §5
+    │   ├── {Page}.search.ts                ← the URL's contract when the page keeps state there — see §5
     │   ├── {Page}.container.tsx
     │   ├── {Page}.container.hook.ts        ← one dedicated container hook per page
     │   ├── {Page}.component.tsx            ← entry + private memo'd body + private Skeleton
@@ -753,7 +753,7 @@ A non-text input is still a controlled field: ReportForm's team checkboxes drive
 
 ## 5. State in the URL
 
-When a page's filter / sort / pagination / tab lives in the URL, that URL has a contract as real as the API's: a zod schema that parses it, the defaults that are omitted from it, and the route options that apply both — one module of the page's own, beside the route file that spreads it ([§1](#file-placement)). `{Page}.schema.ts` is the *form's* contract and does not cover this — a page can need a URL contract and have no form at all.
+When a page's filter / sort / pagination / tab lives in the URL, that URL has a contract as real as the API's: a zod schema that parses it, the defaults that are omitted from it, and the route options that apply both — one module of the page's own, **`{Page}.search.ts`**, beside the route file that spreads it ([§1](#file-placement)). `{Page}.schema.ts` is the *form's* contract and does not cover this — a page can need a URL contract and have no form at all.
 
 The router splits the URL's two variable parts, and the split is typed. **`params`** are the path's segments (`/incidents/$incidentId`): the router reads their names out of the path string itself, so every route knows its own statically, and their values arrive as strings. **`search`** is the query string: it has no shape until the route declares one in `validateSearch`, and its values are JSON, so an array or a number survives the trip as itself. The API layer's `IncidentListParams` puts the word to a third use — the HTTP query contract, the thing a list's *search* schema is pinned to — so in routing vocabulary, `params` always means the path.
 

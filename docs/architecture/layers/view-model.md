@@ -48,7 +48,8 @@ the Component gets. That is why it is worth a test of its own
 ## Wording is the page's, and two pages repeat it
 
 A list and a detail rendering the same status each keep their own
-`Record<IncidentStatus, string>`, rather than reading one table from the feature root.
+`Record<IncidentStatus, string>`, rather than reading one table from the feature root
+([ADR 0003](../../adr/0003-per-page-display-wording.md)).
 
 The repetition is real and accepted. It buys a page whose display decisions are entirely
 its own, and it costs the guarantee that the two agree — nothing catches it if one starts

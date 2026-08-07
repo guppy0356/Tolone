@@ -91,7 +91,8 @@ only defense a name describing a *kind* of code rather than a subject has.
 
 Pure functions are all it takes, and a lookup table is not one. It does not come up here
 at all: display wording belongs to the page that renders it, in that page's
-[view model](../layers/view-model.md), even when a sibling renders the same values.
+[view model](../layers/view-model.md), even when a sibling renders the same values
+([ADR 0003](../../adr/0003-per-page-display-wording.md)).
 
 App-shell chrome — navigation, the page layout, route redirects — lives outside the page
 directories entirely ([Routing](../routing.md)).

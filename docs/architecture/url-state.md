@@ -188,8 +188,9 @@ So the defaults object is declared **first**, and the schema reads from it.
 
 That order settles how it is typed. The defaults feed the schema, so the schema's
 inferred type is not available to type them: `satisfies Partial<IncidentListSearch>` is a
-circular reference and the compiler says so. Each property carries its own assertion
-instead.
+circular reference and the compiler says so. The properties whose literal types widen —
+an array, an enum member — carry their own assertion instead. `page: 1` already infers as
+`number` and needs none.
 
 **`as const` is the spelling that looks right and is not.** It makes an array default
 `readonly`, and `stripSearchParams` takes the mutable search shape. A bare literal fails

@@ -12,8 +12,8 @@ called from that page's [Container](./container.md) and nowhere else.
 
 | Question | Criterion | Detail |
 |---|---|---|
-| Does this hook hold more than one query? | Two or more → loading flags carry the resource name (`isReportsPending`). One → plain (`isPending`) | [Loading state](../conventions/loading-state.md) |
-| Is a query gated by `enabled`? | Gated → the Skeleton condition is `isLoading`, not `isPending`. A disabled query stays `status: "pending"` forever | [Loading state](../conventions/loading-state.md) |
+| Does this hook hold more than one query? | Two or more → resource-named flags. One → plain | [Loading state](../conventions/loading-state.md) |
+| Is a query gated by `enabled`? | Gated → the Skeleton condition is `isLoading`, not `isPending` | [Loading state](../conventions/loading-state.md) |
 | Does the user observe the mutated cache? | Stays on screen → optimistic update. Page navigates away on success → invalidate only | ↓ Mutation side effects |
 | Which caches does this write make wrong? | Per operation, scoped through the key hierarchy | ↓ After-mutation invalidation |
 | Does the list render the field that changed? | It does not → skip the list invalidation | ↓ After-mutation invalidation |

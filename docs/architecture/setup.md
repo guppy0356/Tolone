@@ -34,8 +34,7 @@ import ky from "ky";
 export const api = ky.create({ prefix: "/api" });
 ```
 
-How the [API layer](./layers/api.md) calls it is that layer's business; nothing else in
-the app touches it.
+How the [API layer](./layers/api.md) calls it is that layer's business.
 
 ## Contract and type generation
 

@@ -69,7 +69,12 @@ record has no way to say:
 
 ```ts
 // Todo.api.ts — the parameterized list that Todo.queries.ts's list(params) consumes
-export type TodoListParams = components["schemas"]["TodoListParams"];
+import type { paths } from "../types/openapi";
+
+// A query-parameter type is generated onto the path, not into components.schemas.
+export type TodoListParams = NonNullable<
+  paths["/api/todos"]["get"]["parameters"]["query"]
+>;
 
 const toQuery = ({ status, page }: TodoListParams) => {
   const query = new URLSearchParams();

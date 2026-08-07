@@ -16,7 +16,7 @@ from props alone.
 |---|---|---|
 | Does the hook need something from the address bar? | A path segment → `useParams({ from })`. URL state → `useSearch({ from })`. Neither → the Container calls only the hook | ↓ Examples |
 | Does the URL's vocabulary have to become the hook's? | Translate here when a *reader* would not notice it (`withComments: search.tab === "comments"`). Anything a reader would notice — formatting, ordering, labels — is the [component hook](./component-hook.md)'s | ↓ Translating is wiring |
-| Does the Component also need the URL state? | It renders the current controls and writes them back → pass it as its own prop. Read once, injected twice, never round-tripped through the hook's return | [URL state](../url-state.md) |
+| Does the Component also need the URL state? | It renders the current controls and writes them back → pass it as its own prop | [URL state](../url-state.md) |
 
 ### Translating is wiring
 

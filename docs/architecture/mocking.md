@@ -13,8 +13,7 @@ through `openapi-msw`. Two different consumers use that one technique, and they 
 
 | Question | Criterion | Detail |
 |---|---|---|
-| Which instance does this handler belong to? | Something you want to see in the browser during development → the dev seed. Something a test needs → that test file's `worker.use()` | ↓ Why two instances |
-| A test needs a response | Register it in the test file. Never reach for the dev seed handlers | ↓ Why two instances |
+| Which instance does this handler belong to? | Something you want to see in the browser during development → the dev seed. Something a test needs → that test file's `worker.use()`, never the dev seed | ↓ Why two instances |
 
 ## Typed handlers
 

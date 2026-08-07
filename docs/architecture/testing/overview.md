@@ -49,8 +49,9 @@ stories as render smoke tests, and the `*.test.{ts,tsx}` files.
   (e.g. a search keyword reaching the query key and triggering a server-filtered refetch)
   is tested on the hook itself via `renderHook` + the MSW worker; duplicating that wiring
   in a test harness drifts from the real hook
-- ❌ **Restating a route's contract in a harness** — spread the exported route options. A
-  harness missing `stripSearchParams` asserts against URLs the app never produces
+- ❌ **Restating a route's contract in a harness** — spread the
+  [exported route options](../url-state.md#export-the-route-options-not-the-schema-and-defaults).
+  A harness missing `stripSearchParams` asserts against URLs the app never produces
 
 ## Browser-mode caveats
 

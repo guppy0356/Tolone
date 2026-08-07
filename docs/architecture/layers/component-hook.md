@@ -4,10 +4,10 @@
 
 ## Responsibility
 
-Local UI state, memoization and handlers for one page. Called **inside** the
-[Component](./component.md), never from outside. It receives container-hook actions as
-params, keeps `useState` / `useMemo` / `useCallback`, and assembles the page's view model
-by calling the pure functions in [`{Page}.view-model.ts`](./view-model.md).
+Local UI state, memoization and handlers for one page, called from inside the
+[Component](./component.md). It keeps `useState` / `useMemo` / `useCallback` and
+assembles the page's view model by calling the pure functions in
+[`{Page}.view-model.ts`](./view-model.md).
 
 ## Decisions
 

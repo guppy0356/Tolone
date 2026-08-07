@@ -20,7 +20,7 @@ There is no separate "View" layer and no `{Page}View` symbol
 |---|---|---|
 | Where is the component hook called? | Whichever component renders its output | ↓ Where the component hook is called |
 | Does a loading flag have to reach the body? | Only if a page-wide refetch cannot toggle it. A flag that flips on every background refetch would break `memo` continuously | ↓ Why memo works |
-| List page or not? | List → li-granular Skeleton, with the frame (heading, filters, add form) left rendered. Otherwise → page-level placeholder when the layout depends on data | Rules ↓ |
+| List page or not? | List → li-granular Skeleton. Otherwise → page-level placeholder | Rules ↓ |
 | Keep this piece private or extract it? | Small, no own state, no own props contract → private. Distinct concern with its own props and behavior → `components/{Sub}.component.tsx`. In doubt, keep it private | ↓ Sub-components |
 | Does this sub-component get `memo`? | It receives reference-stable props → yes | ↓ Why memo on the private body works |
 
@@ -45,9 +45,8 @@ Component never receives component-hook output as a prop.
 - Accepts the container-state fields it renders as individual props, typed per
   [Component props](../conventions/type-patterns.md)
 - Handles `isPending` → renders the private Skeleton
-- Handles `isRefetching` → wraps the rendered content in an opacity overlay.
-  `isRefetching` excludes the initial load, so the Skeleton is never dimmed; the overlay
-  only dims content already on screen ([Loading state](../conventions/loading-state.md))
+- Handles `isRefetching` → wraps the rendered content in an opacity overlay
+  ([Loading state](../conventions/loading-state.md))
 - Calls app-shell action hooks (e.g. `useNavigate()`) and wraps them as callbacks for the
   component hook. Routing is what this boundary lets through; a server is not
 - Not wrapped with `memo` — it receives `isFetching`, which changes frequently

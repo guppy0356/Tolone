@@ -9,13 +9,10 @@ enforced by the Lefthook pre-commit hook.
 
 ## Why routes come early
 
-`Link`, `useSearch({ from })` and `useParams({ from })` are typed against the registered
-route tree, so a Component that navigates cannot typecheck before its routes exist — while
-the routes cannot name a Container that has not been written.
-
-The cycle breaks by splitting the route work: **declare the URLs first** (path + spread
-route options, no `component:`), **attach the Containers last**. Steps 6 and 15 are the
-two halves ([Routing](./routing.md)).
+Steps 6 and 15 are two halves of one job: **declare the URLs first** (path + spread route
+options, no `component:`), **attach the Containers last**. The type cycle that forces the
+split is
+[The route tree types the Component](./routing.md#the-route-tree-types-the-component).
 
 ## The steps
 

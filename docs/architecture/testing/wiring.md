@@ -116,7 +116,7 @@ export function IncidentRouterHarness(props: Parameters<typeof createIncidentRou
 }
 ```
 
-**Why the options are spread and not restated.** A harness that rebuilds the schema and
-omits the strip middleware exercises a URL the app can never produce —
-`?status=[]&sort=-openedAt&page=1` instead of `/incidents` — and passes while asserting
-something untrue.
+The options are spread and never restated. A harness that rebuilds them exercises URLs
+the app cannot produce, and passes while asserting something untrue — which is what the
+[exported route options](../url-state.md#export-the-route-options-not-the-schema-and-defaults)
+exist to prevent.

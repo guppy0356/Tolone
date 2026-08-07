@@ -115,9 +115,8 @@ to the compiler and nothing at all by the time the page loads.
 
 Generate the members too, rather than typing them out a second time.
 `openapi-typescript --enum-values` writes an array per enum from the same `openapi.yaml`,
-into a `.ts` file — a `.d.ts` would declare the arrays and produce none of them, so every
-call site would compile and the page would find nothing there
-([Setup](./setup.md)).
+into a `.ts` file — and it has to be a `.ts`, for the reason in
+[Setup](./setup.md#contract-and-type-generation).
 
 ```ts
 // src/types/openapi.ts — generated

@@ -40,7 +40,6 @@ same factory definition, the call sites cannot drift.
 
 ## Rules
 
-- One dedicated container hook per page, not shared across pages
 - Consume the Queries layer — `useQuery(featureQueries.list())`. Consumer-specific
   options (`enabled`, and anything `useSuspenseQuery` omits) go at this call site
 - Mutations use `useMutation` + `useQueryClient`; read the cache key from the same

@@ -22,8 +22,7 @@ There is no separate "View" layer and no `{Page}View` symbol
 | Does a loading flag have to reach the body? | Only if a page-wide refetch cannot toggle it. A flag that flips on every background refetch would break `memo` continuously | ↓ Why memo works |
 | List page or not? | List → li-granular Skeleton, with the frame (heading, filters, add form) left rendered. Otherwise → page-level placeholder when the layout depends on data | Rules ↓ |
 | Keep this piece private or extract it? | Small, no own state, no own props contract → private. Distinct concern with its own props and behavior → `components/{Sub}.component.tsx`. In doubt, keep it private | ↓ Sub-components |
-| Does this sub-component get `memo`? | It receives reference-stable props → yes. The exported Component never does — it receives `isFetching` | ↓ Sub-components |
-| Does this sub-component get a story? | It can be storied meaningfully alone → yes. One needing a sized container (a chart) is verified through its parent's story | [Storybook](../testing/storybook.md) |
+| Does this sub-component get `memo`? | It receives reference-stable props → yes | ↓ Why memo on the private body works |
 
 ### Where the component hook is called
 
@@ -107,6 +106,10 @@ requires user approval. Extract as you write; propose, don't perform, a later sp
 for DOM behavior like click-outside, as in `TeamMemberPicker` — without routing them
 through a component hook. App-relevant state, such as whether the picker is open, still
 lives in the component hook.
+
+**Coverage.** An extracted sub-component gets a behavior test and no catalog story; one
+that cannot be rendered meaningfully alone is seen through its parent's story
+([What gets what](../testing/overview.md#what-gets-what)).
 
 ## Example
 

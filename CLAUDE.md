@@ -24,6 +24,19 @@ The detailed wiring rules (Container/Component/hook responsibilities, routing-ho
 
 No linter is configured. Tests run in browser mode (Playwright Chromium) — no jsdom. Storybook stories are a **visual catalog** — states via `args`, **no `play`** — and behavior lives in `*.test.{ts,tsx}`. See [docs/architecture/testing/overview.md](./docs/architecture/testing/overview.md) for the full convention.
 
+## Changing the Architecture
+
+A discussion that changes a rule produces two artifacts, and the order matters: **the ADR first, then the guide.**
+
+The gate is one question — **can you name an option that was rejected?**
+
+- **Yes → it is a decision.** Write `docs/adr/000N-*.md` before rewriting `docs/architecture/`, then state the new rule in the guide with a one-line link back. Writing the ADR is where a half-made decision falls apart, and finding that out is cheaper before the guide is rewritten than after.
+- **No → it is editing.** Fix the guide and stop. A clarification, a corrected example, a missing link earns no ADR. If the type system or a tool decided it, nobody decided it.
+
+Write it in the conversation that decided it — a week later the alternatives have to be reconstructed, and a reconstruction is not a record. When a change is only discovered to be a decision by attempting it, the rule still holds in its real form: **before the guide is rewritten**, not before the work starts.
+
+An ADR and the guide's link to it land in the same commit, so no dangling pointer ever reaches `main`. Criteria, format and the current records: [docs/adr/README.md](docs/adr/README.md).
+
 ## Commit Strategy
 
 When implementing a new feature, **commit after each step** of the checklist in [docs/architecture/workflow.md](docs/architecture/workflow.md). Do not batch multiple steps into one commit. The sequence is not duplicated here — it lives there, with the file to read at each step.

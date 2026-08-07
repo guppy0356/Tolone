@@ -11,7 +11,8 @@ Two artifacts, two purposes — kept separate:
   assertions, run by Vitest in **browser mode** (Playwright Chromium, the same runner as
   the stories) via `vitest-browser-react`. No jsdom — the browser is required so
   layout-dependent UI (e.g. Recharts) actually renders
-  ([Component tests](./component.md), [Hook tests](./hook.md))
+  ([ADR 0008](../../adr/0008-browser-mode-not-jsdom.md);
+  [Component tests](./component.md), [Hook tests](./hook.md))
 
 Behavior never lives in a story; a catalog never asserts. `pnpm test` runs both — the
 stories as render smoke tests, and the `*.test.{ts,tsx}` files. Why this and not

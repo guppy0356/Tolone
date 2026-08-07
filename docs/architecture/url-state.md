@@ -171,6 +171,24 @@ exercises a URL the app can never produce — `?status=[]&sort=-openedAt&page=1`
 would make that assembly possible. **A harness may choose its paths; it may not restate
 their contract.**
 
+## One source for the defaults
+
+The schema's `.default()` / `.catch()` and the strip middleware have to name the **same**
+values. Written out twice they drift, and the thing the module exists to guarantee — that
+`/incidents` and `/incidents?page=1` are one address — fails silently: stripping removes
+a value that is no longer the default, or leaves one that is.
+
+So the defaults object is declared **first**, and the schema reads from it.
+
+That order settles how it is typed. The defaults feed the schema, so the schema's
+inferred type is not available to type them: `satisfies Partial<IncidentListSearch>` is a
+circular reference and the compiler says so. Each property carries its own assertion
+instead.
+
+**`as const` is the spelling that looks right and is not.** It makes an array default
+`readonly`, and `stripSearchParams` takes the mutable search shape. A bare literal fails
+one property earlier: `sort` widens to `string`, which is not one of the enum's members.
+
 ## The complete module
 
 ```ts
@@ -179,28 +197,44 @@ import { z } from "zod";
 import { stripSearchParams } from "@tanstack/react-router";
 import {
   INCIDENT_SEVERITIES,
+  INCIDENT_SORTS,
   INCIDENT_STATUSES,
   type IncidentListParams,
+  type IncidentSort,
+  type IncidentStatus,
 } from "@api/Incident.api";
 
-// A malformed value degrades to the default: this URL is ordinary user-editable
-// text, where a typo or a stale bookmark should still render a list.
+// Declared first: the schema reads these, and so does the strip middleware.
+// Not `as const` — stripSearchParams takes the mutable search shape.
+const incidentListSearchDefaults = {
+  status: [] as IncidentStatus[],
+  sort: "-openedAt" as IncidentSort,
+  page: 1,
+};
+
+// A malformed value degrades to its default rather than failing the route: this
+// URL is ordinary editable text, where a typo or a stale bookmark should still
+// render a list.
 const incidentListSearchSchema = z.object({
   // Absence is the value — no severity chosen means every severity.
-  severity: z.enum(INCIDENT_SEVERITIES).optional(),
-  status: z.array(z.enum(INCIDENT_STATUSES)).default([]).catch([]),
-  sort: z.enum(["-openedAt", "openedAt"]).default("-openedAt").catch("-openedAt"),
-  page: z.number().int().min(1).default(1).catch(1),
+  severity: z.enum(INCIDENT_SEVERITIES).optional().catch(undefined),
+  status: z
+    .array(z.enum(INCIDENT_STATUSES))
+    .default(incidentListSearchDefaults.status)
+    .catch(incidentListSearchDefaults.status),
+  sort: z
+    .enum(INCIDENT_SORTS)
+    .default(incidentListSearchDefaults.sort)
+    .catch(incidentListSearchDefaults.sort),
+  page: z
+    .number()
+    .int()
+    .min(1)
+    .default(incidentListSearchDefaults.page)
+    .catch(incidentListSearchDefaults.page),
 }) satisfies z.ZodType<IncidentListParams, unknown>;
 
 export type IncidentListSearch = z.infer<typeof incidentListSearchSchema>;
-
-// Private: only the route options leave this module.
-const incidentListSearchDefaults = {
-  status: [],
-  sort: "-openedAt",
-  page: 1,
-};
 
 // Parsing on the way in, stripping defaults on the way out, so that /incidents
 // and /incidents?status=[]&sort=-openedAt&page=1 are one address.

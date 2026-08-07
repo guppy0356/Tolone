@@ -31,6 +31,9 @@ Data needed by two pages is shared at the **cache** level instead: two container
 calling `useQuery` with the same `queryKey` deduplicate through TanStack Query's global
 keyed cache. Sharing is a property of the cache, not of a shared hook.
 
+The shared-hook and per-query alternatives, and what each costs:
+[ADR 0007](../../adr/0007-one-container-hook-per-page.md).
+
 ### Cross-resource data
 
 The cache layer is central (`src/api/`), so reading another resource is never reaching

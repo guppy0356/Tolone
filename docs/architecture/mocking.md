@@ -107,7 +107,8 @@ one of them is completed — and would break the next time someone edits the see
 something in the browser.
 
 So the seed is not a fixture and never becomes one. Tests get an empty worker and own
-every response they assert against.
+every response they assert against. Why this rather than MSW's documented single-handler
+setup: [ADR 0009](../adr/0009-two-msw-worker-instances.md).
 
 The two files are wired separately as a result: `main.tsx` starts the browser worker,
 `src/test/setup.ts` starts the test worker ([Test wiring](./testing/wiring.md)).

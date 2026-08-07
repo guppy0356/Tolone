@@ -87,8 +87,10 @@ optional on the way *in*, and without it every `<Link>` and every
 error.
 
 Not every parameter has one. A filter whose absence *is* the value has nothing to fall
-back to: it is `.optional()`, it arrives as `undefined`, and it is left out of the object
-handed to the strip middleware, since there is no default there to strip. Reserve a
+back to: it is `.optional()`, it arrives as `undefined`, and it is left out of the
+defaults object handed to `stripSearchParams`
+([Export the route options](#export-the-route-options-not-the-schema-and-defaults)),
+since there is no default there to strip. Reserve a
 default for a parameter that always means something, and let the rest be genuinely absent
 rather than inventing a sentinel to stand in for "unset".
 

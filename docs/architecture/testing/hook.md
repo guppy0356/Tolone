@@ -8,7 +8,7 @@ Exercising a hook's logic directly with `renderHook`, without rendering the page
 
 | Question | Criterion | Detail |
 |---|---|---|
-| Does this hook get a test? | There is a decision in it — error mapping, a hook-scoped query param reaching the key, a derivation worth pinning. A hook that only passes `useQuery` through does not | [What gets what](./overview.md#what-gets-what) |
+| Does this hook get a test? | There is a decision in it — error mapping, a [hook-scoped query param](../conventions/state-placement.md) reaching the key, a derivation worth pinning. A hook that only passes `useQuery` through does not | [What gets what](./overview.md#what-gets-what) |
 | Where do the responses come from? | The test file itself, through `worker.use()`, typed against the contract. Never the dev seed handlers | [Mocking](../mocking.md) |
 
 ## Rules

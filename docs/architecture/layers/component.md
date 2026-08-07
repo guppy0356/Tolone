@@ -26,8 +26,9 @@ There is no separate "View" layer and no `{Page}View` symbol
 
 ### Where the component hook is called
 
-- **Body is fully view-model-driven** → derive in the exported Component and pass the
-  view model into a pure memo body (`ReportList` / `TeamList` take `rows`)
+- **Body is fully [view-model](./view-model.md)-driven** → derive in the exported
+  Component and pass the view model into a pure memo body (`ReportList` / `TeamList`
+  take `rows`)
 - **Body also needs raw domain** → pass the domain into the body and call the component
   hook there (`ReportDetail` passes `detail` to its private body, which calls
   `useReportDetailComponent` to derive chart data *and* reads `detail.teams`)

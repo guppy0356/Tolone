@@ -45,7 +45,8 @@ same factory definition, the call sites cannot drift.
 - Mutations use `useMutation` + `useQueryClient`; read the cache key from the same
   factory (`featureQueries.list().queryKey`) so it never drifts
 - **URL values arrive as params**, under the hook's own `{Page}ContainerParams` interface
-  like every other hook input. Its field is the API layer's params type when the page has
+  like every other hook input. Its field is the
+  [API layer's params type](./api.md#where-a-params-type-lives) when the page has
   several — `interface IncidentListContainerParams { params: IncidentListParams }` — so
   Container → hook → Queries → API passes one shape end to end and no layer reshapes it
   in transit. The hook never reads the URL itself
@@ -55,7 +56,8 @@ same factory definition, the call sites cannot drift.
 - Return action functions + data + loading states, and only the flags the page renders
 - `data` may be `undefined` before the first successful fetch — use `data ?? []` or a
   similar default
-- Map HTTP errors to domain flags here, since the API layer does no error handling: read
+- Map HTTP errors to domain flags here, since the [API layer](./api.md) does no error
+  handling: read
   ky's `HTTPError` directly — `error instanceof HTTPError && error.response.status === 404`
   → `isNotFound` — rather than wrapping it in a custom error type. ky is the project-wide
   client, so reading its standard error is the idiomatic approach, not a leak to abstract

@@ -36,10 +36,11 @@ The Component is typed by the container hook's return, because the
 [Container](../layers/container.md) passes that state straight down.
 
 The one legitimate addition comes from the address bar: the container hook never returns
-URL state — it is not that hook's to own — so a page that renders its own filters
-declares the extension itself.
+[URL state](../url-state.md) — it is not that hook's to own — so a page that renders its
+own filters declares the extension itself.
 
 ```ts
+// IncidentListSearch is the parsed search type exported by IncidentList.search.ts
 export interface IncidentListComponentProps extends IncidentListContainerState {
   search: IncidentListSearch;
 }

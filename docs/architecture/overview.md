@@ -33,6 +33,9 @@ What the boundary excludes is **server coupling**, not routing. `navigate` and `
 called in the Component, so pages that navigate pay a minimal router in their stories and
 tests — but never a server.
 
+The alternatives, and what each would cost:
+[ADR 0004](../adr/0004-container-holds-no-state.md).
+
 ## The layers
 
 | Layer | File | Responsibility | Form |

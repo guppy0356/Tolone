@@ -33,7 +33,8 @@ the hook's return.
 
 ## Why reading and changing sit in different layers
 
-Not for one shared reason.
+Not for one shared reason. The two, and the options that were weighed against them:
+[ADR 0006](../../adr/0006-url-read-in-container-written-in-component.md).
 
 **Reading** is lifted to the Container so the container hook never sees the URL. It takes
 parsed values as params, the way a detail hook takes an `id`, and can therefore be tested

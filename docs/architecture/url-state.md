@@ -64,6 +64,10 @@ since `useSearch({ from })` is typed by the declared schema. On the way out it l
 as long as every link spreads the current search: the first `navigate` handed a fresh
 object drops it. Neither direction is a channel for another page's state.
 
+Declare exactly what the page reads: the detail page declares its `tab` and nothing of
+the list's, and `/incidents/1043?severity=medium` renders the same detail as its
+unadorned address, for everyone.
+
 ## Writing the schema
 
 ### Absent, malformed, valid
@@ -121,7 +125,9 @@ export const incidentStatusValues: ReadonlyArray<…> = ["open", "acknowledged",
 ```
 
 The [API layer](./layers/api.md) renames them the way it already renames the types, so
-both halves of the contract enter the app in one file:
+both halves of the contract enter the app in one file — and the schema reads the array
+from there, as does anything else that needs the members, such as a Component rendering
+one checkbox per status:
 
 ```ts
 // src/api/Incident.api.ts

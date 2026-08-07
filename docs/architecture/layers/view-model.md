@@ -4,18 +4,21 @@
 
 ## Responsibility
 
-The shapes the [Component](./component.md) receives, and the pure functions that build
-them from the contract. One page's own vocabulary, written in plain TypeScript with no
-React in it — which is what makes the mapping testable without rendering.
+The view model a page renders from is `{Page}ComponentState`, the interface its
+[component hook](./component-hook.md) returns — the page's own vocabulary rather than the
+wire's. That interface has two kinds of member, and they are built in different places:
+its **actions** are the handlers the hook creates, and its **shapes** are this file's.
 
-The [component hook](./component-hook.md) calls these functions and memoizes the result;
-this file holds no hooks and no state.
+So `{Page}.view-model.ts` holds the shapes the [Component](./component.md) receives and
+the pure functions that build them from the contract, in plain TypeScript with no React
+in it — which is what makes the mapping testable without rendering. The hook calls those
+functions and memoizes the result; this file holds no hooks and no state.
 
 ## Decisions
 
 | Question | Criterion | Detail |
 |---|---|---|
-| Is this the view model, or what it is built from? | The shapes and actions the Component receives are the view model. One contract value turned into one display value (`open` → `"Open"`, an instant → text) is a material it is built out of | ↓ What counts as the view model |
+| Is this the view model, or what it is built from? | The view model is `{Page}ComponentState` — the shapes and actions the [component hook](./component-hook.md) returns. One contract value turned into one display value (`open` → `"Open"`, an instant → text) is a material it is built out of | ↓ What counts as the view model |
 | Constant or memo? | Depends on neither server data nor current state (a sort control's options) → a plain constant here, not a memo with an empty dependency array | ↓ Example |
 | Another page reads the same resource — share the shape? | No. A list's row and a detail's headline are different; each page writes its own, and the names say so: `IncidentListRow`, not `IncidentRow`, so a screen's shape is never mistaken for the contract's `IncidentSummary` beside it in the same import block | — |
 | Two pages render the same status — share the wording? | No. Each keeps its own `Record<IncidentStatus, string>` | ↓ Wording is the page's |
@@ -23,7 +26,8 @@ this file holds no hooks and no state.
 ### What counts as the view model
 
 Both the shapes and the small conversions are UI work, and neither belongs to the API
-contract. The contract carries clean domain data; its types are the server's word and
+contract. Neither is the Component's *props* either — those are the container hook's
+state, passed down by the Container ([Type patterns](../conventions/type-patterns.md)). The contract carries clean domain data; its types are the server's word and
 stay unwrapped in the cache. Shaping them for a particular view — a chart's row format,
 team-name-keyed columns — happens here, never by bending the OpenAPI schema toward a
 screen.
@@ -103,3 +107,6 @@ export function toIncidentListRow(incident: Incident): IncidentListRow {
 
 The component hook then reads `incidents.map(toIncidentListRow)` inside a `useMemo` and
 adds nothing else ([Component hook](./component-hook.md)).
+
+Why the generated array answers only *which* statuses exist, and not the order they are
+offered in, is [URL state](../url-state.md#where-the-enum-members-come-from).

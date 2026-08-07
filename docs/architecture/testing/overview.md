@@ -30,7 +30,7 @@ stories as render smoke tests, and the `*.test.{ts,tsx}` files.
 | | Story (catalog) | `.test.tsx` (behavior) |
 |---|---|---|
 | Page entry `{Page}.component.tsx` | ✅ catalog states | ✅ branch + interaction behavior |
-| Sub-component in `components/` | ❌ implementation detail | ✅ behavior — incl. ones that can't be storied alone (e.g. a chart needing a sized container) |
+| Sub-component in `components/` | ❌ implementation detail — [ADR 0002](../../adr/0002-sub-component-stories.md) | ✅ behavior — incl. ones that can't be storied alone (e.g. a chart needing a sized container) |
 | Container hook / component hook | ❌ | ✅ logic directly (error mapping, derivations, hook-scoped query params) when worth it |
 | Container / API / `{Page}.route.ts` | ❌ | ❌ — pure wiring |
 

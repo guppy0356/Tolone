@@ -14,7 +14,9 @@ Two artifacts, two purposes — kept separate:
   ([Component tests](./component.md), [Hook tests](./hook.md))
 
 Behavior never lives in a story; a catalog never asserts. `pnpm test` runs both — the
-stories as render smoke tests, and the `*.test.{ts,tsx}` files.
+stories as render smoke tests, and the `*.test.{ts,tsx}` files. Why this and not
+Storybook's `play`-based path:
+[ADR 0005](../../adr/0005-stories-are-a-catalog-not-a-test.md).
 
 ## Decisions
 

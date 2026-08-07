@@ -3,7 +3,7 @@
 A pnpm monorepo for working out one React architecture — Container + Presentational
 Component — by building against it.
 
-**The deliverable is [docs/architecture.md](./docs/architecture.md), not the apps.**
+**The deliverable is [docs/architecture/](./docs/architecture/overview.md), not the apps.**
 Each playground under `playgrounds/` is a small application built to put the guide
 under pressure: a list whose filters live in the URL, a form that navigates away on
 save, a page reading two resources at once. Where a build hesitates, the guide was
@@ -35,7 +35,7 @@ the Component, which keeps the Component renderable from props alone — and the
 catalogable in Storybook and testable without a QueryClient or a server.
 
 The layer table, the wiring rules and the conventions are in
-[docs/architecture.md](./docs/architecture.md).
+[docs/architecture/](./docs/architecture/overview.md).
 
 ## Layout
 
@@ -43,7 +43,7 @@ The layer table, the wiring rules and the conventions are in
 .
 ├── .claude/skills/           # Repo workflows, loaded on demand
 ├── docs/
-│   ├── architecture.md       # The guide — single source of truth
+│   ├── architecture/         # The guide — single source of truth (start at overview.md)
 │   └── adr/                  # Why a rule is what it is, and when to revisit it
 ├── packages/tailwind/        # Shared TailwindCSS base styles
 ├── playgrounds/              # One app per experiment (todo, blog, incident-board, …)
@@ -80,7 +80,7 @@ in `*.test.{ts,tsx}`, run by Vitest in browser mode (Playwright Chromium, no jsd
 `new:playground` writes the Vite app, one Storybook project and a starter story.
 What it deliberately leaves for you — the `@api` alias, the `unit` Vitest project,
 `zod`, `react-hook-form` — is listed under
-[Playground setup](./docs/architecture.md#playground-setup).
+[Setup](./docs/architecture/setup.md#what-the-scaffold-leaves-for-you).
 
 ## Sample Prompts for Claude
 
@@ -94,7 +94,7 @@ Features:
 - Filter by tags
 
 Scaffold with `pnpm new:playground bookmark`, then define openapi.yaml
-and implement following docs/architecture.md.
+and implement following docs/architecture/workflow.md.
 ```
 
 ### Update packages

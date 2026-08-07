@@ -89,8 +89,9 @@ Rejected: runtime collection destroys the static route-tree type, degrading `Lin
 ## Decision
 
 Adopt **B**, with the module split `root.route.tsx` / `{Page}.route.ts` / `router.ts`
-/ `main.tsx` and the `Register` declaration. `docs/architecture.md` carries the
-normative wiring rules; this ADR carries the why.
+/ `main.tsx` and the `Register` declaration.
+[docs/architecture/routing.md](../architecture/routing.md) carries the normative wiring
+rules; this ADR carries the why.
 
 ## Why B over A — including at product scale
 

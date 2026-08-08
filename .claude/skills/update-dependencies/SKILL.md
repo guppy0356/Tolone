@@ -23,6 +23,14 @@ Packages released as a unit (same version across the catalog) form a single cand
 - `vitest` + `@vitest/browser` + `@vitest/browser-playwright`
 - `react` + `react-dom`
 
+For a non-catalog candidate, enumerate its specs before treating it as one edit:
+
+```bash
+grep -h '"<package>":' playgrounds/*/package.json packages/*/package.json | sort | uniq -c
+```
+
+`pnpm outdated` reports the version a spec **resolved to**, not the spec, so a candidate can carry several — `@types/react` was `^19.2.14` in four playgrounds and `^19.2.17` in nine, all resolving to 19.2.17, and `vite` was `^8.0.10` in one and `^8.1.5` in twelve. All of them move together. Bumping only the specs that match the reported version splits the package across two resolved versions, and for anything other packages take as a *peer* — `storybook`, `react`, `vitest` — pnpm keys a separate instance per peer version. Two instances of one library fail at runtime rather than at typecheck: one patches `HTMLElement.focus` while a story calls the other's, and every `userEvent` call dies with `Illegal invocation`.
+
 ## 2. Investigate each candidate
 
 For each candidate in the current group:
@@ -73,12 +81,9 @@ Apply the candidates in the order presented in step 3. For each:
 ### a. Where to edit the version
 
 - **Catalog package** (in `pnpm-workspace.yaml`): edit the catalog, then `pnpm install` at the repo root.
-- **Non-catalog, used by all playgrounds** (e.g. `vite`): `pnpm update <package> --latest -r` at the repo root.
-- **Non-catalog, used by only some playgrounds** (e.g. `react-hook-form`): one command per dependent playground:
-  ```bash
-  pnpm --filter @tolone/account-settings update <package> --latest
-  pnpm --filter @tolone/blog update <package> --latest
-  ```
+- **Non-catalog** (e.g. `vite`, `react-hook-form`): edit every spec enumerated in step 1, then `pnpm install` at the repo root.
+
+Edit the specs rather than reaching for `pnpm update <package> --latest -r`. That command re-resolves floating ranges it was not asked about: run for `vite`, it also moved `undici` and three `@csstools` packages, which belong in whatever commit does move them.
 
 To check the catalog: `grep <package> pnpm-workspace.yaml`. To check dependents for a non-catalog package: see `Dependents:` in `pnpm outdated -r --format list`.
 
@@ -90,6 +95,14 @@ Both must pass before committing:
 pnpm test       # Vitest unit tests (Storybook play functions, browser mode)
 pnpm -r build   # Production build (also runs tsc via vite-plugin-checker)
 ```
+
+Confirm the bump landed as one version, since a spec left behind in step 1 surfaces here rather than in the test output:
+
+```bash
+grep -oE "<package>@[0-9][0-9.]*" pnpm-lock.yaml | sort -u   # one line
+```
+
+Count lockfile keys, not directories — `node_modules/.pnpm` keeps orphaned directories from earlier installs, and an unreferenced one looks exactly like a second instance.
 
 For "impact" candidates, additionally execute the **done criteria** declared in step 3.
 

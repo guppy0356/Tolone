@@ -87,14 +87,24 @@ import { IncidentListComponent } from "./IncidentList.component";
 
 export function IncidentListContainer() {
   const search = useSearch({ from: "/incidents" });
-  const { incidents, total, isIncidentsPending, isIncidentsRefetching } =
-    useIncidentListContainer({ params: search });
+  // Two queries behind this hook — the incidents, and the assignees its
+  // filter offers — so every flag names the resource it waits on.
+  const {
+    incidents,
+    total,
+    assignees,
+    isIncidentsPending,
+    isIncidentsRefetching,
+    isAssigneesPending,
+  } = useIncidentListContainer({ params: search });
   return (
     <IncidentListComponent
       incidents={incidents}
       total={total}
+      assignees={assignees}
       isIncidentsPending={isIncidentsPending}
       isIncidentsRefetching={isIncidentsRefetching}
+      isAssigneesPending={isAssigneesPending}
       search={search}
     />
   );
@@ -103,3 +113,10 @@ export function IncidentListContainer() {
 
 `search` reaches the Component as its own prop and the hook as a param — read once,
 injected twice, never round-tripped through the hook's return.
+
+The prefixes are earned, not decoration. This hook holds a second query — the assignee
+filter's options are another resource
+([cross-resource data](./container-hook.md#cross-resource-data)) — so a bare `isPending`
+would leave the Component unable to say which of the two its Skeleton is waiting on. A
+list page whose hook holds **one** query names its flags plainly: `isPending`,
+`isRefetching` ([Loading state](../conventions/loading-state.md)).

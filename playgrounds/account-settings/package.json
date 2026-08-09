@@ -42,10 +42,5 @@
     "vite": "^8.2.0",
     "vite-plugin-checker": "catalog:",
     "vitest": "catalog:"
-  },
-  "msw": {
-    "workerDirectory": [
-      "public"
-    ]
   }
 }

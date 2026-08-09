@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { execSync } from "node:child_process";
 
@@ -295,15 +295,18 @@ for (const [filePath, content] of files) {
 
 console.log(`\nScaffolded playground: ${root}`);
 
-// Install dependencies
+// Register the public directory so the root postinstall writes the MSW worker script into
+// it during the install below — a playground missing from this list never gets one, and
+// never gets it updated (docs/adr/0010-worker-script-sync-at-the-root.md).
+const rootManifest = JSON.parse(readFileSync("package.json", "utf8"));
+rootManifest.msw.workerDirectory = [
+  ...new Set([...rootManifest.msw.workerDirectory, join(root, "public")]),
+].sort();
+writeFileSync("package.json", `${JSON.stringify(rootManifest, null, 2)}\n`);
+
+// Install dependencies — the root postinstall syncs the MSW worker script
 console.log("\nInstalling dependencies...");
 execSync("pnpm install", { stdio: "inherit" });
-
-// Initialize MSW
-console.log("\nInitializing MSW...");
-execSync(`pnpm --filter @tolone/${name} exec msw init public --save`, {
-  stdio: "inherit",
-});
 
 console.log(`\n✅ Playground "${name}" is ready!`);
 console.log(`   cd ${root}`);

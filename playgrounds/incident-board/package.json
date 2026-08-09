@@ -41,10 +41,5 @@
     "vite-plugin-checker": "catalog:",
     "vitest": "catalog:",
     "vitest-browser-react": "catalog:"
-  },
-  "msw": {
-    "workerDirectory": [
-      "public"
-    ]
   }
 }

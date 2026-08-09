@@ -6,7 +6,8 @@
   "scripts": {
     "new:playground": "node scripts/new-playground.mjs",
     "dev": "pnpm --filter @tolone/* dev",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "postinstall": "node scripts/sync-msw-worker.mjs"
   },
   "devDependencies": {
     "lefthook": "^2.1.10",
@@ -16,5 +17,22 @@
   "engines": {
     "node": ">=20.19.0",
     "pnpm": ">=10"
+  },
+  "msw": {
+    "workerDirectory": [
+      "playgrounds/account-settings/public",
+      "playgrounds/blog/public",
+      "playgrounds/family-todo/public",
+      "playgrounds/incident-board/public",
+      "playgrounds/novel/public",
+      "playgrounds/pat/public",
+      "playgrounds/photo-gallery/public",
+      "playgrounds/pizza-order/public",
+      "playgrounds/reading-list/public",
+      "playgrounds/rice-catalog/public",
+      "playgrounds/team-cost-report/public",
+      "playgrounds/todo/public",
+      "playgrounds/travel-expense/public"
+    ]
   }
 }

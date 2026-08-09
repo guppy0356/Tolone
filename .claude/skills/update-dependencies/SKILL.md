@@ -128,6 +128,26 @@ pnpm --filter @tolone/blog exec playwright install chromium chromium-headless-sh
 
 This pattern applies to any post-install step that depends on the package's bin.
 
-## Known gap
+## Known gaps
 
-MSW intercepts at the fetch level, so unit tests do not exercise `ky` directly. A `ky` update that changes HTTP behavior will pass tests but may break the dev server. For `ky` updates, add `pnpm dev` smoke-test as an explicit done criterion in step 3.
+Both verification commands run the app. Anything reached only by a `package.json` script
+is outside them, so a bump can pass step 4b and still break the repo.
+
+**`ky` — the dev server.** MSW intercepts at the fetch level, so unit tests do not exercise
+`ky` directly. A `ky` update that changes HTTP behavior will pass tests but may break the
+dev server. For `ky` updates, add `pnpm dev` smoke-test as an explicit done criterion in
+step 3.
+
+**Anything holding the TypeScript compiler API — `generate:api`.** `openapi-typescript`
+calls `ts.factory`, and its peer is still `typescript@^5.x`. Under TypeScript 7 that object
+is `undefined`, because the native port ships no programmatic API before 7.1:
+
+```
+TypeError: Cannot read properties of undefined (reading 'createKeywordTypeNode')
+```
+
+`pnpm test` and `pnpm -r build` both pass while this is broken — `tsc` itself is a binary
+and `vite-plugin-checker` shells out to it, so only the generator, which links the API in
+process, fails. For a `typescript` or `openapi-typescript` bump, add
+`pnpm --filter @tolone/<playground> generate:api` as a done criterion in step 3. Tracked as
+[#9](https://github.com/guppy0356/Tolone/issues/9).

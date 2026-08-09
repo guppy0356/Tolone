@@ -99,6 +99,7 @@ to read for it.
 | `*.stories.tsx` | [Stories](./testing/storybook.md) |
 | `*.test.tsx` | [Testing overview](./testing/overview.md) · [Component tests](./testing/component.md) · [Hook tests](./testing/hook.md) · [Test wiring](./testing/wiring.md) |
 | `src/mocks/handlers.ts` | [Mocking](./mocking.md) |
+| `public/mockServiceWorker.js` | [Mocking](./mocking.md#the-worker-script) |
 | a new page directory | [Directory structure](./conventions/directory-structure.md) · [Naming](./conventions/naming.md) |
 | a new playground | [Setup](./setup.md) |
 
@@ -121,6 +122,7 @@ Each rule is stated once, in the file that applies it.
 | Domain contract, not view model | [View model](./layers/view-model.md) |
 | Feature-root modules — wired vs called | [Directory structure](./conventions/directory-structure.md#wired-or-called) |
 | Dev seed handlers are never a test fixture | [Mocking](./mocking.md#why-two-instances) |
+| The worker script is generated, never edited | [Mocking](./mocking.md#the-worker-script) |
 
 Decisions that were argued out rather than merely stated live in
 [ADRs](../adr/), which carry the options considered and the conditions for revisiting.

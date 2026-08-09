@@ -14,6 +14,7 @@ through `openapi-msw`. Two different consumers use that one technique, and they 
 | Question | Criterion | Detail |
 |---|---|---|
 | Which instance does this handler belong to? | Something you want to see in the browser during development → the dev seed. Something a test needs → that test file's `worker.use()`, never the dev seed | ↓ Why two instances |
+| What version should `mockServiceWorker.js` be? | Never a choice — `pnpm install` rewrites it to the installed msw. Adding a playground means adding its path to the root list | ↓ The worker script |
 
 ## Typed handlers
 
@@ -112,3 +113,22 @@ setup: [ADR 0009](../adr/0009-two-msw-worker-instances.md).
 
 The two files are wired separately as a result: `main.tsx` starts the browser worker,
 `src/test/setup.ts` starts the test worker ([Test wiring](./testing/wiring.md)).
+
+## The worker script
+
+Both instances register the same file, `public/mockServiceWorker.js`. It is MSW's own
+script, it is committed, and it is **never edited by hand** — every byte of it comes from
+the installed msw.
+
+Keeping it current is not a step anyone performs. The root `package.json` lists every
+playground's public directory in `msw.workerDirectory`, and its `postinstall` runs
+`scripts/sync-msw-worker.mjs` over that list.
+
+So a bump to msw carries the worker scripts along in the same commit, and the script says
+which playgrounds it rewrote. A playground is added to the list when it is scaffolded; one
+missing from it stops being updated.
+
+Note that MSW ships an equivalent postinstall of its own, keyed off the same
+`msw.workerDirectory` field — it cannot run under pnpm, and per-playground copies of the
+field do nothing. Why the sync is the root project's job:
+[ADR 0010](../adr/0010-worker-script-sync-at-the-root.md).

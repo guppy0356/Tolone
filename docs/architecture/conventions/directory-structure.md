@@ -31,7 +31,7 @@ src/
 │   └── {feature}-router.tsx        ← minimal router for stories/tests of navigating Components
 └── features/{feature-name}/
     ├── helpers/                    ← called by more than one page and wired by nothing
-    │   └── {subject}.ts            ← what one page calls stays in that page's view model
+    │   └── {subject}.ts            ← pure functions only
     ├── {Page}/                     ← one directory per page/route
     │   ├── {Page}.route.ts                 ← the page's URL: path, spread route options, Container
     │   ├── {Page}.search.ts                ← the URL's contract when the page keeps state there

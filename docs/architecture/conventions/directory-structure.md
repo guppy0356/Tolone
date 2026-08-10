@@ -31,7 +31,7 @@ src/
 │   └── {feature}-router.tsx        ← minimal router for stories/tests of navigating Components
 └── features/{feature-name}/
     ├── helpers/                    ← called by more than one page and wired by nothing
-    │   └── {subject}.ts            ← what one page calls stays in its component hook
+    │   └── {subject}.ts            ← what one page calls stays in that page's view model
     ├── {Page}/                     ← one directory per page/route
     │   ├── {Page}.route.ts                 ← the page's URL: path, spread route options, Container
     │   ├── {Page}.search.ts                ← the URL's contract when the page keeps state there
@@ -65,11 +65,12 @@ agree on cannot live in either. The test is the one that put the cache layer in
 `src/api/`: **shared by more than one page → out of the page directory** — but only as
 far as the sharing reaches.
 
-A single page's labels and formatting stay at module scope in that page's component hook
-and get no file of their own; a second page calling them is what moves them up to the
-feature root. Leaving the feature takes the same evidence one level higher — a second
-feature that actually calls them — and the slot above is defined when that happens rather
-than reserved now.
+A single page's derivations live in that page's own files and go no further — the shapes
+and pure functions of its [view model](../layers/view-model.md). What moves one up to the
+feature root is a second page actually calling it: a `toDisplayInstant` written for one
+page stays there until a sibling needs the same conversion. Leaving the feature takes the
+same evidence one level higher — a second feature that actually calls it — and the slot
+above is defined when that happens rather than reserved now.
 
 ### Wired or called
 

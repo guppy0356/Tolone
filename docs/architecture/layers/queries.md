@@ -14,7 +14,7 @@ feature's directory.
 
 | Question | Criterion | Detail |
 |---|---|---|
-| Does the list bake filters / sort / pagination into its key? | Yes → split the level into a `lists()` prefix and a `list(params)` leaf. No → `list()` is both | ↓ Parameterized lists |
+| Does the list bake filters / sort / pagination into its key? | Yes → `list(params)` carries the query, and a `lists()` prefix goes above it **only if a write invalidates every variant**. No → `list()` is both | ↓ Parameterized lists |
 | Should this level get a prefix of its own? | Only where you actually invalidate at it. A `detail(id)` you only ever touch one at a time needs no `details()` | ↓ Parameterized lists |
 | Is this a sub-resource of another? | Sibling key (`[...all(), "comments", id]`) by default. Nest under `detail(id)` only when a write genuinely wants the parent's invalidation to sweep it too | ↓ Sub-resources |
 | Is this option the same for every consumer? | Same for all → in the definition (`staleTime`, `placeholderData`, `retry`). Varies per call site → leave it in the container hook (`enabled`, anything `useSuspenseQuery` omits) | — |
@@ -91,6 +91,11 @@ filter/page combination through the prefix. Add a prefix level **only where you 
 invalidate at it**: a `detail(id)` you only ever touch one at a time (per-id
 `invalidateQueries` / `removeQueries`) needs no `details()` prefix, so don't add one for
 symmetry.
+
+A resource nothing writes to needs no `lists()` either — `list(params)` alone is the
+whole shape. Nothing is lost by waiting: the prefix produces the same key it would have
+inlined (`["todos", "list", params]` either way), so the first write can introduce it
+without touching a single call site.
 
 Which caches a given mutation reconciles is
 [the container hook's table](./container-hook.md).

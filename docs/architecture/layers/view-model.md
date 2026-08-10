@@ -20,7 +20,7 @@ functions and memoizes the result; this file holds no hooks and no state.
 |---|---|---|
 | Is this the view model, or what it is built from? | The view model is `{Page}ComponentState` — the shapes and actions the [component hook](./component-hook.md) returns. One contract value turned into one display value (`open` → `"Open"`, an instant → text) is a material it is built out of | ↓ What counts as the view model |
 | Constant or memo? | Depends on neither server data nor current state (a sort control's options) → a plain constant here, not a memo with an empty dependency array | ↓ Example |
-| Another page reads the same resource — share the shape? | No. A list's row and a detail's headline are different; each page writes its own, and the names say so: `IncidentListRow`, not `IncidentRow`, so a screen's shape is never mistaken for the contract's `IncidentSummary` beside it in the same import block | — |
+| Another page reads the same resource — share the shape? | No. A list's row and a detail's headline are different; each page writes its own, and the names say so: `IncidentListRow`, not `IncidentRow`, so a screen's shape is never mistaken for the contract type beside it in the same import block | — |
 | Two pages render the same status — share the wording? | No. Each keeps its own `Record<IncidentStatus, string>` | ↓ Wording is the page's |
 
 ### What counts as the view model

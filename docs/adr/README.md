@@ -51,6 +51,7 @@ Status becomes `Superseded by ADR N` rather than being edited.
 | [0008](./0008-browser-mode-not-jsdom.md) | Tests run in a real browser, not jsdom | Accepted |
 | [0009](./0009-two-msw-worker-instances.md) | The dev seed worker and the test worker are separate instances | Accepted |
 | [0010](./0010-worker-script-sync-at-the-root.md) | The worker scripts are synced by the root project's own postinstall | Accepted |
+| [0011](./0011-view-model-only-with-decisions.md) | A view model is written when the page's translation carries a decision, and skipped when it does not | Accepted |
 
 Held back deliberately, as decisions whose rejected options are real but narrow: the
 sibling-key shape for sub-resources (`layers/queries.md`) and the exported-route-options

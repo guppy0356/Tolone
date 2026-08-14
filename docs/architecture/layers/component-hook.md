@@ -46,7 +46,9 @@ See [URL state](../url-state.md) for the contract those values are written again
   current selections, and the like
 - **The building lives in `{Page}.view-model.ts`, the memoizing lives here.** The hook
   reads `incidents.map(toIncidentListRow)` and keeps only `useMemo` / `useCallback`,
-  state and handlers ([View model](./view-model.md))
+  state and handlers. A page whose translation carries no decision has no view model to
+  call, and keeps its decision-free derivation in these memos — the criterion is
+  [View model](./view-model.md)'s
 - **No direct container-hook call** — receive container-hook actions as params
 - **No pass-through** — return only what the hook creates (local state, derived values,
   handlers). Container data the Component or its private body needs is read straight from

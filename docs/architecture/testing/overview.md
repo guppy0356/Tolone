@@ -35,6 +35,7 @@ Storybook's `play`-based path:
 | Page entry `{Page}.component.tsx` | ✅ catalog states | ✅ branch + interaction behavior |
 | Sub-component in `components/` | ❌ implementation detail — [ADR 0002](../../adr/0002-sub-component-stories.md) | ✅ behavior — incl. ones that can't be storied alone (e.g. a chart needing a sized container) |
 | Container hook / component hook | ❌ | ✅ logic directly (error mapping, derivations, hook-scoped query params) when worth it |
+| View model `{Page}.view-model.ts` | ❌ | Ridden by the page's behavior test, which asserts the rendered wording. Direct function tests when a mapping's case matrix outgrows render-driven assertion |
 | Container / API / `{Page}.route.ts` | ❌ | ❌ — pure wiring |
 
 ## Anti-patterns

@@ -11,17 +11,30 @@ its **actions** are the handlers the hook creates, and its **shapes** are this f
 
 So `{Page}.view-model.ts` holds the shapes the [Component](./component.md) receives and
 the pure functions that build them from the contract, in plain TypeScript with no React
-in it — which is what makes the mapping testable without rendering. The hook calls those
+in it. Being named pure functions is what lets each display decision be exercised as a
+plain call; the separate file is what keeps that checkable — one glance at its imports
+says no React reached the mapping — and keeps the hook readable as the React it is there
+for ([ADR 0011](../../adr/0011-view-model-only-with-decisions.md)). The hook calls those
 functions and memoizes the result; this file holds no hooks and no state.
+
+**The file is written when the translation carries a decision**: wording, a word for an
+absence, an order chosen for display, a composed display string. A page that renders
+contract values as they arrive skips the file, the same way a page with nothing to hold
+skips its component hook. A decision-free derivation — a slice, a lookup by id — may
+stay in the hook's memo; it is not what this file exists to hold.
 
 ## Decisions
 
 | Question | Criterion | Detail |
 |---|---|---|
+| Does this page need the file at all? | The translation carries a decision → yes, from the first one. Contract values rendered as-is → no file ([ADR 0011](../../adr/0011-view-model-only-with-decisions.md)) | ↑ Responsibility |
 | Is this the view model, or what it is built from? | The view model is `{Page}ComponentState` — the shapes and actions the [component hook](./component-hook.md) returns. One contract value turned into one display value (`open` → `"Open"`, an instant → text) is a material it is built out of | ↓ What counts as the view model |
+| Which direction does it build? | From the contract **toward the screen**, only. Building toward the wire — a mutation input from form values, the next search from a control — is the hook's, however pure. A form page's `defaultValues` built from the contract are this file's work; its submit payload is not | — |
+| A `Record` from a contract member to a className? | No — styling is the Component's, declared beside the JSX that uses it. This file supplies the words, and keeps the **raw member beside its label** in the shape so the Component has the key to style by | ↓ Example |
 | Constant or memo? | Depends on neither server data nor current state (a sort control's options) → a plain constant here, not a memo with an empty dependency array | ↓ Example |
 | Another page reads the same resource — share the shape? | No. A list's row and a detail's headline are different; each page writes its own, and the names say so: `IncidentListRow`, not `IncidentRow`, so a screen's shape is never mistaken for the contract type beside it in the same import block | — |
 | Two pages render the same status — share the wording? | No. Each keeps its own `Record<IncidentStatus, string>` | ↓ Wording is the page's |
+| The hook is thickening with display logic — extract more, or split? | One screen concern whose translation is heavy → extract further into this file. Several distinct UI concerns (list + filter + form) → propose the sub-component split ([Sub-components](./component.md#sub-components), CLAUDE.md's Future Work). Fragments that render the same words keep them in this file — within a page, wording that disagrees is a bug, not [ADR 0003](../../adr/0003-per-page-display-wording.md)'s tolerated repetition | — |
 
 ### What counts as the view model
 
@@ -33,13 +46,18 @@ team-name-keyed columns — happens here, never by bending the OpenAPI schema to
 screen.
 
 The mapping is the part with decisions in it: how an absent assignee reads, which fields
-the Component gets. That is why it is worth a test of its own
-([Writing tests](../testing/overview.md)).
+the Component gets. Those decisions are asserted where the page's behavior test already
+renders them — the composed string pins exactly what the user sees. A mapping whose case
+matrix outgrows render-driven assertion (a chart pivot, a grouping) earns direct
+function-call tests ([What gets what](../testing/overview.md#what-gets-what)).
 
 ## Rules
 
 - One pure function per record — `toIncidentListRow(incident)` — plus the interfaces
   those functions return
+- A field's conversion is an **expression inside its record's function**
+  (`assignee ?? "Unassigned"`), not a function of its own. It becomes one when a second
+  record function needs it, or when it grows decisions of its own — never sooner
 - No React, no hooks, no state
 - **No `Intl` in formatting.** `Intl.DateTimeFormat` / `toLocaleString` resolve against
   the runner's locale and ICU build, so a behavior test asserting on their output breaks
@@ -70,7 +88,11 @@ import type { Incident, IncidentStatus } from "@api/Incident.api";
 export interface IncidentListRow {
   id: string;
   title: string;
-  status: string;
+  // The raw member rides beside its label: the Component keys its styling
+  // Record (a status tone, a severity badge) from it, beside the JSX.
+  // A className never comes from this file.
+  status: IncidentStatus;
+  statusLabel: string;
   assignee: string;
   openedAt: string;
 }
@@ -99,7 +121,8 @@ export function toIncidentListRow(incident: Incident): IncidentListRow {
   return {
     id: incident.id,
     title: incident.title,
-    status: STATUS_LABELS[incident.status],
+    status: incident.status,
+    statusLabel: STATUS_LABELS[incident.status],
     assignee: incident.assignee ?? "Unassigned",
     openedAt: toDisplayInstant(incident.openedAt),
   };

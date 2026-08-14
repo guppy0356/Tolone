@@ -39,7 +39,7 @@ src/
     │   ├── {Page}.container.hook.ts        ← one dedicated container hook per page
     │   ├── {Page}.component.tsx            ← entry + private memo'd body + private Skeleton
     │   ├── {Page}.component.hook.ts        ← local UI state, memoization, handlers
-    │   ├── {Page}.view-model.ts            ← the shapes the Component receives, and how they are built
+    │   ├── {Page}.view-model.ts            ← the shapes the Component receives, and how they are built (when the translation carries a decision)
     │   ├── {Page}.schema.ts                ← zod form-validation contract (form pages only)
     │   ├── {Page}.component.stories.tsx
     │   └── components/

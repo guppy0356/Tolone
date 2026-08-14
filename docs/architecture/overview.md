@@ -46,7 +46,7 @@ The alternatives, and what each would cost:
 | [Container hook](./layers/container-hook.md) | `{Page}.container.hook.ts` | Server state: `useQuery` + `useMutation`; may hold hook-scoped `useState` for query params. **One dedicated container hook per page** | React hook |
 | [Component](./layers/component.md) | `{Page}.component.tsx` | Presentational rendering; loading UI; calls the component hook; may call app-shell action hooks bound to user interactions | React component |
 | [Component hook](./layers/component-hook.md) | `{Page}.component.hook.ts` | Local UI state, memoization and handlers; called inside the Component; receives container-hook actions as params | React hook |
-| [View model](./layers/view-model.md) | `{Page}.view-model.ts` | The shapes the Component receives and the pure functions that build them from the contract | Plain module |
+| [View model](./layers/view-model.md) | `{Page}.view-model.ts` | The shapes the Component receives and the pure functions that build them from the contract (only when the translation carries a decision) | Plain module |
 | [Form schema](./layers/form-schema.md) | `{Page}.schema.ts` | The page's zod form-validation contract (form pages only) | Plain module |
 
 The container hook is the page's server-state hook (what older Container/Presentational

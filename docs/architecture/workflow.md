@@ -43,7 +43,9 @@ split is
    via `satisfies` (**only when the page validates a form**) → **commit**
    — [Form schema](./layers/form-schema.md)
 9. `{Page}.view-model.ts` — the shapes the Component receives + one pure function per
-   record; constants for option lists that depend on nothing → **commit**
+   record; constants for option lists that depend on nothing (**skip this file entirely**
+   when the translation carries no decision — contract values rendered as they arrive
+   need no view model) → **commit**
    — [View model](./layers/view-model.md)
 10. `{Page}.component.hook.ts` — `use{Page}Component` + `{Page}ComponentState`, memoizing
     the view model's functions and wrapping handlers (**skip this file entirely** when the

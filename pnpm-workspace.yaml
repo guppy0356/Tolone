@@ -16,6 +16,7 @@ catalog:
   '@storybook/addon-vitest': ^10.5.6
   '@storybook/react-vite': ^10.5.6
   tailwindcss: ^4.3.3
+  typed-openapi: ^3.2.1
   vite-plugin-checker: ^0.14.5
   vitest: ^4.1.10
   '@vitest/browser': ^4.1.10

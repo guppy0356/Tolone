@@ -60,11 +60,12 @@ same factory definition, the call sites cannot drift.
 - `data` may be `undefined` before the first successful fetch — use `data ?? []` or a
   similar default
 - Map HTTP errors to domain flags here, since the [API layer](./api.md) does no error
-  handling: read
-  ky's `HTTPError` directly — `error instanceof HTTPError && error.response.status === 404`
-  → `isNotFound` — rather than wrapping it in a custom error type. ky is the project-wide
-  client, so reading its standard error is the idiomatic approach, not a leak to abstract
-  away
+  handling: read the generated client's `TypedStatusError` directly (import it from
+  `src/lib/api-client`) — `error instanceof TypedStatusError && error.status === 404`
+  → `isNotFound` — rather than wrapping it in a custom error type. It is the project-wide
+  client's standard error, so reading it is the idiomatic approach, not a leak to
+  abstract away
+  ([ADR 0012](../../adr/0012-generated-client-validates-responses.md))
 - When wrapping a mutation in `useCallback`, depend on `mutation.mutateAsync` (a stable
   reference), never the mutation object — a new reference each render would defeat the
   `memo` that keeps the [Component](./component.md)'s private body reference-stable

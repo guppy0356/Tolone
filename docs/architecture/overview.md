@@ -120,6 +120,7 @@ Each rule is stated once, in the file that applies it.
 | Sub-component naming, placement, `memo` | [Component](./layers/component.md#sub-components) |
 | No `View` suffix | [Naming](./conventions/naming.md) |
 | Domain contract, not view model | [View model](./layers/view-model.md) |
+| Responses are validated at the fetch boundary | [API layer](./layers/api.md#the-generated-client) |
 | Feature-root modules — wired vs called | [Directory structure](./conventions/directory-structure.md#wired-or-called) |
 | Dev seed handlers are never a test fixture | [Mocking](./mocking.md#why-two-instances) |
 | The worker script is generated, never edited | [Mocking](./mocking.md#the-worker-script) |

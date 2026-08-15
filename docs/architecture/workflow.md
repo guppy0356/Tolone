@@ -18,10 +18,10 @@ split is
 
 1. Define endpoints and schemas in `src/openapi.yaml` → **commit**
    — [Setup](./setup.md)
-2. Run `pnpm generate:api` to generate types → **commit**
+2. Run `pnpm generate:api` to generate the types and the validating client → **commit**
    — [Setup](./setup.md)
-3. `src/api/{Resource}.api.ts` — generated types + the API function object; rename anything
-   that collides with a DOM global → **commit**
+3. `src/api/{Resource}.api.ts` — generated types + the API facade over the generated
+   client; rename anything that collides with a DOM global → **commit**
    — [API layer](./layers/api.md)
 4. `src/api/{Resource}.queries.ts` — the `queryOptions()` factory (`all` / `list` /
    `detail`) over the API functions → **commit**

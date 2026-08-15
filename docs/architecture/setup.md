@@ -22,35 +22,94 @@ below is added by hand, when the rule that needs it applies.
 | the `unit` Vitest project | when the playground gains its first `*.test.tsx` — see [Test wiring](./testing/wiring.md) |
 | `resolve.dedupe: ["react", "react-dom"]` | required as soon as `vitest-browser-react` renders anything using React context |
 | `vitest-browser-react` | the dependency itself, with that first behavior test |
-| `zod` | as soon as a page validates a [form](./layers/form-schema.md) or keeps state in the [URL](./url-state.md) |
+| `zod` | with the first `generate:api` — the generated client imports it; [forms](./layers/form-schema.md) and [URL state](./url-state.md) reuse it |
+| `typed-openapi` | devDependency, with the same first `generate:api` |
 | `react-hook-form` + `@hookform/resolvers` | with the first form page |
 
-## The ky client
+## The API client
 
-Each playground has a shared ky instance in `src/lib/api-client.ts`:
+Each playground wires the [generated, validating client](./layers/api.md#the-generated-client)
+in `src/lib/api-client.ts`, with ky as its transport. The generated client owns URL
+building, response parsing, validation and error policy; ky owns retry and timeout
+(its documented defaults). Why the seam sits exactly here:
+[ADR 0012](../adr/0012-generated-client-validates-responses.md).
 
 ```ts
-import ky from "ky";
-export const api = ky.create({ prefix: "/api" });
-```
+import ky, { HTTPError } from "ky";
+import { createApiClient, type Fetcher } from "./api.gen";
 
-How the [API layer](./layers/api.md) calls it is that layer's business.
+// ky's status-code retry only runs while it throws, so HTTPError is caught
+// *after* the retries and handed back as a response. ky has already consumed
+// the error body into `error.data`, so the response serves that.
+const fetcher: Fetcher = {
+  fetch: async ({ url, method, urlSearchParams, parameters, requestFormat, overrides }) => {
+    try {
+      return await ky(url, {
+        method,
+        searchParams: urlSearchParams,
+        ...(requestFormat === "json" && parameters?.body !== undefined
+          ? { json: parameters.body }
+          : {}),
+        ...overrides,
+      });
+    } catch (error) {
+      if (error instanceof HTTPError) {
+        const { response } = error;
+        return {
+          ok: false,
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+          json: async () => error.data,
+          text: async () =>
+            typeof error.data === "string" ? error.data : JSON.stringify(error.data),
+          arrayBuffer: async () => new ArrayBuffer(0),
+          clone() {
+            return this;
+          },
+        };
+      }
+      throw error;
+    }
+  },
+};
+
+// The client resolves paths against an absolute base URL. Input validation
+// stays off: request shapes are TS-owned end to end, and zod input parsing
+// would rewrite them (a defaulted contract param gets injected into the
+// query string).
+export const api = createApiClient(fetcher, window.location.origin, {
+  validate: "output",
+});
+
+export { TypedStatusError } from "./api.gen";
+```
 
 ## Contract and type generation
 
-Each playground defines its API contract in `src/openapi.yaml`. Types are generated from
-it and used by both the API layer and the mock handlers.
+Each playground defines its API contract in `src/openapi.yaml`. Two artifacts are
+generated from it: the types (used by the API layer and the mock handlers) and the
+validating client.
 
 ```
-src/openapi.yaml → openapi-typescript → src/types/openapi.ts
-                    --enum-values       ├── Todo.api.ts      (renames the types and the enum arrays)
-                                        ├── Todo.queries.ts  (queryOptions over the api fns)
-                                        └── handlers.ts      (openapi-msw: type-safe responses)
+src/openapi.yaml ─→ openapi-typescript ─→ src/types/openapi.ts
+                     --enum-values         ├── Todo.api.ts      (renames the types and the enum arrays)
+                                           ├── Todo.queries.ts  (queryOptions over the api fns)
+                                           └── handlers.ts      (openapi-msw: type-safe responses)
+                 └─→ typed-openapi ──────→ src/lib/api.gen.ts   (zod schemas + validating ApiClient)
+                      --runtime zod        └── api-client.ts    (ky fetcher, ↑ above)
 ```
 
 ```bash
 pnpm --filter @tolone/todo generate:api
 ```
+
+typed-openapi writes a sidecar `src/lib/api.gen.types.d.ts` next to its output; both are
+generated, committed, and never edited — the same standing as `src/types/openapi.ts`.
+(`api.gen.ts` opens with `// @ts-nocheck` by design; validation still runs.) The app
+imports its types from `src/types/openapi.ts` only — the generated client module's own
+schema type exports stay internal to it
+([ADR 0012](../adr/0012-generated-client-validates-responses.md)).
 
 `--enum-values` makes the generated module carry each enum's members as an array as well
 as its type — what a `z.enum()` or a rendered set of choices needs at runtime — which is

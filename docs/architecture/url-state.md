@@ -284,9 +284,8 @@ HTTP  /api/incidents?status=open&status=resolved ← OpenAPI style=form, explode
 ```
 
 The URL's shape is the router's business; the query string's shape is the API contract's.
-Convert in the [API layer](./layers/api.md), where building the request already lives —
-ky's `searchParams` cannot express a repeated key from a plain record, so hand it a
-`URLSearchParams`.
+The [API layer](./layers/api.md) hands the parsed params object to the generated client,
+whose encoder owns the wire shape — a repeated key goes out once per array element.
 
 ## Which layer does what
 

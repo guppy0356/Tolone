@@ -15,7 +15,7 @@ rest of the app.
 |---|---|---|
 | Does this endpoint take parameters? | Declare its params type here, beside the response types — this layer's own fetcher is what takes it | ↓ Where a params type lives |
 | Does a contract type collide with a DOM global? | `Comment`, `Range`, `Selection`, `Event` — prefix with the resource (`IncidentComment`) | ↓ Renaming on collision |
-| Does the URL's shape differ from the HTTP query string's? | The conversion belongs here; a repeated key needs a `URLSearchParams`, which a plain record cannot express | [URL state](../url-state.md) |
+| Who checks the response against the contract? | The generated client parses and validates every success response; a violation throws at this boundary, not in a render | ↓ The generated client |
 
 ### Where a params type lives
 
@@ -35,10 +35,17 @@ the two apart.
 
 - Pure functions only — no React dependency
 - Use the `api` client from `src/lib/api-client.ts`
-- Types are derived from the OpenAPI schema via `openapi-typescript` generated types
+- Types are derived from the OpenAPI schema via `openapi-typescript` generated types.
+  The generated client module exports its own schema types too — app code never imports
+  those; annotating each facade function's return type with the `openapi-typescript`
+  alias is where the two generated artifacts meet, so drift between the generators is a
+  `tsc` error
+  ([ADR 0012](../../adr/0012-generated-client-validates-responses.md))
 - Re-export types as named aliases for use by other layers
-- No error handling — delegate to the caller. Mapping an `HTTPError` to a domain flag is
-  the [container hook](./container-hook.md)'s job
+- Responses arrive parsed and validated against the contract; fields the contract does
+  not declare are stripped. No `.json<T>()` casts
+- No error handling — delegate to the caller. Mapping a `TypedStatusError` to a domain
+  flag is the [container hook](./container-hook.md)'s job
 - No query keys and no TanStack Query options — those live in the
   [Queries layer](./queries.md)
 
@@ -54,18 +61,23 @@ export type CreateTodoInput = components["schemas"]["CreateTodoInput"];
 export type UpdateTodoInput = components["schemas"]["UpdateTodoInput"];
 
 export const todoApi = {
-  getAll: () => api.get("todos").json<Todo[]>(),
-  create: (input: CreateTodoInput) =>
-    api.post("todos", { json: input }).json<Todo>(),
-  update: (id: string, input: Partial<Todo>) =>
-    api.patch(`todos/${id}`, { json: input }).json<Todo>(),
-  delete: (id: string) => api.delete(`todos/${id}`),
+  getAll: (): Promise<Todo[]> => api.get("/api/todos"),
+  create: (input: CreateTodoInput): Promise<Todo> =>
+    api.post("/api/todos", { body: input }),
+  update: (id: string, input: UpdateTodoInput): Promise<Todo> =>
+    api.patch("/api/todos/{todoId}", { path: { todoId: id }, body: input }),
+  delete: (id: string) =>
+    api.delete("/api/todos/{todoId}", { path: { todoId: id } }),
 };
 ```
 
-When the list is filterable, the params type joins the response types and the request
-carries a `URLSearchParams` — `status` repeats once per selected value, which a plain
-record has no way to say:
+Paths are the contract's own literals — `{todoId}` filled through `path`, never a
+template string — so a facade line and the `openapi.yaml` entry it calls read the same.
+
+When the list is filterable, the params type joins the response types and the parsed
+params object is handed to the client as `query` — its encoder writes a repeated key
+once per array element, so `status: ["open", "done"]` goes out as
+`status=open&status=done`:
 
 ```ts
 // Todo.api.ts — the parameterized list that Todo.queries.ts's list(params) consumes
@@ -76,29 +88,27 @@ export type TodoListParams = NonNullable<
   paths["/api/todos"]["get"]["parameters"]["query"]
 >;
 
-const toQuery = ({ status, page }: TodoListParams) => {
-  const query = new URLSearchParams();
-  status?.forEach((value) => query.append("status", value));
-  if (page) query.set("page", String(page));
-  return query;
-};
-
 export const todoApi = {
-  getList: (params: TodoListParams) =>
-    api.get("todos", { searchParams: toQuery(params) }).json<Todo[]>(),
+  getList: (params: TodoListParams): Promise<Todo[]> =>
+    api.get("/api/todos", { query: params }),
   // ...
 };
 ```
 
-## The ky client
+## The generated client
 
-The shared instance lives in `src/lib/api-client.ts` ([setup](../setup.md)). Its methods
-as this layer uses them:
+The shared instance lives in `src/lib/api-client.ts` ([setup](../setup.md)), a
+`createApiClient` over `src/lib/api.gen.ts` with ky as the fetcher — ky's documented
+retry and timeout still apply underneath. Its call shapes as this layer uses them:
 
 | Call | |
 |---|---|
-| `api.get("endpoint").json<Type>()` | GET |
-| `api.post("endpoint", { json: body }).json<Type>()` | POST |
-| `api.patch("endpoint", { json: body }).json<Type>()` | PATCH |
-| `api.delete("endpoint")` | DELETE |
-| `api.get("endpoint", { searchParams })` | pass a `URLSearchParams` when a key repeats |
+| `api.get("/api/todos")` | GET → the parsed, validated data — no `Response`, no cast |
+| `api.get("/api/todos", { query: params })` | plain params object; an array value repeats its key |
+| `api.get("/api/todos/{todoId}", { path: { todoId } })` | path params by contract name |
+| `api.post("/api/todos", { body })` | POST; `patch` / `delete` alike |
+
+Failure is uniform: a non-2xx status throws `TypedStatusError` (after ky's retries), a
+success body that breaks the contract throws zod's error right here — never `undefined`
+drifting into a render
+([ADR 0012](../../adr/0012-generated-client-validates-responses.md)).

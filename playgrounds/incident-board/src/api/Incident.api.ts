@@ -31,23 +31,11 @@ export type IncidentListParams = NonNullable<
   paths["/api/incidents"]["get"]["parameters"]["query"]
 >;
 
-// `status` is a repeatable parameter (OpenAPI style=form, explode=true), which
-// a plain record cannot express, so the query string is built explicitly.
-function toSearchParams(params: IncidentListParams): URLSearchParams {
-  const searchParams = new URLSearchParams();
-  for (const status of params.status ?? []) searchParams.append("status", status);
-  if (params.severity) searchParams.set("severity", params.severity);
-  if (params.assignee) searchParams.set("assignee", params.assignee);
-  if (params.sort) searchParams.set("sort", params.sort);
-  if (params.page !== undefined) searchParams.set("page", String(params.page));
-  return searchParams;
-}
-
 export const incidentApi = {
-  getList: (params: IncidentListParams) =>
-    api.get("incidents", { searchParams: toSearchParams(params) }).json<IncidentPage>(),
-  getDetail: (incidentId: string) =>
-    api.get(`incidents/${incidentId}`).json<IncidentDetail>(),
-  getComments: (incidentId: string) =>
-    api.get(`incidents/${incidentId}/comments`).json<IncidentComment[]>(),
+  getList: (params: IncidentListParams): Promise<IncidentPage> =>
+    api.get("/api/incidents", { query: params }),
+  getDetail: (incidentId: string): Promise<IncidentDetail> =>
+    api.get("/api/incidents/{incidentId}", { path: { incidentId } }),
+  getComments: (incidentId: string): Promise<IncidentComment[]> =>
+    api.get("/api/incidents/{incidentId}/comments", { path: { incidentId } }),
 };

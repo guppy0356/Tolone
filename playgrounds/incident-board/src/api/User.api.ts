@@ -4,5 +4,5 @@ import type { components } from "../types/openapi";
 export type User = components["schemas"]["User"];
 
 export const userApi = {
-  getAll: () => api.get("users").json<User[]>(),
+  getAll: (): Promise<User[]> => api.get("/api/users"),
 };

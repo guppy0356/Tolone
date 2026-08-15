@@ -36,7 +36,7 @@ building, response parsing, validation and error policy; ky owns retry and timeo
 
 ```ts
 import ky, { HTTPError } from "ky";
-import { createApiClient, type Fetcher } from "./api.gen";
+import { createApiClient, type Fetcher, type FetcherResponse } from "./api.gen";
 
 // ky's status-code retry only runs while it throws, so HTTPError is caught
 // *after* the retries and handed back as a response. ky has already consumed
@@ -55,7 +55,7 @@ const fetcher: Fetcher = {
     } catch (error) {
       if (error instanceof HTTPError) {
         const { response } = error;
-        return {
+        const errorResponse: FetcherResponse = {
           ok: false,
           status: response.status,
           statusText: response.statusText,
@@ -64,10 +64,9 @@ const fetcher: Fetcher = {
           text: async () =>
             typeof error.data === "string" ? error.data : JSON.stringify(error.data),
           arrayBuffer: async () => new ArrayBuffer(0),
-          clone() {
-            return this;
-          },
+          clone: () => errorResponse,
         };
+        return errorResponse;
       }
       throw error;
     }

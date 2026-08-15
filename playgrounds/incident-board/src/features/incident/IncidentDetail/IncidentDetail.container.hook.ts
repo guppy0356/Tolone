@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { HTTPError } from "ky";
+import { TypedStatusError } from "../../../lib/api-client";
 import { incidentQueries } from "@api/Incident.queries";
 import type { IncidentComment, IncidentDetail } from "@api/Incident.api";
 
@@ -40,9 +40,9 @@ export function useIncidentDetailContainer({
     detail,
     comments: comments ?? [],
     isDetailPending: isPending,
-    // ky's own error type, read directly: it is the project's client, so a 404
-    // is already a first-class thing to ask about.
-    isDetailNotFound: error instanceof HTTPError && error.response.status === 404,
+    // The generated client's own error type, read directly: it is the
+    // project's client, so a 404 is already a first-class thing to ask about.
+    isDetailNotFound: error instanceof TypedStatusError && error.status === 404,
     // Not `isPending`: a query held back by `enabled` is pending too, and the
     // comments panel must not show a skeleton for something nobody requested.
     isCommentsLoading,

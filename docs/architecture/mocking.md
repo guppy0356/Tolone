@@ -1,8 +1,9 @@
 # Mocking
 
 Every faked response in the app is typed against the same contract — `src/openapi.yaml` —
-through `openapi-msw`. Two different consumers use that one technique, and they are
-**separate worker instances** on purpose.
+through `typed-http`, a handwritten helper typed by the generated contract module. Two
+different consumers use that one technique, and they are **separate worker instances**
+on purpose.
 
 | | What it is | Where |
 |---|---|---|
@@ -18,21 +19,28 @@ through `openapi-msw`. Two different consumers use that one technique, and they 
 
 ## Typed handlers
 
-`createOpenApiHttp<paths>()` returns a typed `http` object where response status codes and
-bodies are checked against the OpenAPI schema at compile time. Both instances build their
-handlers with it.
+`src/mocks/typed-http.ts` — handwritten, ~95 lines over plain msw — exports the typed
+`http` object both instances build their handlers with. The path argument is a key of
+the generated `GetEndpoints` (the contract's own literal, `{param}` style, converted to
+msw's `:param` at runtime); `params` types from the endpoint's path parameters; and
+`response(status)` accepts only the statuses the contract declares for that path — a
+bodyless status offers `.empty()` alone, a body-bearing one `.json(body)` typed to the
+contract. `.json()` also runs the endpoint's runtime zod schema over the body, so a mock
+drifting in a way the types cannot see fails the test loudly.
+
+The helper carries exactly the methods the playground's contract uses. The first
+mutation endpoint adds its method to `typed-http.ts`, typing the request body from the
+endpoint's `parameters.body` the same way `params` already types. Why a handwritten
+helper rather than openapi-msw or generated handlers:
+[ADR 0013](../adr/0013-single-generator-hand-rolled-mock-typing.md).
 
 ## Dev seed
 
 ```ts
 // src/mocks/handlers.ts
 import { delay } from "msw";
-import { createOpenApiHttp } from "openapi-msw";
-import type { paths, components } from "../types/openapi";
-
-type Todo = components["schemas"]["Todo"];
-
-const http = createOpenApiHttp<paths>();
+import type { Todo } from "../lib/api.gen";
+import { http } from "./typed-http";
 
 let todos: Todo[] = [
   { id: "1", title: "Learn React", completed: false },

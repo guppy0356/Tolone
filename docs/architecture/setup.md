@@ -11,7 +11,7 @@ below is added by hand, when the rule that needs it applies.
 | Question | Criterion | Detail |
 |---|---|---|
 | Does this playground import through `@api`? | It has a `src/api/` — so, always, from the first import onward. Add the alias in **three** files before writing that import | ↓ What the scaffold leaves for you |
-| Does this enum have to exist at runtime? | A `z.enum()` or a rendered set of choices needs the members as an array → `--enum-values`, and the output is a `.ts` | ↓ Contract and type generation |
+| Does this enum have to exist at runtime? | A `z.enum()` or a rendered set of choices needs the members as an array → the generated zod enum's `.options` already carries them | ↓ Contract and type generation |
 | A `resolve` change did not take effect | `dedupe` already set → stop editing config and clear the caches first | ↓ When a resolve change does not take |
 
 ## What the scaffold leaves for you
@@ -86,17 +86,16 @@ export { TypedStatusError } from "./api.gen";
 
 ## Contract and type generation
 
-Each playground defines its API contract in `src/openapi.yaml`. Two artifacts are
-generated from it: the types (used by the API layer and the mock handlers) and the
-validating client.
+Each playground defines its API contract in `src/openapi.yaml`. One artifact is
+generated from it — the contract module: zod schemas, per-endpoint contract objects
+keyed by status code, and the validating client.
 
 ```
-src/openapi.yaml ─→ openapi-typescript ─→ src/types/openapi.ts
-                     --enum-values         ├── Todo.api.ts      (renames the types and the enum arrays)
-                                           ├── Todo.queries.ts  (queryOptions over the api fns)
-                                           └── handlers.ts      (openapi-msw: type-safe responses)
-                 └─→ typed-openapi ──────→ src/lib/api.gen.ts   (zod schemas + validating ApiClient)
-                      --runtime zod        └── api-client.ts    (ky fetcher, ↑ above)
+src/openapi.yaml ─→ typed-openapi ─→ src/lib/api.gen.ts
+                     --runtime zod    ├── Todo.api.ts      (renames the types and the `.options` enum arrays)
+                                      ├── Todo.queries.ts  (queryOptions over the api fns)
+                                      ├── handlers.ts      (typed-http: contract-typed responses)
+                                      └── api-client.ts    (ky fetcher, ↑ above)
 ```
 
 ```bash
@@ -104,17 +103,16 @@ pnpm --filter @tolone/todo generate:api
 ```
 
 typed-openapi writes a sidecar `src/lib/api.gen.types.d.ts` next to its output; both are
-generated, committed, and never edited — the same standing as `src/types/openapi.ts`.
-(`api.gen.ts` opens with `// @ts-nocheck` by design; validation still runs.) The app
-imports its types from `src/types/openapi.ts` only — the generated client module's own
-schema type exports stay internal to it
-([ADR 0012](../adr/0012-generated-client-validates-responses.md)).
+generated, committed, and never edited. (`api.gen.ts` opens with `// @ts-nocheck` by
+design; validation still runs.) The module exports every schema and endpoint twice under
+one name — the type for annotations, the zod value for runtime — which is why an enum's
+members need no second artifact: `.options` reads them off the zod enum
+([URL state](./url-state.md#where-the-enum-members-come-from)).
 
-`--enum-values` makes the generated module carry each enum's members as an array as well
-as its type — what a `z.enum()` or a rendered set of choices needs at runtime — which is
-why the output is a `.ts` and not a `.d.ts`. A `.d.ts` would declare the arrays and
-produce none of them, so every call site would compile and the page would find nothing
-there. The API layer renames both halves; see [URL state](./url-state.md).
+App code imports the module's types through the [API layer](./layers/api.md) facade
+only; the mock layer types its handlers from the same module through
+[typed-http](./mocking.md#typed-handlers). One generator, one interpretation of the
+contract ([ADR 0013](../adr/0013-single-generator-hand-rolled-mock-typing.md)).
 
 **Type safety:** `vite-plugin-checker` runs `tsc` during dev, so mismatches between the
 schema and handler/API code surface as errors in the terminal and browser overlay.

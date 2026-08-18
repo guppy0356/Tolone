@@ -30,7 +30,7 @@ In routing vocabulary, `params` always means the path.
 | Does this value belong in the URL at all? | It is what the page is **showing** → yes. It describes how the reader **got here** → no | ↓ What a page's URL carries |
 | Does this parameter have a default? | It always means something → `.default(x)`. Its absence *is* the value (no severity chosen means every severity) → `.optional()` | ↓ Absent, malformed, valid |
 | What does a malformed value do? | Ordinary user-editable text, where a typo or stale bookmark should still render → `.catch(x)`. An address that *is* the meaning, where rendering something else is worse than rendering nothing → let the route fail | ↓ Absent, malformed, valid |
-| Where do this enum's members come from? | The API has them → generate them (`--enum-values`). The API has never heard of them (a `tab` choosing a pane) → write them beside the schema | ↓ Where the enum members come from |
+| Where do this enum's members come from? | The API has them → read them off the generated zod enum (`.options`). The API has never heard of them (a `tab` choosing a pane) → write them beside the schema | ↓ Where the enum members come from |
 | Does this link differ from its sibling only by a search parameter? | Yes → `activeOptions={{ exact: true }}`, or both report themselves current | ↓ Stripping defaults, and the two bugs it looks like |
 
 ## What a page's URL carries
@@ -115,14 +115,15 @@ arrives as a number, and coercing would widen the input type to `unknown`.
 generated type cannot supply one: `IncidentStatus` is `"open" | "acknowledged" | "resolved"`
 to the compiler and nothing at all by the time the page loads.
 
-Generate the members too, rather than typing them out a second time.
-`openapi-typescript --enum-values` writes an array per enum from the same `openapi.yaml`,
-into a `.ts` file — and it has to be a `.ts`, for the reason in
-[Setup](./setup.md#contract-and-type-generation).
+The generated module already carries them, rather than typing them out a second time.
+typed-openapi exports every contract enum twice under one name — the type, and the zod
+enum whose `.options` is the member array, in `openapi.yaml`'s order
+([Setup](./setup.md#contract-and-type-generation)):
 
 ```ts
-// src/types/openapi.ts — generated
-export const incidentStatusValues: ReadonlyArray<…> = ["open", "acknowledged", "resolved"];
+// src/lib/api.gen.ts — generated: one name, type and value
+export type IncidentStatus = "open" | "acknowledged" | "resolved";
+export const IncidentStatus = z.enum(["open", "acknowledged", "resolved"]);
 ```
 
 The [API layer](./layers/api.md) renames them the way it already renames the types, so
@@ -132,8 +133,8 @@ one checkbox per status:
 
 ```ts
 // src/api/Incident.api.ts
-export type IncidentStatus = components["schemas"]["IncidentStatus"];
-export const INCIDENT_STATUSES = incidentStatusValues;
+export type { IncidentStatus };
+export const INCIDENT_STATUSES: readonly IncidentStatus[] = IncidentStatus.options;
 ```
 
 Two things stay written by hand:

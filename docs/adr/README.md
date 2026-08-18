@@ -52,7 +52,11 @@ Status becomes `Superseded by ADR N` rather than being edited.
 | [0009](./0009-two-msw-worker-instances.md) | The dev seed worker and the test worker are separate instances | Accepted |
 | [0010](./0010-worker-script-sync-at-the-root.md) | The worker scripts are synced by the root project's own postinstall | Accepted |
 | [0011](./0011-view-model-only-with-decisions.md) | A view model is written when the page's translation carries a decision, and skipped when it does not | Accepted |
-| [0012](./0012-generated-client-validates-responses.md) | Responses are validated at the fetch boundary by a client generated from the contract | Accepted |
+| [0012](./0012-generated-client-validates-responses.md) | Responses are validated at the fetch boundary by a client generated from the contract | Accepted¹ |
+| [0013](./0013-single-generator-hand-rolled-mock-typing.md) | typed-openapi is the single generator; mock typing is hand-rolled over its output | Accepted |
+
+¹ 0012's type-source sub-decision (openapi-typescript remains beside typed-openapi) is
+superseded by 0013; its decision — the generated validating client — stands.
 
 Held back deliberately, as decisions whose rejected options are real but narrow: the
 sibling-key shape for sub-resources (`layers/queries.md`) and the exported-route-options

@@ -1,6 +1,7 @@
 # ADR 0012: Responses are validated at the fetch boundary by a client generated from the contract
 
-- Status: Accepted
+- Status: Accepted — the type-source sub-decision (`openapi-typescript` remains) is
+  superseded by [ADR 0013](./0013-single-generator-hand-rolled-mock-typing.md)
 - Date: 2026-08-16
 
 ## Context

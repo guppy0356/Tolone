@@ -35,12 +35,10 @@ the two apart.
 
 - Pure functions only — no React dependency
 - Use the `api` client from `src/lib/api-client.ts`
-- Types are derived from the OpenAPI schema via `openapi-typescript` generated types.
-  The generated client module exports its own schema types too — app code never imports
-  those; annotating each facade function's return type with the `openapi-typescript`
-  alias is where the two generated artifacts meet, so drift between the generators is a
-  `tsc` error
-  ([ADR 0012](../../adr/0012-generated-client-validates-responses.md))
+- Types come from the generated contract module `src/lib/api.gen.ts` and are renamed
+  here. This facade is the only app code that imports them: everything upstream gets
+  the contract's names from `@api`, so the contract still enters the app in one file
+  ([ADR 0013](../../adr/0013-single-generator-hand-rolled-mock-typing.md))
 - Re-export types as named aliases for use by other layers
 - Responses arrive parsed and validated against the contract; fields the contract does
   not declare are stripped. No `.json<T>()` casts
@@ -54,11 +52,9 @@ the two apart.
 ```ts
 // Todo.api.ts
 import { api } from "../lib/api-client";
-import type { components } from "../types/openapi";
+import type { CreateTodoInput, Todo, UpdateTodoInput } from "../lib/api.gen";
 
-export type Todo = components["schemas"]["Todo"];
-export type CreateTodoInput = components["schemas"]["CreateTodoInput"];
-export type UpdateTodoInput = components["schemas"]["UpdateTodoInput"];
+export type { Todo, CreateTodoInput, UpdateTodoInput };
 
 export const todoApi = {
   getAll: (): Promise<Todo[]> => api.get("/api/todos"),
@@ -81,11 +77,11 @@ once per array element, so `status: ["open", "done"]` goes out as
 
 ```ts
 // Todo.api.ts — the parameterized list that Todo.queries.ts's list(params) consumes
-import type { paths } from "../types/openapi";
+import type { get__api_todos } from "../lib/api.gen";
 
-// A query-parameter type is generated onto the path, not into components.schemas.
+// A query-parameter type is generated onto the endpoint, not among the schemas.
 export type TodoListParams = NonNullable<
-  paths["/api/todos"]["get"]["parameters"]["query"]
+  get__api_todos["parameters"]["query"]
 >;
 
 export const todoApi = {

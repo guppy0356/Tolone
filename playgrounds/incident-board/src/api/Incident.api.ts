@@ -1,34 +1,35 @@
 import { api } from "../lib/api-client";
 import {
-  incidentSeverityValues,
-  incidentSortValues,
-  incidentStatusValues,
-  type components,
-  type paths,
-} from "../types/openapi";
+  IncidentSeverity,
+  IncidentSort,
+  IncidentStatus,
+  type Comment,
+  type get__api_incidents,
+  type IncidentDetail,
+  type IncidentPage,
+} from "../lib/api.gen";
 
 // Generated types vanish at runtime, so the contract's enums are generated as
-// values too (`--enum-values`). Both are renamed here, in one place, into the
-// names the app uses — nothing downstream writes a member out by hand.
-export type IncidentStatus = components["schemas"]["IncidentStatus"];
-export const INCIDENT_STATUSES = incidentStatusValues;
+// zod values too; `.options` recovers the member arrays. Both are renamed
+// here, in one place, into the names the app uses — nothing downstream writes
+// a member out by hand.
+export type { IncidentSeverity, IncidentSort, IncidentStatus } from "../lib/api.gen";
+export const INCIDENT_STATUSES = IncidentStatus.options;
+export const INCIDENT_SEVERITIES = IncidentSeverity.options;
+export const INCIDENT_SORTS = IncidentSort.options;
 
-export type IncidentSeverity = components["schemas"]["IncidentSeverity"];
-export const INCIDENT_SEVERITIES = incidentSeverityValues;
-
-export type IncidentSort = components["schemas"]["IncidentSort"];
-export const INCIDENT_SORTS = incidentSortValues;
-
-export type IncidentSummary = components["schemas"]["IncidentSummary"];
-export type IncidentDetail = components["schemas"]["IncidentDetail"];
-export type IncidentPage = components["schemas"]["IncidentPage"];
-export type TimelineEvent = components["schemas"]["TimelineEvent"];
+export type {
+  IncidentDetail,
+  IncidentPage,
+  IncidentSummary,
+  TimelineEvent,
+} from "../lib/api.gen";
 // `Comment` is a DOM lib global; the alias is prefixed so the domain type wins
 // at every call site without a shadowing import.
-export type IncidentComment = components["schemas"]["Comment"];
+export type IncidentComment = Comment;
 
 export type IncidentListParams = NonNullable<
-  paths["/api/incidents"]["get"]["parameters"]["query"]
+  get__api_incidents["parameters"]["query"]
 >;
 
 export const incidentApi = {

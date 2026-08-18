@@ -1,7 +1,7 @@
 import { api } from "../lib/api-client";
-import type { components } from "../types/openapi";
+import type { User } from "../lib/api.gen";
 
-export type User = components["schemas"]["User"];
+export type { User } from "../lib/api.gen";
 
 export const userApi = {
   getAll: (): Promise<User[]> => api.get("/api/users"),

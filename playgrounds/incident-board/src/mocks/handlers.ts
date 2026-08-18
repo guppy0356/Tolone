@@ -1,15 +1,13 @@
 import { delay } from "msw";
-import { createOpenApiHttp } from "openapi-msw";
-import type { components, paths } from "../types/openapi";
-
-const http = createOpenApiHttp<paths>();
-
-type User = components["schemas"]["User"];
-type IncidentStatus = components["schemas"]["IncidentStatus"];
-type IncidentSeverity = components["schemas"]["IncidentSeverity"];
-type IncidentSummary = components["schemas"]["IncidentSummary"];
-type IncidentDetail = components["schemas"]["IncidentDetail"];
-type Comment = components["schemas"]["Comment"];
+import type {
+  Comment,
+  IncidentDetail,
+  IncidentSeverity,
+  IncidentStatus,
+  IncidentSummary,
+  User,
+} from "../lib/api.gen";
+import { http } from "./typed-http";
 
 const PER_PAGE = 10;
 

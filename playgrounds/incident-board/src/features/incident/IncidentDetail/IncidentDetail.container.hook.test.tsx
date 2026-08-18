@@ -1,17 +1,14 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createOpenApiHttp } from "openapi-msw";
 import type { ReactNode } from "react";
 import { expect, test, vi } from "vitest";
 import { renderHook } from "vitest-browser-react";
 import type { IncidentDetail } from "@api/Incident.api";
-import type { paths } from "../../../types/openapi";
+import { http } from "../../../mocks/typed-http";
 import { worker } from "../../../test/worker";
 import {
   useIncidentDetailContainer,
   type IncidentDetailContainerParams,
 } from "./IncidentDetail.container.hook";
-
-const http = createOpenApiHttp<paths>();
 
 const detail: IncidentDetail = {
   id: "1",

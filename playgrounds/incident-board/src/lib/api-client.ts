@@ -1,9 +1,10 @@
 import ky, { HTTPError } from "ky";
-import { createApiClient, type Fetcher, type FetcherResponse } from "./api.gen";
+import { createApiClient, type Fetcher } from "./api.gen";
 
 // ky's status-code retry only runs while it throws, so HTTPError is caught
-// *after* the retries and handed back as a response. ky has already consumed
-// the error body into `error.data`, so the response serves that.
+// *after* the retries and handed back as a response. `error.response` cannot
+// be handed back as-is: ky consumed its body to populate `error.data`, so the
+// error body is re-serialized into a fresh Response.
 const fetcher: Fetcher = {
   fetch: async ({ url, method, urlSearchParams, parameters, requestFormat, overrides }) => {
     try {
@@ -18,18 +19,17 @@ const fetcher: Fetcher = {
     } catch (error) {
       if (error instanceof HTTPError) {
         const { response } = error;
-        const errorResponse: FetcherResponse = {
-          ok: false,
+        const body =
+          error.data === undefined
+            ? null
+            : typeof error.data === "string"
+              ? error.data
+              : JSON.stringify(error.data);
+        return new Response(body, {
           status: response.status,
           statusText: response.statusText,
           headers: response.headers,
-          json: async () => error.data,
-          text: async () =>
-            typeof error.data === "string" ? error.data : JSON.stringify(error.data),
-          arrayBuffer: async () => new ArrayBuffer(0),
-          clone: () => errorResponse,
-        };
-        return errorResponse;
+        });
       }
       throw error;
     }

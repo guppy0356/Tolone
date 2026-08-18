@@ -10,13 +10,12 @@
     "test": "vitest run",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "generate:api": "openapi-typescript src/openapi.yaml --enum-values -o src/types/openapi.ts && typed-openapi src/openapi.yaml --runtime zod -o src/lib/api.gen.ts"
+    "generate:api": "typed-openapi src/openapi.yaml --runtime zod -o src/lib/api.gen.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
     "ky": "catalog:",
-    "openapi-msw": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "zod": "catalog:"
@@ -32,7 +31,6 @@
     "@vitest/browser": "catalog:",
     "@vitest/browser-playwright": "catalog:",
     "msw": "catalog:",
-    "openapi-typescript": "catalog:",
     "playwright": "catalog:",
     "storybook": "catalog:",
     "tailwindcss": "catalog:",

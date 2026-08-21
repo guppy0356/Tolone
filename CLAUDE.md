@@ -45,6 +45,10 @@ Every commit must typecheck — a Lefthook pre-commit hook runs `tsc --noEmit` f
 
 The one ordering that is easy to get wrong: **declare the URLs first, attach the Containers last.** `Link` / `useSearch({ from })` are typed against the registered route tree, so a navigating Component cannot typecheck before its routes exist — and the routes cannot name a Container that does not exist yet. Those are the checklist's two route steps.
 
+## Feature Cycle
+
+New playgrounds and features enter through three skills — `/enjoy-playground <description>`, `/plan <name>`, `/implement <name>`. What they write (the playground `README.md` requirement checklist, the committed `plan.md`) and what one run does are stated once in [workflow.md § Requirements, plans, and runs](docs/architecture/workflow.md#requirements-plans-and-runs); the checklist and commit-per-step rules above apply inside every run.
+
 ## Future Work
 
 Once a feature is working end-to-end, if a single Component contains multiple distinct UI concerns (e.g. form, filter, list), **propose** splitting into sub-components (each with its own component hook when it owns state). Do not split without user approval.

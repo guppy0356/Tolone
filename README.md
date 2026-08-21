@@ -87,15 +87,15 @@ What it deliberately leaves for you — the `@api` alias, the `unit` Vitest proj
 ### Create a new playground
 
 ```
-Create a bookmark management playground.
-
-Features:
-- List, add, and delete bookmarks
-- Filter by tags
-
-Scaffold with `pnpm new:playground bookmark`, then define openapi.yaml
-and implement following docs/architecture/workflow.md.
+/enjoy-playground A bookmark manager. GET /bookmarks lists them with their tags
+and can be filtered by tag; POST /bookmarks adds one; DELETE /bookmarks/{id}
+removes one.
 ```
+
+This scaffolds the playground and writes its requirement checklist to
+`playgrounds/bookmarks/README.md`. Then `/plan bookmarks` to scope a round and
+commit the plan, and `/implement bookmarks` once per requirement — see
+[workflow.md § Requirements, plans, and runs](./docs/architecture/workflow.md#requirements-plans-and-runs).
 
 ### Update packages
 

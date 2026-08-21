@@ -27,6 +27,7 @@ Storybook's `play`-based path:
 | Does this unit get anything at all? | Only what renders or decides. Pure wiring gets neither | ↓ What gets what |
 | Does the Component navigate? | It renders `<Link>` or calls `navigate` → its stories and tests need the shared minimal router | [Test wiring](./wiring.md) |
 | Does this test need server responses? | Register them in the test file with `worker.use()`. Never depend on the dev seed handlers | [Mocking](../mocking.md) |
+| Is this a README requirement line? | It gets a same-named behavior test regardless of `args`-reachability — the checked line is a receipt | [Requirements, plans, and runs](../workflow.md#requirements-plans-and-runs) |
 
 ### What gets what
 

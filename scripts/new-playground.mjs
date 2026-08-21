@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { execSync } from "node:child_process";
 
@@ -10,6 +10,14 @@ if (!name) {
 
 const pascal = name.charAt(0).toUpperCase() + name.slice(1);
 const root = join("playgrounds", name);
+if (!/^[a-z][a-z0-9-]*$/.test(name)) {
+  console.error("Playground name must be kebab-case: lowercase letters, digits and hyphens.");
+  process.exit(1);
+}
+if (existsSync(root)) {
+  console.error(`playgrounds/${name} already exists — pick another name.`);
+  process.exit(1);
+}
 
 // Directory structure
 const dirs = [

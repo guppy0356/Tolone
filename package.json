@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "new:playground": "node scripts/new-playground.mjs",
+    "check:readme": "node scripts/check-playground-readme.mjs",
     "dev": "pnpm --filter @tolone/* dev",
     "test": "pnpm -r test",
     "postinstall": "node scripts/sync-msw-worker.mjs"

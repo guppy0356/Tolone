@@ -103,14 +103,15 @@ has no reader. Only intent and deliberate departures are worth keeping.
   Inferring the target from the unique `plan.md` or from the working directory was
   considered and rejected: it is ambiguous as soon as two plans exist, and a slash
   command has no working directory of its own.
-- **Nothing enforces the receipt today, and that is a known cost.** Lefthook runs
-  `tsc` only and there is no CI, so the guarantee is the human matching plan against
-  tree and `[x]` lines against test names; the prose in a SKILL.md is not a guarantee.
-  The mechanical checks that would close this — a pre-commit script
-  (`scripts/check-playground-readme.mjs`: README append-only, `[x]` ↔ same-named test,
-  flipped lines ⊆ plan scope) beside Lefthook's typecheck, and CI running `pnpm test` —
-  are not yet written. What cannot be linted at all (a file written *on purpose* not at
-  all) rests on `## Decisions`.
+- **The shape is enforced before the commit; the test's passing is not, yet.**
+  `scripts/check-playground-readme.mjs` runs beside Lefthook's typecheck and rejects a
+  commit that edits a committed README line, checks a line off without a same-named
+  `test("…")`, checks off outside the committed plan's Scope or out of its order, or
+  stages a `plan.md` in the wrong shape. The prose in a SKILL.md is not the guarantee;
+  the script is. What it cannot see is whether the test *passes* — there is no CI, so
+  that rests on `pnpm test` run by the session and on the human reading the result —
+  and what cannot be linted at all (a file written *on purpose* not at all) rests on
+  `## Decisions`.
 - **Older playgrounds are not retrofitted.** The README files already in `family-todo`
   and `novel` are usage notes and stay as they are. Back-filling requirement lines from
   existing tests was not taken: a line written after its test is a description, not a
@@ -127,8 +128,9 @@ guide against the tree — and the code body is opened only when a match fails.
 ## Revisit triggers
 
 1. **A playground's `## Decisions` line is cited as precedent in another playground**:
-   it is a rule. Promote it through the ADR gate and mark the README line
-   `(promoted to ADR N, YYYY-MM-DD)` — the README stays append-only.
+   it is a rule. Promote it through the ADR gate and append a `## Decisions` line
+   `- YYYY-MM-DD <Page>: promoted to ADR N (promotes YYYY-MM-DD)` — the README stays
+   append-only.
 2. **`## Decisions` entries start being written in the present tense, or the README
    grows a section that describes current behaviour**: the file is becoming the spec
    this ADR refused; re-read option A's failure modes before accepting it.

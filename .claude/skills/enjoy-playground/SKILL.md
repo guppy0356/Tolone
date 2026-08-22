@@ -56,12 +56,13 @@ the description and stop — do not name or scaffold anything.
 4. **Scaffold.** `pnpm -w new:playground <name>` (the `-w` runs the root script from any
    cwd). It writes `playgrounds/<name>/` — the Vite / Vitest / Storybook / MSW base, a
    placeholder `indexRoute` in `src/root.route.tsx`, a starter
-   `src/features/welcome/Welcome.stories.tsx` — appends `playgrounds/<name>/public` to
-   `msw.workerDirectory` in the root `package.json`, and runs `pnpm install`, which
-   rewrites `pnpm-lock.yaml` and writes the tracked `public/mockServiceWorker.js`. It
-   writes neither `README.md` nor `src/openapi.yaml`, and its `generate:api` script is
-   the pre-ADR-0013 one — `/implement`'s first run replaces it per
-   [setup.md](../../../docs/architecture/setup.md#what-the-scaffold-leaves-for-you).
+   `src/features/welcome/Welcome.stories.tsx`, a `src/openapi.yaml` with no paths yet,
+   and the `src/lib/api-client.ts` of
+   [setup.md](../../../docs/architecture/setup.md#the-api-client) — appends
+   `playgrounds/<name>/public` to `msw.workerDirectory` in the root `package.json`, runs
+   `pnpm install`, which rewrites `pnpm-lock.yaml` and writes the tracked
+   `public/mockServiceWorker.js`, and runs `generate:api` once, so `src/lib/api.gen.ts`
+   and its sidecar exist before the first commit. It does not write `README.md`.
 5. **Write `playgrounds/<name>/README.md`** with the approved text.
 6. **Hand over the first commit.** Run `git status --short`; the only entries must be
    ` M package.json`, ` M pnpm-lock.yaml` and `?? playgrounds/<name>/` — anything else

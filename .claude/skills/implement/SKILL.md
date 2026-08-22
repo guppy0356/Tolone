@@ -50,8 +50,8 @@ from the working directory or from whichever plan happens to exist.
    action), stop and ask — the answer becomes a new README line through `/plan`, not a
    choice made in the run.
 3. **Walk only the steps the line needs.** Compare what exists — the page directory, the
-   paths **and schemas** in `src/openapi.yaml` (absent until the first run's step 1
-   writes it), the handlers, the routes — with what the requirement needs, and walk only
+   paths **and schemas** in `src/openapi.yaml` (`paths: {}` until the first run's step 1
+   fills it), the handlers, the routes — with what the requirement needs, and walk only
    the missing or changed workflow.md steps, in its order, one commit per step as it says
    (Lefthook typechecks each; stage explicitly, never `git add -A`). The first
    requirement of a new page walks steps 1–15, each conditional step (8, 9, 10) by its

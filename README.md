@@ -77,9 +77,10 @@ Stories are a visual catalog — every state through `args`, no `play`. Behavior
 in `*.test.{ts,tsx}`, run by Vitest in browser mode (Playwright Chromium, no jsdom).
 `pnpm test` runs both.
 
-`new:playground` writes the Vite app, one Storybook project and a starter story.
-What it deliberately leaves for you — the `@api` alias, the `unit` Vitest project,
-`zod`, `react-hook-form` — is listed under
+`new:playground` writes the Vite app, one Storybook project, a starter story, a
+`src/openapi.yaml` with no paths yet, and the generated client wired in
+`src/lib/api-client.ts`. What it deliberately leaves for you — the `@api` alias, the
+`unit` Vitest project, `react-hook-form` — is listed under
 [Setup](./docs/architecture/setup.md#what-the-scaffold-leaves-for-you).
 
 ## Sample Prompts for Claude
@@ -114,10 +115,10 @@ commit. See [.claude/skills/update-dependencies/SKILL.md](.claude/skills/update-
 - React 19 + TypeScript
 - TanStack Query 5 + TanStack Router 1
 - Vite + TailwindCSS v4
-- MSW v2 + openapi-msw (type-safe mock handlers)
-- openapi-typescript (schema → type generation)
+- MSW v2 (mock handlers typed against the contract by a handwritten `typed-http` helper)
+- typed-openapi (`src/openapi.yaml` → zod schemas + validating client in `src/lib/api.gen.ts`)
 - vite-plugin-checker (dev server type checking)
-- ky (HTTP client)
+- ky (HTTP transport under the generated client)
 - react-hook-form + zod (form validation)
 - Vitest (browser-mode via @storybook/addon-vitest and vitest-browser-react; no jsdom)
 - Storybook 10 + Playwright (visual catalog; every story also runs as a render smoke test in Chromium via `@storybook/addon-vitest`)

@@ -3,8 +3,11 @@
 What `pnpm new:playground <name>` gives you, what it deliberately does not, and how types
 get generated from the contract.
 
-The scaffold writes the Vite app, one Storybook project and a starter story. Everything
-below is added by hand, when the rule that needs it applies.
+The scaffold writes the Vite app, one Storybook project, a starter story, a
+`src/openapi.yaml` with no paths yet, and the [API client](#the-api-client) below — with
+`generate:api` run once against that contract, so the client typechecks before the first
+feature lands. Everything in the table below is added by hand, when the rule that needs
+it applies.
 
 ## Decisions
 

@@ -22,8 +22,6 @@ below is added by hand, when the rule that needs it applies.
 | the `unit` Vitest project | when the playground gains its first `*.test.tsx` — see [Test wiring](./testing/wiring.md) |
 | `resolve.dedupe: ["react", "react-dom"]` | required as soon as `vitest-browser-react` renders anything using React context |
 | `vitest-browser-react` | the dependency itself, with that first behavior test |
-| `zod` | with the first `generate:api` — the generated client imports it; [forms](./layers/form-schema.md) and [URL state](./url-state.md) reuse it |
-| `typed-openapi` | devDependency, with the same first `generate:api` |
 | `react-hook-form` + `@hookform/resolvers` | with the first form page |
 
 ## The API client

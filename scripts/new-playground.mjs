@@ -27,7 +27,6 @@ const dirs = [
   join(root, "src", "features"),
   join(root, "src", "features", "welcome"),
   join(root, "src", "mocks"),
-  join(root, "src", "types"),
   join(root, "public"),
   join(root, ".storybook"),
 ];
@@ -50,15 +49,15 @@ const packageJson = `{
     "test": "vitest run",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "generate:api": "openapi-typescript src/openapi.yaml -o src/types/openapi.d.ts"
+    "generate:api": "typed-openapi src/openapi.yaml --runtime zod --output src/lib/api.gen.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
-    "openapi-msw": "catalog:",
+    "ky": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "ky": "catalog:"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@storybook/addon-vitest": "catalog:",
@@ -71,10 +70,10 @@ const packageJson = `{
     "@vitest/browser": "catalog:",
     "@vitest/browser-playwright": "catalog:",
     "msw": "catalog:",
-    "openapi-typescript": "catalog:",
     "playwright": "catalog:",
     "storybook": "catalog:",
     "tailwindcss": "catalog:",
+    "typed-openapi": "catalog:",
     "typescript": "^6.0.3",
     "vite": "^8.0.10",
     "vite-plugin-checker": "catalog:",
@@ -260,13 +259,70 @@ const appCss = `@import "@tolone/tailwind/base.css";
 const viteEnvDts = `/// <reference types="vite/client" />
 `;
 
-const apiClient = `import ky from "ky";
+// Placeholder until the first feature defines its endpoints and schemas (workflow step 1).
+// It exists so generate:api can run at scaffold time and src/lib/api-client.ts resolves
+// ./api.gen from the first commit on.
+const openapiYaml = `openapi: 3.1.0
+info:
+  title: ${pascal}
+  version: 0.0.0
+paths: {}
+`;
 
-export const api = ky.create({ prefix: "/api" });
+// docs/architecture/setup.md § The API client
+const apiClient = `import ky, { HTTPError } from "ky";
+import { createApiClient, type Fetcher } from "./api.gen";
+
+// ky's status-code retry only runs while it throws, so HTTPError is caught
+// *after* the retries and handed back as a response. \`error.response\` cannot
+// be handed back as-is: ky consumed its body to populate \`error.data\`, so the
+// error body is re-serialized into a fresh Response.
+const fetcher: Fetcher = {
+  fetch: async ({ url, method, urlSearchParams, parameters, requestFormat, overrides }) => {
+    try {
+      return await ky(url, {
+        method,
+        searchParams: urlSearchParams,
+        ...(requestFormat === "json" && parameters?.body !== undefined
+          ? { json: parameters.body }
+          : {}),
+        ...overrides,
+      });
+    } catch (error) {
+      if (error instanceof HTTPError) {
+        const { response } = error;
+        const body =
+          error.data === undefined
+            ? null
+            : typeof error.data === "string"
+              ? error.data
+              : JSON.stringify(error.data);
+        return new Response(body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        });
+      }
+      throw error;
+    }
+  },
+};
+
+// The client resolves paths against an absolute base URL. Input validation
+// stays off: request shapes are TS-owned end to end, and zod input parsing
+// would rewrite them (a defaulted contract param gets injected into the
+// query string).
+export const api = createApiClient(fetcher, window.location.origin, {
+  validate: "output",
+});
+
+export { TypedStatusError } from "./api.gen";
 `;
 
 const mockHandlers = `import type { HttpHandler } from "msw";
 
+// Empty until src/openapi.yaml has its first endpoint: workflow step 13 adds handlers
+// built with the typed-http helper (docs/architecture/mocking.md#typed-handlers).
 export const handlers: HttpHandler[] = [];
 `;
 
@@ -289,6 +345,7 @@ const files = [
   [join(root, "src", "router.ts"), routerTs],
   [join(root, "src", "app.css"), appCss],
   [join(root, "src", "vite-env.d.ts"), viteEnvDts],
+  [join(root, "src", "openapi.yaml"), openapiYaml],
   [join(root, "src", "lib", "api-client.ts"), apiClient],
   [join(root, "src", "mocks", "handlers.ts"), mockHandlers],
   [join(root, "src", "mocks", "browser.ts"), mockBrowser],
@@ -315,6 +372,12 @@ writeFileSync("package.json", `${JSON.stringify(rootManifest, null, 2)}\n`);
 // Install dependencies — the root postinstall syncs the MSW worker script
 console.log("\nInstalling dependencies...");
 execSync("pnpm install", { stdio: "inherit" });
+
+// Generate the contract module — src/lib/api.gen.ts and its sidecar — from the
+// placeholder contract, so api-client.ts typechecks before the first feature lands
+// (docs/architecture/setup.md § Contract and type generation).
+console.log("\nGenerating the contract module...");
+execSync(`pnpm --filter @tolone/${name} generate:api`, { stdio: "inherit" });
 
 console.log(`\n✅ Playground "${name}" is ready!`);
 console.log(`   cd ${root}`);

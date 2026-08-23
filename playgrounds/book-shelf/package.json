@@ -40,6 +40,7 @@
     "typescript": "^6.0.3",
     "vite": "^8.0.10",
     "vite-plugin-checker": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "vitest-browser-react": "catalog:"
   }
 }

@@ -8,10 +8,26 @@ import { fileURLToPath } from "node:url";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Each project needs its OWN config object: vitest stamps the resolved project
+// name onto the shared `instances` entries, so reusing one literal would make
+// the two projects collide on a single name.
+const browserConfig = () => ({
+  enabled: true,
+  // pnpm resolves two vitest instances via peer graphs, splitting the
+  // BrowserProviderOption type. Cast bridges them; runtime is unaffected.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  provider: playwright({}) as any,
+  headless: true,
+  instances: [{ browser: "chromium" }],
+});
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: { "@api": path.join(dirname, "src/api") },
+    // vitest-browser-react bundles its own React; without this a render runs
+    // against a second copy and throws Invalid hook call.
+    dedupe: ["react", "react-dom"],
   },
   test: {
     projects: [
@@ -23,17 +39,15 @@ export default defineConfig({
             storybookScript: "pnpm storybook --no-open",
           }),
         ],
+        test: { name: "storybook", browser: browserConfig() },
+      },
+      {
+        extends: true,
         test: {
-          name: "storybook",
-          browser: {
-            enabled: true,
-            // pnpm resolves two vitest instances via peer graphs, splitting the
-            // BrowserProviderOption type. Cast bridges them; runtime is unaffected.
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            provider: playwright({}) as any,
-            headless: true,
-            instances: [{ browser: "chromium" }],
-          },
+          name: "unit",
+          include: ["src/**/*.test.{ts,tsx}"],
+          setupFiles: [path.join(dirname, "src/test/setup.ts")],
+          browser: browserConfig(),
         },
       },
     ],

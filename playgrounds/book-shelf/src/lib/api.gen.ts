@@ -4,22 +4,40 @@ import type * as __TypedOpenapi from "./api.gen.types.js";
   import { z } from "zod";
 
 // <Schemas>
+export type Book = __TypedOpenapi.Schemas.Book;
+export const Book = z.object({ id: z.string(), isbn13: z.string(), title: z.string(), coverUrl: z.url(), authors: z.array(z.string()), publisher: z.string(), registeredAt: z.iso.datetime() });
+
+export type CreateBookInput = __TypedOpenapi.Schemas.CreateBookInput;
+export const CreateBookInput = z.object({ isbn13: z.string() });
+
 // </Schemas>
 
 // <Endpoints>
+export type post__api_books = __TypedOpenapi.Endpoints.post__api_books;
+export const post__api_books = {
+  method: z.literal("POST"),
+  path: z.literal("/api/books"),
+  requestFormat: z.literal("json"),
+  responseFormat: z.literal("json"),
+  parameters: { body: CreateBookInput },
+  responses: { 201: Book },
+};
+
 // </Endpoints>
 
   
      // <EndpointByMethod>
      export const EndpointByMethod: __TypedOpenapi.EndpointByMethod = {
-     
+     post: {
+           "/api/books": post__api_books as any
+         }
      }
      export type EndpointByMethod = __TypedOpenapi.EndpointByMethod;
      // </EndpointByMethod>
      
 
     // <EndpointByMethod.Shorthands>
-    
+    export type PostEndpoints = EndpointByMethod["post"]
     // </EndpointByMethod.Shorthands>
     
   
@@ -412,7 +430,33 @@ export class ApiClient {
     return
   }
 
-  
+  // <ApiClient.post>
+    post<Path extends keyof PostEndpoints, TEndpoint extends PostEndpoints[Path]>(
+      path: Path,
+      ...params: MaybeOptionalArg<
+        (TEndpoint extends { parameters: infer UParams }
+          ? NotNever<UParams> extends true ? InferSchemaInput<UParams> & { overrides?: RequestInit; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide } : { overrides?: RequestInit; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide }
+          : { overrides?: RequestInit; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide })
+      >
+    ): Promise<SafeApiResponse<TEndpoint>>;
+
+    post<Path extends keyof PostEndpoints, TEndpoint extends PostEndpoints[Path]>(
+      path: Path,
+      ...params: MaybeOptionalArg<
+        (TEndpoint extends { parameters: infer UParams }
+          ? NotNever<UParams> extends true ? InferSchemaInput<UParams> & { overrides?: RequestInit; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide } : { overrides?: RequestInit; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide }
+          : { overrides?: RequestInit; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide })
+      >
+    ): Promise<InferSuccessData<TEndpoint>>;
+
+    post<Path extends keyof PostEndpoints, _TEndpoint extends PostEndpoints[Path]>(
+      path: Path,
+      ...params: MaybeOptionalArg<any>
+    ): Promise<any> {
+        return this.request("post", path, ...params);
+    }
+    // </ApiClient.post>
+    
 
     // <ApiClient.request>
     /**

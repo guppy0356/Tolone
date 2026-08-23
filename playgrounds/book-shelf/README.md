@@ -5,7 +5,7 @@ A shelf for the books you bought, each with a short review you can share.
 ## Requirements
 
 - Register a book
-  - [ ] registers a book from its ISBN-13
+  - [x] registers a book from its ISBN-13
 - My books
   - [ ] shows the books I registered
   - [ ] shows each book's cover, title, authors and publisher

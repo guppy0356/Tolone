@@ -13,11 +13,13 @@
     "generate:api": "typed-openapi src/openapi.yaml --runtime zod --output src/lib/api.gen.ts"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.7.1",
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
     "ky": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "react-hook-form": "^7.84.0",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -10,6 +10,9 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: { "@api": path.join(dirname, "src/api") },
+  },
   test: {
     projects: [
       {

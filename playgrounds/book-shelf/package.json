@@ -1,0 +1,43 @@
+{
+  "name": "@tolone/book-shelf",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "generate:api": "typed-openapi src/openapi.yaml --runtime zod --output src/lib/api.gen.ts"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-router": "catalog:",
+    "ky": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@storybook/addon-vitest": "catalog:",
+    "@storybook/react-vite": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "@tolone/tailwind": "workspace:*",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/browser": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
+    "msw": "catalog:",
+    "playwright": "catalog:",
+    "storybook": "catalog:",
+    "tailwindcss": "catalog:",
+    "typed-openapi": "catalog:",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10",
+    "vite-plugin-checker": "catalog:",
+    "vitest": "catalog:"
+  }
+}

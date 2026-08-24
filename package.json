@@ -23,7 +23,6 @@
     "workerDirectory": [
       "playgrounds/account-settings/public",
       "playgrounds/blog/public",
-      "playgrounds/book-shelf/public",
       "playgrounds/family-todo/public",
       "playgrounds/incident-board/public",
       "playgrounds/novel/public",

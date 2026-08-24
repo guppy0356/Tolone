@@ -25,11 +25,14 @@ playgrounds created by `/enjoy-playground`; the README files of older playground
 notes, and `/plan` and `/implement` stop on a README without `## Requirements`.
 
 **`README.md`** — what to build, kept as history. Under `## Requirements`, one top-level
-bullet per endpoint or screen, as the user named it, and beneath it, indented two spaces,
-one checkbox line per requirement — no headings, no blank lines inside a group:
+bullet per page, named by the address it answers on — `/enjoy-playground` derives the map
+from the description and the user approves it with the draft
+([ADR 0015](../adr/0015-url-map-decided-at-enjoy-playground.md)) — and beneath it,
+indented two spaces, one checkbox line per requirement — no headings, no blank lines
+inside a group:
 
 ```markdown
-- GET /my/loans
+- /my/loans
   - [ ] shows my loans
   - [x] marks a loan as overdue when the due date has passed
   - [ ] ~~lists loans newest first~~ (superseded 2026-08-21)
@@ -65,8 +68,8 @@ in exactly this shape:
 
 ## Scope (in this order)
 
-1. GET /my/loans — shows my loans
-2. GET /my/loans — shows the due date of each loan
+1. /my/loans — shows my loans
+2. /my/loans — shows the due date of each loan
 
 ## On purpose
 

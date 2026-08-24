@@ -261,7 +261,7 @@ for (const [name, entry] of playgrounds) {
     const names = testNamesOf(name);
     for (const now of after.entries) {
       if (now.group === null) {
-        fail(`${readmePath}: this requirement line is not under a group bullet (\`- GET /…\`):\n    ${now.line.trim()}`);
+        fail(`${readmePath}: this requirement line is not under a group bullet (\`- /…\`):\n    ${now.line.trim()}`);
         continue;
       }
       if (now.mark !== " " && now.mark !== "x") {

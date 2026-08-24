@@ -30,29 +30,40 @@ the description and stop — do not name or scaffold anything.
 2. **Draft the README in the reply — not on disk.** In English:
    - `# <Title>` and one sentence saying what the service is.
    - `## Requirements` — exactly the shape workflow.md gives: one top-level
-     `- <endpoint or screen, as the user named it>` per group, in the order given;
-     beneath it, indented two spaces, one `  - [ ] <behaviour>` line per requirement. No
-     headings, no bold, no blank lines inside a group. Each behaviour is a single line
-     phrased as the sentence that becomes its test name, split as workflow.md says — one
-     fixture, one line.
+     `- <the page's address>` per group, in the order given; beneath it, indented two
+     spaces, one `  - [ ] <behaviour>` line per requirement. No headings, no bold, no
+     blank lines inside a group. Each behaviour is a single line phrased as the sentence
+     that becomes its test name, split as workflow.md says — one fixture, one line.
    - `## Decisions` — the heading only.
+
+   **Derive the addresses.** One page per screen the description names, each answering on
+   an address of its own: a collection (`/books`), the page that creates one
+   (`/books/new`), a single record (`/books/$bookId` — the `$param` syntax of
+   [routing.md](../../../docs/architecture/routing.md)). Use the user's own addresses
+   where they gave any, and keep the set collision-free across the feature: a first page
+   that takes `/` leaves nothing for the pages that follow it. The map is settled here and
+   freezes with the group lines
+   ([ADR 0015](../../../docs/adr/0015-url-map-decided-at-enjoy-playground.md)).
+   Query-string design — parameter names, defaults, the sort vocabulary — is per round,
+   not per feature, and is not this command's.
 
    Translate what the user said; do not add requirements they did not state. When the
    description leaves a behaviour ambiguous, ask before writing it down. For
-   "本の貸し出しサービス。GET /books 蔵書の一覧。GET /my/loans 借りている本の一覧で、タイトル・借りた日・返却期限・期限切れかが見える"
+   "本の貸し出しサービス。蔵書の一覧。借りている本の一覧で、タイトル・借りた日・返却期限・期限切れかが見える"
    the requirements are:
 
    ```markdown
-   - GET /books
+   - /books
      - [ ] shows the catalogue
-   - GET /my/loans
+   - /my/loans
      - [ ] shows my loans
      - [ ] shows each loan's title, borrowed date and due date
      - [ ] marks a loan as overdue when the due date has passed
    ```
 
 3. **Ask the user to compare the draft with what they typed, and stop until they
-   approve.** A rejected draft leaves the tree clean.
+   approve.** The addresses are derived rather than quoted, so say which they are and ask
+   for them by name. A rejected draft leaves the tree clean.
 4. **Scaffold.** `pnpm -w new:playground <name>` (the `-w` runs the root script from any
    cwd). It writes `playgrounds/<name>/` — the Vite / Vitest / Storybook / MSW base, a
    placeholder `indexRoute` in `src/root.route.tsx`, a starter

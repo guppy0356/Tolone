@@ -127,6 +127,7 @@ const parsePlan = (text) => {
   const lines = splitLines(text);
   const problems = [];
   const scope = [];
+  const contract = [];
   const onPurpose = [];
   if (!/^# Plan — .+/.test(lines[0] ?? "")) problems.push("line 1 must be `# Plan — <short title of this round>`");
   let section = null;
@@ -140,15 +141,27 @@ const parsePlan = (text) => {
       const m = line.match(/^\d+\.\s+(.*)$/);
       if (m) scope.push(m[1].trim());
       else problems.push(`Scope line is not \`N. <group line> — <requirement line>\`: ${line}`);
+    } else if (section === "## Contract") {
+      if (/^- /.test(line)) contract.push(line.slice(2).trim());
+      else problems.push(`Contract line is not a bullet: ${line}`);
     } else if (section === "## On purpose") {
       if (/^- /.test(line)) onPurpose.push(line.slice(2).trim());
       else problems.push(`On purpose line is not a bullet: ${line}`);
     } else {
-      problems.push(`unexpected line outside \`## Scope (in this order)\` / \`## On purpose\`: ${line}`);
+      problems.push(
+        `unexpected line outside \`## Scope (in this order)\` / \`## Contract\` / \`## On purpose\`: ${line}`,
+      );
     }
   }
   if (!lines.includes("## Scope (in this order)")) problems.push("missing `## Scope (in this order)`");
   else if (scope.length === 0) problems.push("`## Scope (in this order)` lists no requirement");
+  if (!lines.includes("## Contract")) problems.push("missing `## Contract`");
+  else if (contract.length === 0) problems.push("`## Contract` needs at least `- (none)`");
+  for (const item of contract) {
+    if (item !== "(none)" && !/^[^:\s][^:]{0,40}: \S/.test(item)) {
+      problems.push(`Contract line must start with the page or path it scopes (\`- /my/loans: …\`) or be \`- (none)\`: - ${item}`);
+    }
+  }
   if (!lines.includes("## On purpose")) problems.push("missing `## On purpose`");
   else if (onPurpose.length === 0) problems.push("`## On purpose` needs at least `- (none)`");
   for (const item of onPurpose) {
@@ -156,7 +169,7 @@ const parsePlan = (text) => {
       problems.push(`On purpose line must start with the page it scopes (\`- MyLoans: …\`) or be \`- (none)\`: - ${item}`);
     }
   }
-  return { scope, onPurpose, problems };
+  return { scope, contract, onPurpose, problems };
 };
 
 const PLAN_SHAPE = [
@@ -166,6 +179,10 @@ const PLAN_SHAPE = [
   "    ## Scope (in this order)",
   "",
   "    1. <group line> — <requirement line>",
+  "",
+  "    ## Contract",
+  "",
+  "    - <page or path>: <choice>   (or `- (none)`)",
   "",
   "    ## On purpose",
   "",

@@ -56,6 +56,7 @@ Status becomes `Superseded by ADR N` rather than being edited.
 | [0013](./0013-single-generator-hand-rolled-mock-typing.md) | typed-openapi is the single generator; mock typing is hand-rolled over its output | Accepted |
 | [0014](./0014-requirements-in-the-playground-readme.md) | Requirements are an append-only checklist in the playground README; a committed, disposable plan gates implementation one requirement at a time | Accepted |
 | [0015](./0015-url-map-decided-at-enjoy-playground.md) | The URL map is decided when the requirements are written, and recorded as the README's group lines | Accepted |
+| [0016](./0016-plan-carries-the-rounds-contract-choices.md) | The round's contract choices are named in the plan, in a required `## Contract` section | Accepted |
 
 ¹ 0012's type-source sub-decision (openapi-typescript remains beside typed-openapi) is
 superseded by 0013; its decision — the generated validating client — stands.

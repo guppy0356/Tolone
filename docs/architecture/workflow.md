@@ -71,6 +71,10 @@ in exactly this shape:
 1. /my/loans — shows my loans
 2. /my/loans — shows the due date of each loan
 
+## Contract
+
+- /my/loans: due dates travel as dates, not instants — the page never shows a time.
+
 ## On purpose
 
 - MyLoans: no view model on purpose; the overdue rule is tried in a sub component.
@@ -79,7 +83,14 @@ in exactly this shape:
 Each Scope entry is `<group line, verbatim> — <requirement line, verbatim>`; the
 requirement line is everything after the first ` — `, so a group name never contains
 ` — `. Scope holds unchecked, non-superseded lines in execution order: the behaviour that
-makes the page exist first, its variations next, edge and failure cases last. `## On
+makes the page exist first, its variations next, edge and failure cases last.
+`## Contract` holds the choices the requirement lines leave open about the endpoints and
+parameters this round adds — what a filter is called, how many rows a page holds, which
+sort orders are offered — one statement per line, prefixed with the page or path it
+scopes, `- (none)` when the round adds neither
+([ADR 0016](../adr/0016-plan-carries-the-rounds-contract-choices.md)). It is the choice
+and never the schema: a line listing fields or types is restating `openapi.yaml`, which is
+the record that outlives the plan, so nothing here is copied anywhere. `## On
 purpose` holds what the run does deliberately against the guide, or as an experiment — one
 statement per line, prefixed with the page it scopes, `- (none)` when there is nothing —
 not the judgements the guide delegates and you merely applied. **The user commits the

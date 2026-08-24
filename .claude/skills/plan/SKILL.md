@@ -55,7 +55,13 @@ print the list above and stop — do not guess a near name.
    free text, every unchecked line of the first group that has one. When a picked line
    belongs to a page whose existence line (the one that makes the page exist) is still
    unchecked, put that line first and say so — it cannot be left behind. Order as
-   workflow.md says. "On purpose": what the user stated, as statements prefixed with the
+   workflow.md says. "Contract": the choices this round's endpoints and parameters leave
+   open — what a filter is called, how many rows a page holds, which sort orders are
+   offered — one statement per line, prefixed with the page or path it scopes, and each
+   one you are choosing rather than quoting marked `(proposed)` and phrased as a
+   question. `- (none)` when the round adds no endpoint and no parameter. The choice,
+   never the schema — a field list is `openapi.yaml`'s. "On purpose": what the user
+   stated, as statements prefixed with the
    page they scope (`MyLoans: …`), plus anything you want to propose — each proposal
    prefixed `(proposed)` and phrased as a question. `- (none)` when there is nothing. Do
    not list judgements the guide delegates and you merely applied; do not restate guide
@@ -69,7 +75,9 @@ print the list above and stop — do not guess a near name.
    where the item is no longer "on purpose".
 5. **On approval, write the files and stop for the commit.** First rewrite every
    accepted proposal as a statement and drop the declined ones — `plan.md` holds no
-   questions; `/implement` copies these lines verbatim into `## Decisions`. Append the
+   questions. The "On purpose" ones are what `/implement` copies verbatim into
+   `## Decisions`; the "Contract" ones are consumed by the run's step 1 and die with the
+   plan, since `openapi.yaml` is what survives it. Append the
    approved requirement lines to `README.md` (show the diff), write `plan.md`, then tell
    the user what to stage and the message, and stop without committing:
    `git add playgrounds/<name>/plan.md` (plus `playgrounds/<name>/README.md` if step 2

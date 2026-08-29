@@ -80,8 +80,7 @@ Component never receives component-hook output from outside. The component hook 
 
 Building a feature front to back is an ordered job, and
 [Adding a feature](./workflow.md) is that order — each of its fifteen steps names the file
-to read for it. Where the requirements come from and what one implementation run is:
-[Requirements, plans, and runs](./workflow.md#requirements-plans-and-runs).
+to read for it.
 
 ### By what you are about to write
 
@@ -103,7 +102,6 @@ to read for it. Where the requirements come from and what one implementation run
 | `public/mockServiceWorker.js` | [Mocking](./mocking.md#the-worker-script) |
 | a new page directory | [Directory structure](./conventions/directory-structure.md) · [Naming](./conventions/naming.md) |
 | a new playground | [Setup](./setup.md) |
-| `playgrounds/*/README.md`, `plan.md` | [Requirements, plans, and runs](./workflow.md#requirements-plans-and-runs) |
 
 ### By rule
 
@@ -126,9 +124,6 @@ Each rule is stated once, in the file that applies it.
 | Feature-root modules — wired vs called | [Directory structure](./conventions/directory-structure.md#wired-or-called) |
 | Dev seed handlers are never a test fixture | [Mocking](./mocking.md#why-two-instances) |
 | The worker script is generated, never edited | [Mocking](./mocking.md#the-worker-script) |
-| The README is append-only; `[x]` is a receipt backed by a same-named test | [Requirements, plans, and runs](./workflow.md#requirements-plans-and-runs) |
-| A plan is approved by committing it and deleted when its scope closes | [Requirements, plans, and runs](./workflow.md#requirements-plans-and-runs) |
-| Feature-local choice vs rule change (plan approval is not an ADR) | [Requirements, plans, and runs](./workflow.md#requirements-plans-and-runs) |
 
 Decisions that were argued out rather than merely stated live in
 [ADRs](../adr/), which carry the options considered and the conditions for revisiting.

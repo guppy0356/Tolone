@@ -49,10 +49,6 @@ The one ordering that is easy to get wrong: **declare the URLs first, attach the
 
 Once a feature is working end-to-end, if a single Component contains multiple distinct UI concerns (e.g. form, filter, list), **propose** splitting into sub-components (each with its own component hook when it owns state). Do not split without user approval.
 
-## Updating Dependencies
-
-Every bump — patch, minor, or major — follows the `update-dependencies` skill exactly, even trivial patches.
-
 ## Workspace Layout
 
 - `playgrounds/` — feature playgrounds (each is a Vite React app)

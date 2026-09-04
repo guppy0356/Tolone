@@ -98,18 +98,6 @@ Scaffold with `pnpm new:playground bookmark`, then define openapi.yaml
 and implement following docs/architecture/workflow.md.
 ```
 
-### Update packages
-
-```
-Update the outdated packages.
-```
-
-This picks up the `update-dependencies` skill, which owns the procedure: collect
-with `pnpm outdated -r`, read the release notes for every direct and transitive
-bump, present an impact assessment and wait for confirmation, then execute one
-candidate at a time, verifying with `pnpm test` and `pnpm -r build` before each
-commit. See [.claude/skills/update-dependencies/SKILL.md](.claude/skills/update-dependencies/SKILL.md).
-
 ## Tech Stack
 
 - React 19 + TypeScript

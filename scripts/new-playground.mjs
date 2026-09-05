@@ -46,9 +46,11 @@ const packageJson = `{
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p .",
     "test": "vitest run",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "generate": "pnpm generate:api",
     "generate:api": "typed-openapi src/openapi.yaml --runtime zod --output src/lib/api.gen.ts"
   },
   "dependencies": {

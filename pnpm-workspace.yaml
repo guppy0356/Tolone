@@ -3,31 +3,31 @@ packages:
   - packages/*
 
 catalog:
+  '@storybook/addon-vitest': ^10.5.10
+  '@storybook/react-vite': ^10.5.10
   '@tailwindcss/vite': ^4.3.3
-  '@tanstack/react-query': ^5.101.4
-  '@tanstack/react-router': ^1.170.20
-  ky: ^2.0.2
+  '@tanstack/react-query': ^5.102.8
+  '@tanstack/react-router': ^1.170.32
+  '@vitest/browser': ^4.1.11
+  '@vitest/browser-playwright': ^4.1.11
+  ky: ^2.1.0
   msw: ^2.15.0
   openapi-msw: ^2.0.0
   openapi-typescript: ^7.13.0
+  playwright: ^1.62.1
   react: ^19.2.8
   react-dom: ^19.2.8
-  storybook: ^10.5.6
-  '@storybook/addon-vitest': ^10.5.6
-  '@storybook/react-vite': ^10.5.6
+  storybook: ^10.5.10
   tailwindcss: ^4.3.3
-  typed-openapi: ^3.2.1
+  typed-openapi: ^3.3.1
   vite-plugin-checker: ^0.14.5
-  vitest: ^4.1.10
-  '@vitest/browser': ^4.1.10
-  '@vitest/browser-playwright': ^4.1.10
+  vitest: ^4.1.11
   vitest-browser-react: ^2.2.0
-  playwright: ^1.62.1
-  zod: ^4.4.3
+  zod: ^4.5.2
+
+minimumReleaseAge: 10080
 
 onlyBuiltDependencies:
   - esbuild
   - lefthook
   - msw
-
-minimumReleaseAge: 10080

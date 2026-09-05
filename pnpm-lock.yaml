@@ -117,7 +117,7 @@ importers:
         specifier: ^7.84.0
         version: 7.84.0(react@19.2.8)
       zod:
-        specifier: ^4.4.3
+        specifier: 'catalog:'
         version: 4.4.3
     devDependencies:
       '@storybook/addon-vitest':
@@ -202,7 +202,7 @@ importers:
         specifier: ^7.84.0
         version: 7.84.0(react@19.2.8)
       zod:
-        specifier: ^4.4.3
+        specifier: 'catalog:'
         version: 4.4.3
     devDependencies:
       '@storybook/addon-vitest':
@@ -752,7 +752,7 @@ importers:
         specifier: ^7.84.0
         version: 7.84.0(react@19.2.8)
       zod:
-        specifier: ^4.4.3
+        specifier: 'catalog:'
         version: 4.4.3
     devDependencies:
       '@storybook/addon-vitest':

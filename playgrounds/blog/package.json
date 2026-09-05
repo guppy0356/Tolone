@@ -23,7 +23,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-hook-form": "^7.84.0",
-    "zod": "^4.4.3"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@storybook/addon-vitest": "catalog:",

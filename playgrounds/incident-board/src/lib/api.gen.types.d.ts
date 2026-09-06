@@ -4,8 +4,8 @@
   export type IncidentStatus = ("open" | "acknowledged" | "resolved")
 export type IncidentSeverity = ("low" | "medium" | "high" | "critical")
 export type IncidentSort = ("openedAt" | "-openedAt" | "severity" | "-severity")
-export type User = { id: string, name: string }
-export type IncidentSummary = {
+export type User = ({ id: string, name: string } & Record<string, unknown>)
+export type IncidentSummary = ({
   id: string;
   /**
    * Human-facing identifier, e.g. INC-1043.
@@ -19,11 +19,11 @@ export type IncidentSummary = {
    */
   assignee: (User | null);
   openedAt: string;
-}
-export type TimelineEvent = { id: string, at: string, kind: ("opened" | "acknowledged" | "resolved" | "note"), actor: string, message: string }
-export type IncidentDetail = { id: string, key: string, title: string, status: IncidentStatus, severity: IncidentSeverity, assignee: (User | null), openedAt: string, description: string, timeline: Array<TimelineEvent> }
-export type Comment = { id: string, author: string, body: string, postedAt: string }
-export type IncidentPage = { items: Array<IncidentSummary>, page: number, perPage: number, total: number, totalPages: number }
+} & Record<string, unknown>)
+export type TimelineEvent = ({ id: string, at: string, kind: ("opened" | "acknowledged" | "resolved" | "note"), actor: string, message: string } & Record<string, unknown>)
+export type IncidentDetail = ({ id: string, key: string, title: string, status: IncidentStatus, severity: IncidentSeverity, assignee: (User | null), openedAt: string, description: string, timeline: Array<TimelineEvent> } & Record<string, unknown>)
+export type Comment = ({ id: string, author: string, body: string, postedAt: string } & Record<string, unknown>)
+export type IncidentPage = ({ items: Array<IncidentSummary>, page: number, perPage: number, total: number, totalPages: number } & Record<string, unknown>)
 
     // </Schemas>
     }

@@ -14,22 +14,22 @@ export type IncidentSort = __TypedOpenapi.Schemas.IncidentSort;
 export const IncidentSort = z.enum(["openedAt", "-openedAt", "severity", "-severity"]);
 
 export type User = __TypedOpenapi.Schemas.User;
-export const User = z.object({ id: z.string(), name: z.string() });
+export const User = z.object({ id: z.string(), name: z.string() }).catchall(z.unknown());
 
 export type IncidentSummary = __TypedOpenapi.Schemas.IncidentSummary;
-export const IncidentSummary = z.object({ id: z.string(), key: z.string(), title: z.string(), status: IncidentStatus, severity: IncidentSeverity, assignee: User.nullable(), openedAt: z.iso.datetime() });
+export const IncidentSummary = z.object({ id: z.string(), key: z.string(), title: z.string(), status: IncidentStatus, severity: IncidentSeverity, assignee: User.nullable(), openedAt: z.iso.datetime() }).catchall(z.unknown());
 
 export type TimelineEvent = __TypedOpenapi.Schemas.TimelineEvent;
-export const TimelineEvent = z.object({ id: z.string(), at: z.iso.datetime(), kind: z.enum(["opened", "acknowledged", "resolved", "note"]), actor: z.string(), message: z.string() });
+export const TimelineEvent = z.object({ id: z.string(), at: z.iso.datetime(), kind: z.enum(["opened", "acknowledged", "resolved", "note"]), actor: z.string(), message: z.string() }).catchall(z.unknown());
 
 export type IncidentDetail = __TypedOpenapi.Schemas.IncidentDetail;
-export const IncidentDetail = z.object({ id: z.string(), key: z.string(), title: z.string(), status: IncidentStatus, severity: IncidentSeverity, assignee: User.nullable(), openedAt: z.iso.datetime(), description: z.string(), timeline: z.array(TimelineEvent) });
+export const IncidentDetail = z.object({ id: z.string(), key: z.string(), title: z.string(), status: IncidentStatus, severity: IncidentSeverity, assignee: User.nullable(), openedAt: z.iso.datetime(), description: z.string(), timeline: z.array(TimelineEvent) }).catchall(z.unknown());
 
 export type Comment = __TypedOpenapi.Schemas.Comment;
-export const Comment = z.object({ id: z.string(), author: z.string(), body: z.string(), postedAt: z.iso.datetime() });
+export const Comment = z.object({ id: z.string(), author: z.string(), body: z.string(), postedAt: z.iso.datetime() }).catchall(z.unknown());
 
 export type IncidentPage = __TypedOpenapi.Schemas.IncidentPage;
-export const IncidentPage = z.object({ items: z.array(IncidentSummary), page: z.number().int(), perPage: z.number().int(), total: z.number().int(), totalPages: z.number().int() });
+export const IncidentPage = z.object({ items: z.array(IncidentSummary), page: z.number().int(), perPage: z.number().int(), total: z.number().int(), totalPages: z.number().int() }).catchall(z.unknown());
 
 // </Schemas>
 
@@ -40,7 +40,7 @@ export const get__api_incidents = {
   path: z.literal("/api/incidents"),
   requestFormat: z.literal("json"),
   responseFormat: z.literal("json"),
-  parameters: { query: z.object({ status: z.array(IncidentStatus), severity: IncidentSeverity, assignee: z.string(), sort: IncidentSort, page: z.coerce.number().int().min(1).default(1) }).partial().optional() },
+  parameters: { query: z.object({ status: z.array(IncidentStatus), severity: IncidentSeverity, assignee: z.string(), sort: IncidentSort, page: z.coerce.number().int().min(1).default(1) }).partial().strict().optional() },
   responses: { 200: IncidentPage },
 };
 
@@ -50,7 +50,7 @@ export const get__api_incidents_IncidentId = {
   path: z.literal("/api/incidents/{incidentId}"),
   requestFormat: z.literal("json"),
   responseFormat: z.literal("json"),
-  parameters: { path: z.object({ incidentId: z.string() }) },
+  parameters: { path: z.object({ incidentId: z.string() }).strict() },
   responses: { 200: IncidentDetail, 404: z.unknown() },
 };
 
@@ -60,7 +60,7 @@ export const get__api_incidents_IncidentId_comments = {
   path: z.literal("/api/incidents/{incidentId}/comments"),
   requestFormat: z.literal("json"),
   responseFormat: z.literal("json"),
-  parameters: { path: z.object({ incidentId: z.string() }) },
+  parameters: { path: z.object({ incidentId: z.string() }).strict() },
   responses: { 200: z.array(Comment), 404: z.unknown() },
 };
 
@@ -78,14 +78,14 @@ export const get__api_users = {
 
   
      // <EndpointByMethod>
-     export const EndpointByMethod: __TypedOpenapi.EndpointByMethod = {
+     export const EndpointByMethod = {
      get: {
-           "/api/incidents": get__api_incidents as any,
-"/api/incidents/{incidentId}": get__api_incidents_IncidentId as any,
-"/api/incidents/{incidentId}/comments": get__api_incidents_IncidentId_comments as any,
-"/api/users": get__api_users as any
+           "/api/incidents": get__api_incidents,
+"/api/incidents/{incidentId}": get__api_incidents_IncidentId,
+"/api/incidents/{incidentId}/comments": get__api_incidents_IncidentId_comments,
+"/api/users": get__api_users
          }
-     }
+     } satisfies { [M in keyof __TypedOpenapi.EndpointByMethod]: { [P in keyof __TypedOpenapi.EndpointByMethod[M]]: unknown } }
      export type EndpointByMethod = __TypedOpenapi.EndpointByMethod;
      // </EndpointByMethod>
      
@@ -105,7 +105,7 @@ export type EndpointParameters = {
 };
 
 export type MutationMethod = "post" | "put" | "patch" | "delete";
-export type Method = "get" | "head" | "options" | MutationMethod;
+export type Method = "get" | "head" | "options" | "trace" | MutationMethod;
 
 export type RequestFormat = "json" | "form-data" | "form-url" | "binary" | "text";
 export type ResponseFormat = "json" | "sse";
@@ -118,6 +118,14 @@ export type SecurityRequirements = readonly (readonly string[])[];
     
     } as Partial<{ [M in keyof EndpointByMethod]: Partial<{ [P in keyof EndpointByMethod[M]]: RequestFormat }> }>;
     // </EndpointRequestFormats>
+    
+
+    // <EndpointParameterStyles>
+    export type ParameterSerialization = { style: string; explode: boolean; allowReserved: boolean };
+    export type EndpointParameterStyles = Partial<Record<"query" | "path" | "header" | "cookie", Record<string, ParameterSerialization>>>;
+    /** OpenAPI parameter styles used by the built-in encoders. */
+    export const endpointParameterStyles = {"get":{"/api/incidents":{"query":{"status":{"style":"form","explode":true,"allowReserved":false},"severity":{"style":"form","explode":true,"allowReserved":false},"assignee":{"style":"form","explode":true,"allowReserved":false},"sort":{"style":"form","explode":true,"allowReserved":false},"page":{"style":"form","explode":true,"allowReserved":false}}},"/api/incidents/{incidentId}":{"path":{"incidentId":{"style":"simple","explode":false,"allowReserved":false}}},"/api/incidents/{incidentId}/comments":{"path":{"incidentId":{"style":"simple","explode":false,"allowReserved":false}}}}} as Partial<Record<string, Partial<Record<string, EndpointParameterStyles>>>>;
+    // </EndpointParameterStyles>
     
 
     // <EndpointResponseFormats>
@@ -181,8 +189,8 @@ export interface FetcherResponse {
 }
 
 export interface Fetcher {
-    decodePathParams?: (path: string, pathParams: unknown) => string
-  encodeSearchParams?: (searchParams: unknown) => URLSearchParams | undefined
+    decodePathParams?: (path: string, pathParams: unknown, styles?: Record<string, ParameterSerialization>) => string
+  encodeSearchParams?: (searchParams: unknown, styles?: Record<string, ParameterSerialization>) => URLSearchParams | undefined
   /** Merge cookie params into request headers (default: Cookie header). */
   encodeCookies?: (cookies: unknown, headers: Headers) => void
     //
@@ -194,6 +202,8 @@ export interface Fetcher {
       path: string;
       /** How to encode `parameters.body` (from OpenAPI requestBody content type). */
       requestFormat: RequestFormat;
+      /** OpenAPI parameter serialization metadata for the current endpoint. */
+      parameterStyles?: EndpointParameterStyles;
       /** OpenAPI security requirements for this operation. Empty means no credentials are required. */
       security?: SecurityRequirements;
       overrides?: RequestInit;
@@ -209,7 +219,7 @@ export const errorStatusCodes = [400,401,402,403,404,405,406,407,408,409,410,411
 export type ErrorStatusCode = typeof errorStatusCodes[number];
 
 // Taken from https://github.com/unjs/fetchdts/blob/ec4eaeab5d287116171fc1efd61f4a1ad34e4609/src/fetch.ts#L3
-export interface TypedHeaders<TypedHeaderValues extends Record<string, string> | unknown> extends Omit<Headers, 'append' | 'delete' | 'get' | 'getSetCookie' | 'has' | 'set' | 'forEach'> {
+export interface TypedHeaders<TypedHeaderValues = unknown> extends Omit<Headers, 'append' | 'delete' | 'get' | 'getSetCookie' | 'has' | 'set' | 'forEach'> {
   /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/append) */
   append: <Name extends Extract<keyof TypedHeaderValues, string> | string & {}> (name: Name, value: Lowercase<Name> extends keyof TypedHeaderValues ? TypedHeaderValues[Lowercase<Name>] : string) => void
   /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/delete) */
@@ -222,7 +232,7 @@ export interface TypedHeaders<TypedHeaderValues extends Record<string, string> |
   has: <Name extends Extract<keyof TypedHeaderValues, string> | string & {}> (name: Name) => boolean
   /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/set) */
   set: <Name extends Extract<keyof TypedHeaderValues, string> | string & {}> (name: Name, value: Lowercase<Name> extends keyof TypedHeaderValues ? TypedHeaderValues[Lowercase<Name>] : string) => void
-  forEach: (callbackfn: (value: TypedHeaderValues[keyof TypedHeaderValues] | string & {}, key: Extract<keyof TypedHeaderValues, string> | string & {}, parent: TypedHeaders<TypedHeaderValues>) => void, thisArg?: any) => void
+  forEach: (callbackfn: (value: TypedHeaderValues[keyof TypedHeaderValues] | string & {}, key: Extract<keyof TypedHeaderValues, string> | string & {}, parent: TypedHeaders<TypedHeaderValues>) => void, thisArg?: unknown) => void
 }
 
 /** @see https://developer.mozilla.org/en-US/docs/Web/API/Response */
@@ -245,35 +255,35 @@ export interface TypedErrorResponse<TData, TStatusCode, THeaders> extends Omit<F
   json: () => Promise<TData>;
 }
 
+type StatusCodeFromKey<TKey> = TKey extends `${infer TStatusCode extends number}`
+  ? TStatusCode
+  : TKey extends number
+    ? TKey
+    : never;
+
 export type TypedApiResponse<TAllResponses = {}, THeaders = {}> = {
-    [K in keyof TAllResponses]: K extends string
-      ? K extends `${infer TStatusCode extends number}`
-        ? TStatusCode extends SuccessStatusCode
-          ? TypedSuccessResponse<TAllResponses[K], TStatusCode, K extends keyof THeaders ? THeaders[K] : never>
-          : TypedErrorResponse<TAllResponses[K], TStatusCode, K extends keyof THeaders ? THeaders[K] : never>
-        : never
-      : K extends number
-        ? K extends SuccessStatusCode
-          ? TypedSuccessResponse<TAllResponses[K], K, K extends keyof THeaders ? THeaders[K] : never>
-          : TypedErrorResponse<TAllResponses[K], K, K extends keyof THeaders ? THeaders[K] : never>
-        : never;
-  }[keyof TAllResponses];
+  [K in keyof TAllResponses]: StatusCodeFromKey<K> extends infer TStatusCode extends number
+    ? TStatusCode extends SuccessStatusCode
+      ? TypedSuccessResponse<TAllResponses[K], TStatusCode, K extends keyof THeaders ? THeaders[K] : never>
+      : TypedErrorResponse<TAllResponses[K], TStatusCode, K extends keyof THeaders ? THeaders[K] : never>
+    : never;
+}[keyof TAllResponses];
 
 type __TypedOpenapiSchema<TOutput, TInput = TOutput> = {
-  readonly __typedOpenapiOutput?: TOutput;
-  readonly __typedOpenapiInput?: TInput;
+  readonly __typedOpenapiOutput: TOutput;
+  readonly __typedOpenapiInput: TInput;
 };
 type OptionalUndefinedKeys<T> = {
   [K in keyof T as undefined extends T[K] ? never : K]: T[K];
 } & {
   [K in keyof T as undefined extends T[K] ? K : never]?: Exclude<T[K], undefined>;
 };
-type InferSchemaValue<T> = T extends __TypedOpenapiSchema<infer O> ? O : T extends z.ZodType ? z.infer<T> : T extends object ? { [K in keyof T]: InferSchemaValue<T[K]> } : T;
-type InferSchemaInputRaw<T> = T extends __TypedOpenapiSchema<infer _O, infer I> ? I : T extends z.ZodType ? z.input<T> : T extends object ? { [K in keyof T]: InferSchemaInputRaw<T[K]> } : T;
+export type InferSchemaValue<T> = T extends string | number | boolean | bigint | symbol | null | undefined ? T : T extends __TypedOpenapiSchema<infer O> ? O : T extends z.ZodType ? z.infer<T> : T extends (...args: never[]) => unknown ? T : T extends object ? { [K in keyof T]: InferSchemaValue<T[K]> } : T;
+type InferSchemaInputRaw<T> = T extends string | number | boolean | bigint | symbol | null | undefined ? T : T extends __TypedOpenapiSchema<infer _O, infer I> ? I : T extends z.ZodType ? z.input<T> : T extends (...args: never[]) => unknown ? T : T extends object ? { [K in keyof T]: InferSchemaInputRaw<T[K]> } : T;
 type InferSchemaInput<T> = OptionalUndefinedKeys<InferSchemaInputRaw<T>>;
 
 export type SafeApiResponse<TEndpoint> = TEndpoint extends { responses: infer TResponses }
-  ? TResponses extends Record<string, unknown>
+  ? TResponses extends Record<string | number, unknown>
     ? TypedApiResponse<InferSchemaValue<TResponses>, TEndpoint extends { responseHeaders: infer THeaders } ? InferSchemaValue<THeaders> : never>
     : never
   : never
@@ -286,25 +296,11 @@ export type InferResponseByStatus<TEndpoint, TStatusCode> = Extract<SafeApiRespo
  */
 export type InferSuccessData<TEndpoint> = TEndpoint extends { responses: infer TResponses }
   ? {
-      [K in keyof TResponses]: K extends string
-        ? K extends `${infer TStatusCode extends number}`
-          ? TStatusCode extends SuccessStatusCode
-            ? InferSchemaValue<TResponses[K]> extends infer D
-              ? D extends {}
-                ? D
-                : never
-              : never
-            : never
+      [K in keyof TResponses]: StatusCodeFromKey<K> extends infer TStatusCode extends number
+        ? TStatusCode extends SuccessStatusCode
+          ? Extract<InferSchemaValue<TResponses[K]>, {}>
           : never
-        : K extends number
-          ? K extends SuccessStatusCode
-            ? InferSchemaValue<TResponses[K]> extends infer D
-              ? D extends {}
-                ? D
-                : never
-              : never
-            : never
-          : never;
+        : never;
     }[keyof TResponses]
   : never;
 
@@ -315,9 +311,15 @@ type RequiredKeys<T> = {
 type MaybeOptionalArg<T> = RequiredKeys<T> extends never ? [config?: T] : [config: T];
 type NotNever<T> = [T] extends [never] ? false : true;
 
+export type ApiQueryOptions = {
+  /** Override whether a generated TanStack Query consumes TanStack Query's AbortSignal. */
+  consumeQuerySignal?: boolean;
+};
+
 /** Call options merged onto inferred endpoint parameters. */
 type ApiRequestOptions = {
   overrides?: RequestInit;
+  queryOptions?: ApiQueryOptions;
   withResponse?: boolean;
   throwOnStatusError?: boolean;
   validate?: ValidateSide;
@@ -325,7 +327,7 @@ type ApiRequestOptions = {
 
 /** Parameter bag for an endpoint + request options. */
 export type ApiCallParams<TEndpoint> = TEndpoint extends { parameters: infer UParams }
-  ? NotNever<UParams> extends true
+  ? NotNever<InferSchemaInput<UParams>> extends true
     ? InferSchemaInput<UParams> & ApiRequestOptions
     : ApiRequestOptions
   : ApiRequestOptions;
@@ -419,25 +421,97 @@ export class ApiClient {
    * Replace path parameters in URL
    * Supports both OpenAPI format {param} and Express format :param
    */
-  defaultDecodePathParams = (url: string, params: unknown): string => {
+  defaultDecodePathParams = (url: string, params: unknown, styles?: Record<string, ParameterSerialization>): string => {
     const record = (params ?? {}) as Record<string, unknown>;
+    const encode = (value: unknown) => encodeURIComponent(String(value));
+    const serialize = (key: string, value: unknown): string => {
+      const parameterStyle = styles?.[key];
+      const style = parameterStyle?.style ?? "simple";
+      const explode = parameterStyle?.explode ?? false;
+      if (style === "label") {
+        if (Array.isArray(value)) return "." + value.filter((item) => item != null).map(encode).join(explode ? "." : ",");
+        if (value && typeof value === "object") {
+          const entries = Object.entries(value as Record<string, unknown>).filter(([, item]) => item != null);
+          return "." + (explode ? entries.map(([name, item]) => encode(name) + "=" + encode(item)).join(".") : entries.flatMap(([name, item]) => [encode(name), encode(item)]).join(","));
+        }
+        return "." + encode(value);
+      }
+      if (style === "matrix") {
+        if (Array.isArray(value)) return explode ? value.filter((item) => item != null).map((item) => ";" + key + "=" + encode(item)).join("") : ";" + key + "=" + value.filter((item) => item != null).map(encode).join(",");
+        if (value && typeof value === "object") {
+          const entries = Object.entries(value as Record<string, unknown>).filter(([, item]) => item != null);
+          return explode ? entries.map(([name, item]) => ";" + encode(name) + "=" + encode(item)).join("") : ";" + key + "=" + entries.flatMap(([name, item]) => [encode(name), encode(item)]).join(",");
+        }
+        return ";" + key + "=" + encode(value);
+      }
+      if (Array.isArray(value)) return value.filter((item) => item != null).map(encode).join(",");
+      if (value && typeof value === "object") {
+        return Object.entries(value as Record<string, unknown>)
+          .filter(([, item]) => item != null)
+          .map(([name, item]) => explode ? encode(name) + "=" + encode(item) : [encode(name), encode(item)])
+          .flat()
+          .join(",");
+      }
+      return encode(value);
+    };
     return url
-      .replace(/{(\w+)}/g, (_, key: string) => (record[key] != null ? String(record[key]) : `{${key}}`))
-      .replace(/:([a-zA-Z0-9_]+)/g, (_, key: string) => (record[key] != null ? String(record[key]) : `:${key}`));
+      .replace(/{([^}]+)}/g, (_, key: string) =>
+        record[key] != null ? serialize(key, record[key]) : `{${key}}`,
+      )
+      .replace(/:([a-zA-Z0-9_]+)/g, (_, key: string) =>
+        record[key] != null ? serialize(key, record[key]) : `:${key}`,
+      );
   }
 
   /** Uses URLSearchParams, skips null/undefined values */
-  defaultEncodeSearchParams = (queryParams: unknown): URLSearchParams | undefined => {
+  defaultEncodeSearchParams = (queryParams: unknown, styles?: Record<string, ParameterSerialization>): URLSearchParams | undefined => {
     if (!queryParams || typeof queryParams !== "object") return;
 
     const searchParams = new URLSearchParams();
+    const rawEntries: Array<{ key: string; value: string; allowReserved: boolean }> = [];
+    const append = (key: string, value: unknown, allowReserved = false) => {
+      const stringValue = String(value);
+      searchParams.append(key, stringValue);
+      rawEntries.push({ key, value: stringValue, allowReserved });
+    };
+    const encodeQueryComponent = (value: string, allowReserved: boolean) => {
+      const encoded = encodeURIComponent(value);
+      return allowReserved
+        ? encoded.replace(/%3A|%2F|%3F|%40|%21|%24|%26|%27|%28|%29|%2A|%2B|%2C|%3B|%3D|%5B|%5D/gi, (part) => decodeURIComponent(part))
+        : encoded;
+    };
+    Object.defineProperty(searchParams, "toString", {
+      value: () => rawEntries.map(({ key, value, allowReserved }) => `${encodeQueryComponent(key, false)}=${encodeQueryComponent(value, allowReserved)}`).join("&"),
+    });
     Object.entries(queryParams as Record<string, unknown>).forEach(([key, value]) => {
       if (value != null) {
         // Skip null/undefined values
+        const parameterStyle = styles?.[key];
+        const style = parameterStyle?.style ?? "form";
+        const explode = parameterStyle?.explode ?? true;
+        const allowReserved = parameterStyle?.allowReserved === true;
         if (Array.isArray(value)) {
-          value.forEach((val) => val != null && searchParams.append(key, String(val)));
+          if (style === "spaceDelimited") append(key, value.filter((item) => item != null).map(String).join(" "), allowReserved);
+          else if (style === "pipeDelimited") append(key, value.filter((item) => item != null).map(String).join("|"), allowReserved);
+          else if (explode) value.forEach((val) => val != null && append(key, val, allowReserved));
+          else append(key, value.filter((item) => item != null).map(String).join(","), allowReserved);
+        } else if (typeof value === "object") {
+          const entries = Object.entries(value as Record<string, unknown>).filter(([, nestedValue]) => nestedValue != null);
+          if (style === "deepObject") {
+            for (const [nestedKey, nestedValue] of entries) {
+              if (Array.isArray(nestedValue)) nestedValue.forEach((item) => item != null && append(`${key}[${nestedKey}]`, item, allowReserved));
+              else append(`${key}[${nestedKey}]`, nestedValue, allowReserved);
+            }
+          } else if (explode) {
+            for (const [nestedKey, nestedValue] of entries) {
+              if (Array.isArray(nestedValue)) nestedValue.forEach((item) => item != null && append(nestedKey, item, allowReserved));
+              else append(nestedKey, nestedValue, allowReserved);
+            }
+          } else {
+            append(key, entries.flatMap(([nestedKey, nestedValue]) => [nestedKey, ...(Array.isArray(nestedValue) ? nestedValue : [nestedValue])]).map(String).join(","), allowReserved);
+          }
         } else {
-          searchParams.append(key, String(value));
+          append(key, value, allowReserved);
         }
       }
     });
@@ -458,21 +532,22 @@ export class ApiClient {
 
   defaultParseResponseData = async (response: FetcherResponse): Promise<unknown> => {
     const contentType = response.headers.get("content-type") ?? "";
-    if (contentType.includes("text/event-stream")) {
+    const normalizedContentType = contentType.toLowerCase();
+    if (normalizedContentType.includes("text/event-stream")) {
       return response.body ?? null;
     }
-    if (contentType.startsWith("text/")) {
+    if (normalizedContentType.startsWith("text/")) {
       return (await response.text())
     }
 
-    if (contentType.toLowerCase().startsWith("application/octet-stream")) {
+    if (normalizedContentType.startsWith("application/octet-stream")) {
       return new Blob([await response.arrayBuffer()])
     }
 
     if (
-      contentType.includes("application/json") ||
-      (contentType.includes("application/") && contentType.includes("json")) ||
-      contentType === "*/*"
+      normalizedContentType.includes("application/json") ||
+      (normalizedContentType.includes("application/") && normalizedContentType.includes("json")) ||
+      normalizedContentType === "*/*"
       ) {
       try {
         return await response.json();
@@ -489,8 +564,8 @@ export class ApiClient {
       path: Path,
       ...params: MaybeOptionalArg<
         (TEndpoint extends { parameters: infer UParams }
-          ? NotNever<UParams> extends true ? InferSchemaInput<UParams> & { overrides?: RequestInit; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide } : { overrides?: RequestInit; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide }
-          : { overrides?: RequestInit; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide })
+          ? NotNever<InferSchemaInput<UParams>> extends true ? InferSchemaInput<UParams> & { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide } : { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide }
+          : { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide })
       >
     ): Promise<SafeApiResponse<TEndpoint>>;
 
@@ -498,16 +573,16 @@ export class ApiClient {
       path: Path,
       ...params: MaybeOptionalArg<
         (TEndpoint extends { parameters: infer UParams }
-          ? NotNever<UParams> extends true ? InferSchemaInput<UParams> & { overrides?: RequestInit; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide } : { overrides?: RequestInit; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide }
-          : { overrides?: RequestInit; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide })
+          ? NotNever<InferSchemaInput<UParams>> extends true ? InferSchemaInput<UParams> & { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide } : { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide }
+          : { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide })
       >
     ): Promise<InferSuccessData<TEndpoint>>;
 
-    get<Path extends keyof GetEndpoints, _TEndpoint extends GetEndpoints[Path]>(
+    get<Path extends keyof GetEndpoints>(
       path: Path,
-      ...params: MaybeOptionalArg<any>
-    ): Promise<any> {
-        return this.request("get", path, ...params);
+      ...params: [config?: unknown]
+    ): Promise<unknown> {
+        return this.request("get", path, params[0] as never) as Promise<unknown>;
     }
     // </ApiClient.get>
     
@@ -525,8 +600,8 @@ export class ApiClient {
       path: TPath,
       ...params: MaybeOptionalArg<
         (TEndpoint extends { parameters: infer UParams }
-          ? NotNever<UParams> extends true ? InferSchemaInput<UParams> & { overrides?: RequestInit; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide } : { overrides?: RequestInit; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide }
-          : { overrides?: RequestInit; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide })
+          ? NotNever<InferSchemaInput<UParams>> extends true ? InferSchemaInput<UParams> & { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide } : { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide }
+          : { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide })
       >
     ): Promise<SafeApiResponse<TEndpoint>>;
 
@@ -539,8 +614,8 @@ export class ApiClient {
       path: TPath,
       ...params: MaybeOptionalArg<
         (TEndpoint extends { parameters: infer UParams }
-          ? NotNever<UParams> extends true ? InferSchemaInput<UParams> & { overrides?: RequestInit; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide } : { overrides?: RequestInit; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide }
-          : { overrides?: RequestInit; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide })
+          ? NotNever<InferSchemaInput<UParams>> extends true ? InferSchemaInput<UParams> & { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide } : { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide }
+          : { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide })
       >
     ): Promise<InferSuccessData<TEndpoint>>;
 
@@ -551,10 +626,18 @@ export class ApiClient {
     >(
       method: TMethod,
       path: TPath,
-      ...params: MaybeOptionalArg<any>
-    ): Promise<any> {
+      ...params: [config?: unknown]
+    ): Promise<unknown> {
       return (async () => {
-      const requestParams = params[0];
+      const requestParams = params[0] as
+        | (EndpointParameters & {
+            overrides?: RequestInit;
+            queryOptions?: ApiQueryOptions;
+            withResponse?: boolean;
+            throwOnStatusError?: boolean;
+            validate?: ValidateSide;
+          })
+        | undefined;
       const withResponse = requestParams?.withResponse;
       const throwOnStatusError = requestParams?.throwOnStatusError ?? (withResponse ? false : true);
       let overrides = requestParams?.overrides;
@@ -591,9 +674,16 @@ export class ApiClient {
         }
       }
 
-      const resolvedPath = (this.fetcher.decodePathParams ?? this.defaultDecodePathParams)(this.baseUrl + (path as string), parametersToSend.path ?? {});
+      const resolvedPath = (this.fetcher.decodePathParams ?? this.defaultDecodePathParams)(
+        this.baseUrl + (path as string),
+        parametersToSend.path ?? {},
+        endpointParameterStyles[method]?.[path]?.path,
+      );
       const url = new URL(resolvedPath);
-      const urlSearchParams = (this.fetcher.encodeSearchParams ?? this.defaultEncodeSearchParams)(parametersToSend.query);
+      const urlSearchParams = (this.fetcher.encodeSearchParams ?? this.defaultEncodeSearchParams)(
+        parametersToSend.query,
+        endpointParameterStyles[method]?.[path]?.query,
+      );
 
       if (parametersToSend.cookie) {
         const headers = new Headers((overrides as RequestInit | undefined)?.headers);
@@ -601,6 +691,7 @@ export class ApiClient {
         overrides = { ...overrides, headers };
       }
 
+      const parameterStyles = endpointParameterStyles[method]?.[path as string];
       const response = await this.fetcher.fetch({
         method: method,
         path: (path as string),
@@ -608,6 +699,7 @@ export class ApiClient {
         ...(urlSearchParams ? { urlSearchParams } : {}),
         ...(Object.keys(parametersToSend).length ? { parameters: parametersToSend } : {}),
         requestFormat: endpointRequestFormats[method]?.[path] ?? "json",
+        ...(parameterStyles ? { parameterStyles } : {}),
         security: endpointSecurityRequirements[method]?.[path] ?? defaultSecurityRequirements,
         ...(overrides ? { overrides } : {}),
         throwOnStatusError
@@ -618,8 +710,17 @@ export class ApiClient {
               ? (response.body ?? null)
               : await (this.fetcher.parseResponseData ?? this.defaultParseResponseData)(response);
           const shouldValidateOutput = validateSide === "output" || validateSide === "both";
-          if (shouldValidateOutput && responseFormat !== "sse" && response.ok && endpointSchema?.responses) {
-            const responseSchema = endpointSchema.responses[String(response.status)] ?? endpointSchema.responses["default"];
+          if (
+            shouldValidateOutput &&
+            responseFormat !== "sse" &&
+            (response.ok || !(errorStatusCodes as readonly number[]).includes(response.status)) &&
+            endpointSchema?.responses
+          ) {
+            const responseSchema =
+              endpointSchema.responses[String(response.status)] ??
+              endpointSchema.responses[String(Math.floor(response.status / 100)) + "xx"] ??
+              endpointSchema.responses[String(Math.floor(response.status / 100)) + "XX"] ??
+              endpointSchema.responses["default"];
             if (responseSchema) {
               data = await runValidate({
                 side: "output",
@@ -641,7 +742,7 @@ export class ApiClient {
           }
 
           return withResponse ? typedResponse : data;
-      })() as Promise<any>
+      })()
     }
     // </ApiClient.request>
 }

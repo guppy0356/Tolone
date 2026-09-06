@@ -19,7 +19,7 @@ catalog:
   react-dom: ^19.2.8
   storybook: ^10.5.10
   tailwindcss: ^4.3.3
-  typed-openapi: ^3.3.1
+  typed-openapi: ^4.0.1
   vite-plugin-checker: ^0.14.5
   vitest: ^4.1.11
   vitest-browser-react: ^2.2.0

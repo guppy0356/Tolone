@@ -3,13 +3,13 @@ packages:
   - packages/*
 
 catalog:
-  '@storybook/addon-vitest': ^10.5.10
-  '@storybook/react-vite': ^10.5.10
+  '@storybook/addon-vitest': ^10.6.0
+  '@storybook/react-vite': ^10.6.0
   '@tailwindcss/vite': ^4.3.3
   '@tanstack/react-query': ^5.102.8
   '@tanstack/react-router': ^1.170.32
   '@types/react': ^19.2.18
-  '@types/react-dom': ^19.2.5
+  '@types/react-dom': ^19.2.7
   '@vitejs/plugin-react': ^6.1.1
   '@vitest/browser': ^4.1.11
   '@vitest/browser-playwright': ^4.1.11
@@ -20,15 +20,15 @@ catalog:
   playwright: ^1.62.1
   react: ^19.2.8
   react-dom: ^19.2.8
-  storybook: ^10.5.10
+  storybook: ^10.6.0
   tailwindcss: ^4.3.3
   typed-openapi: ^4.0.1
   typescript: ^7.0.2
   vite: ^8.2.2
   vite-plugin-checker: ^0.14.5
   vitest: ^4.1.11
-  vitest-browser-react: ^2.2.0
-  zod: ^4.5.2
+  vitest-browser-react: ^2.3.0
+  zod: ^4.5.4
 
 minimumReleaseAge: 10080
 

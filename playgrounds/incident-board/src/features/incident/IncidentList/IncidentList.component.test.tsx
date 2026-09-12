@@ -71,7 +71,7 @@ test("renders one row per incident, with derived labels", async () => {
   // row rather than looked up by text.
   await expect
     .element(screen.getByRole("link", { name: /Checkout API returning 502/ }))
-    .toHaveTextContent("Critical");
+    .toMatchTextContent("Critical");
   await expect
     .element(screen.getByText("Alice Chen · 2026-07-28 22:14 UTC"))
     .toBeInTheDocument();
@@ -122,7 +122,10 @@ test("keeps default values out of the URL", async () => {
     search: { ...defaultSearch, severity: "critical", page: 2 },
   });
 
-  await screen.getByLabelText("Severity").selectOptions("Any severity");
+  // The label wraps the <select>, so its text is more than "Severity".
+  await screen
+    .getByLabelText("Severity", { exact: false })
+    .selectOptions("Any severity");
 
   // severity cleared, page reset to its default, sort never left its default:
   // nothing is left to say.
@@ -150,7 +153,9 @@ test("skeletons the list but keeps the filters usable while loading", async () =
     isIncidentsPending: true,
   });
 
-  await expect.element(screen.getByLabelText("Severity")).toBeInTheDocument();
+  await expect
+    .element(screen.getByLabelText("Severity", { exact: false }))
+    .toBeInTheDocument();
   await expect.element(screen.getByText("INC-1043")).not.toBeInTheDocument();
 });
 

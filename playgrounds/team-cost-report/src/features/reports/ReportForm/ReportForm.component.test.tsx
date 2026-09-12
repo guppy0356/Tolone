@@ -78,7 +78,8 @@ test("keeps save disabled until name and team selection are valid", async () => 
   await screen.getByLabelText("Report name").fill("Q2 Cost");
   await expect.element(save).toBeDisabled();
 
-  await screen.getByLabelText("Platform").click();
+  // A team's label also carries its member count, so the name is a substring.
+  await screen.getByLabelText("Platform", { exact: false }).click();
   await expect.element(save).toBeEnabled();
 });
 
@@ -87,8 +88,8 @@ test("submits the schema output — trimmed name and selected team ids", async (
   const screen = await renderForm({ addReport });
 
   await screen.getByLabelText("Report name").fill("  Q2 Cost  ");
-  await screen.getByLabelText("Platform").click();
-  await screen.getByLabelText("Mobile").click();
+  await screen.getByLabelText("Platform", { exact: false }).click();
+  await screen.getByLabelText("Mobile", { exact: false }).click();
   await screen.getByRole("button", { name: "Save report" }).click();
 
   await vi.waitFor(() => {
@@ -111,7 +112,7 @@ test("surfaces schema errors once a field goes invalid", async () => {
     .element(screen.getByText("Report name is required"))
     .toBeInTheDocument();
 
-  const platform = screen.getByLabelText("Platform");
+  const platform = screen.getByLabelText("Platform", { exact: false });
   await platform.click();
   await platform.click();
   await expect
@@ -126,7 +127,7 @@ test("disables the button and shows progress while saving", async () => {
   const screen = await renderForm({ addReport });
 
   await screen.getByLabelText("Report name").fill("Q2 Cost");
-  await screen.getByLabelText("Platform").click();
+  await screen.getByLabelText("Platform", { exact: false }).click();
   await screen.getByRole("button", { name: "Save report" }).click();
 
   await expect

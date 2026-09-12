@@ -52,12 +52,12 @@ test("renders each team with member count and formatted rates", async () => {
   await expect.element(screen.getByText("Platform")).toBeInTheDocument();
   const rows = Array.from(screen.container.querySelectorAll("ul > li"));
   expect(rows).toHaveLength(2);
-  expect(rows[0]).toHaveTextContent("Platform");
-  expect(rows[0]).toHaveTextContent(
+  expect(rows[0]).toMatchTextContent("Platform");
+  expect(rows[0]).toMatchTextContent(
     "2 members — Ada ($120/h), Alan ($110/h)",
   );
-  expect(rows[1]).toHaveTextContent("Design");
-  expect(rows[1]).toHaveTextContent("1 member — Grace ($95/h)");
+  expect(rows[1]).toMatchTextContent("Design");
+  expect(rows[1]).toMatchTextContent("1 member — Grace ($95/h)");
 });
 
 test("omits the rates suffix when a team has no members", async () => {
@@ -68,8 +68,8 @@ test("omits the rates suffix when a team has no members", async () => {
 
   await expect.element(screen.getByText("Platform")).toBeInTheDocument();
   const row = screen.container.querySelector("ul > li");
-  expect(row).toHaveTextContent("0 members");
-  expect(row).not.toHaveTextContent("—");
+  expect(row).toMatchTextContent("0 members");
+  expect(row).not.toMatchTextContent("—");
 });
 
 test("links the header to the new-team form", async () => {

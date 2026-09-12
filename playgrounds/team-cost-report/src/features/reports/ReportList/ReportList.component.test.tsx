@@ -55,10 +55,10 @@ test("renders rows newest-first with team count and formatted date", async () =>
   await expect.element(screen.getByText("Q1 Cost")).toBeInTheDocument();
   const rows = Array.from(screen.container.querySelectorAll("li a"));
   expect(rows).toHaveLength(2);
-  expect(rows[0]).toHaveTextContent("Q1 Cost");
-  expect(rows[0]).toHaveTextContent("2 teams · Apr 1, 2026");
-  expect(rows[1]).toHaveTextContent("Older");
-  expect(rows[1]).toHaveTextContent("1 team · Jan 15, 2026");
+  expect(rows[0]).toMatchTextContent("Q1 Cost");
+  expect(rows[0]).toMatchTextContent("2 teams · Apr 1, 2026");
+  expect(rows[1]).toMatchTextContent("Older");
+  expect(rows[1]).toMatchTextContent("1 team · Jan 15, 2026");
 });
 
 test("links each row to its report detail", async () => {

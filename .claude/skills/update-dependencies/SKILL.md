@@ -69,7 +69,7 @@ process.md の §1 を読み、確認表の全行を実行する。
 
 そのラウンドの §2 と §3 の PR をすべて merge した後に、単独の PR で行う。ブランチ `deps/unblock/<YYYY-MM-DD>`。process.md の §4 の「解除」1.〜4. に従う。解除の中で依存を上げない。
 
-## 人が止まる 6 か所
+## 人が止まる 5 か所
 
 process.md が「人が行う」と名指ししている箇所。ここでは判定せず、材料を示して利用者に問う。
 
@@ -77,7 +77,6 @@ process.md が「人が行う」と名指ししている箇所。ここでは判
 |---|---|
 | §3 の 5. | 落ちたアプリを直すか、置いていくか |
 | §4 の 5. | 警告に出ない落ち方のとき、原因のパッケージはどれか |
-| §6 の 9. | peer 警告を `peerDependencyRules.allowedVersions` に書くか |
 | §3 の 6. | 脆弱性対応で `minimumReleaseAgeExclude` に版を書くか |
 | §1 | `unblock:` 行が無い Issue を解除してよいか |
 | 全体 | PR を merge する |
@@ -108,7 +107,7 @@ process.md が「人が行う」と名指ししている箇所。ここでは判
 6. `pnpm -r --if-present run generate`
 7. アプリごとに `typecheck`、`test`、`build`
 8. ルートの依存
-9. peer 警告の記入（**人**）
+9. peer 警告の扱い
 
 ## やってはいけない操作
 

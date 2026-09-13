@@ -44,7 +44,7 @@ pnpm workspace に複数の独立したアプリがある monorepo を対象に�
 | 候補にメジャー更新がある | §2 の PR を merge した後、1 パッケージずつ全アプリで試し、結果で分類する | 3 |
 | 更新で一部のアプリだけ不合格 | 不合格アプリごとに §3 の 5. で判定する。置いていくアプリの package.json を置いていく直書きにし、共有 catalog は新版にする | 3, 4 |
 | メジャー更新で対象アプリが全部不合格 | 見送る。Issue に記録する。次回また候補に出る | 3 |
-| peer の警告だけ出て typecheck、test、build は合格 | §6 の 9. で警告の組を `peerDependencyRules.allowedVersions` に記録して合格にする | 6 |
+| peer の警告だけ出て typecheck、test、build は合格 | 合格。新しい警告は PR 本文に列挙する。`peerDependencyRules.allowedVersions` には書かない | 6 |
 | 欲しい版が `minimumReleaseAge` で出てこない | 待つ。severity high 以上の脆弱性対応のときだけ `minimumReleaseAgeExclude` に版を書く | 3 |
 | 置いていく直書きの解除条件を満たした | そのラウンドの §2 と §3 の PR を merge した後に、単独の PR で解除する | 4 |
 | 更新前から不合格のアプリがある | Issue に記録して検証対象から外し、更新は始める。そのアプリは共有 catalog に従わせる | 1 |
@@ -88,7 +88,7 @@ done
 1. ブランチを切る。名前は `deps/range/<YYYY-MM-DD>` とする。
 2. `pnpm update -r` を実行する。共有 catalog、置いていく直書き、その他の直書きのすべてが、それぞれの範囲内で最新になる。固定版の置いていく直書きは書き換わらない。ルートの package.json の直書きも同時に更新される。lockfile と node_modules も更新される。
 3. 変更を次の 3 条件で検査する。1 つでも満たさなければ、`git restore --staged --worktree .` で戻し、`pnpm install --frozen-lockfile` を実行して中断する。
-   - `pnpm-workspace.yaml` を YAML として読み、`catalog`、`peerDependencyRules`、`minimumReleaseAgeExclude` 以外のキーの値が更新前と等しい。キーの並びとコメントの変化は前提のとおりで、比較しない。
+   - `pnpm-workspace.yaml` を YAML として読み、`catalog`、`minimumReleaseAgeExclude` 以外のキーの値が更新前と等しい。キーの並びとコメントの変化は前提のとおりで、比較しない。
    - 変わった各エントリで、新しい範囲の最小版が更新前の範囲を満たす。満たさないエントリがあれば手順を誤っている。
    - package.json で変わったのは依存の範囲だけである。引数なしの `pnpm update -r` では直書きが `"catalog:"` に書き換わることは無い。5. の `pnpm update -r <pkg>` では、実行前の範囲文字列が共有 catalog のエントリと完全に同じだった直書きが `"catalog:"` に書き換わる。これは pnpm の正常な動作で、そのまま受け入れる。置いていく直書きは共有 catalog より古い版なので、同じ文字列にならない。
 4. §6 の検証を全アプリで実行する。
@@ -208,18 +208,18 @@ named catalog は使わない。置いていくアプリを named catalog で表
 |---|---|---|
 | 1 | `pnpm dedupe --check` | 終了コード 0。非 0 なら `pnpm dedupe` を実行し、その差分も同じコミットに入れてから 2. に進む。共有 catalog の行だけ変わって他アプリが旧版のままの lockfile は、ここで検出される |
 | 2 | `pnpm install --frozen-lockfile` | 終了コード 0 |
-| 3 | `pnpm-workspace.yaml` の差分 | 更新前と作業ツリーの両方を YAML として読み、`catalog`、`peerDependencyRules`、`minimumReleaseAgeExclude` を除いた内容が等しく、`catalogs` キーが無い。`minimumReleaseAgeExclude` の差分は、この PR で §3 の 6. の手順で書いた行に限る。`peerDependencyRules` の差分は、この PR で 9. の手順で書いた行に限り、9. を行う前の実行では差分が無いこと。コマンド例は表の下 |
+| 3 | `pnpm-workspace.yaml` の差分 | 更新前と作業ツリーの両方を YAML として読み、`catalog`、`minimumReleaseAgeExclude` を除いた内容が等しく、`catalogs` キーが無い。`minimumReleaseAgeExclude` の差分は、この PR で §3 の 6. の手順で書いた行に限る。コマンド例は表の下 |
 | 4 | peer 警告 | `pnpm install --resolution-only` の出力の `unmet peer` 行が、§1 で保存した集合の部分集合である。新しい行があれば §8 の一覧に従って PR 本文に列挙し、この時点では合否を決めずに 5. に進む |
 | 5 | `pnpm ls -r <pkg> --depth 0 --json` | 各アプリの `<pkg>` の `version` が、そのアプリが今参照している範囲を満たす。参照している範囲とは、`"catalog:"` なら共有 catalog の現在の値、直書きならその値である。加えて §3 と §4 では、前進するアプリは `version` のメジャーが上げる先の版のメジャーに等しい |
 | 6 | `pnpm -r --if-present run generate` | 終了コード 0。生成結果の差分は同じコミットに入れる。更新内容で実行の要否を判断しない。§1 で外したアプリは `--filter '!<app>'` で除く |
 | 7 | アプリごとに `pnpm --filter <app> run typecheck`、同じく `test`、`build` | 各アプリで終了コード 0。1 つが不合格でも残りのアプリを最後まで実行し、不合格のアプリ名を列挙する。全アプリを 1 回で走らせるときは `pnpm -r --no-bail run <script>` を使い、合否は全体の終了コードではなくアプリごとの出力で読む。§1 で外したアプリは `--filter '!<app>'` で除く |
 | 8 | ルートの依存 | ルートの package.json に差分があれば、それを使うルートのスクリプトやフックを 1 回実行して成功する |
-| 9 | peer 警告の記入 | 4. で新しい行があり、7. が全アプリ合格のとき、`pnpm-workspace.yaml` の `peerDependencyRules.allowedVersions` に `"<警告を出した依存>><peer 名>": "<実際に解決されたメジャー>"` の形で 1 組ずつ書く。`"*"` や範囲は書かない。書いた後に `pnpm install --resolution-only` をもう一度実行し、新しい行が無ければ合格。書いた後は 2. と 3. だけをもう一度実行する。この再実行は不合格時の「もう 1 回」に数えず、§8 の再実行一覧にも書かない。2. が非 0 なら `pnpm install` を実行し、lockfile の差分を同じコミットに入れて 2. をもう一度実行する。7. に不合格のアプリがあれば記入せず、その警告は §3 の 5. と §4 の手順の 4. の判定に使う。この記入は人が行う |
+| 9 | peer 警告の扱い | 4. で新しい行があり、7. が全アプリ合格なら合格。新しい行は §8 の一覧に従って PR 本文に列挙する。`peerDependencyRules.allowedVersions` には書かない。書けば警告は消えるが、警告を出した依存が宣言を広げた後もその行は残り、消す契機が無い。7. に不合格のアプリがあれば、その警告は §3 の 5. と §4 の手順の 4. の判定に使う |
 
 検証 3. のコマンド例。`<base>` は更新前のコミット。`yq` は mikefarah 版 yq v4 を指す。
 
 ```bash
-diff <(git show <base>:pnpm-workspace.yaml | yq -o json 'del(.catalog, .peerDependencyRules, .minimumReleaseAgeExclude)') <(yq -o json 'del(.catalog, .peerDependencyRules, .minimumReleaseAgeExclude)' pnpm-workspace.yaml)
+diff <(git show <base>:pnpm-workspace.yaml | yq -o json 'del(.catalog, .minimumReleaseAgeExclude)') <(yq -o json 'del(.catalog, .minimumReleaseAgeExclude)' pnpm-workspace.yaml)
 ```
 
 ## 7. やってはいけない操作
@@ -244,7 +244,7 @@ diff <(git show <base>:pnpm-workspace.yaml | yq -o json 'del(.catalog, .peerDepe
 ## 8. CI / 自動化するときの考慮事項
 
 - CI の install は `pnpm install --frozen-lockfile` にする。`pnpm dedupe --check` も CI のゲートに入れる。`--frozen-lockfile` だけでは、共有 catalog の行と他アプリの解決版がずれた lockfile を通してしまう。
-- 自動実行が自分で commit と PR 作成をしてよいのは、§2 と、§3 の候補のうち代表名の昇順で最初の 1 つまでとする。§3 では「全アプリで試し、§6 の結果をアプリ別に報告する」までを行い、PR は draft で開く。次の候補の PR は、前の PR が merge された後の実行で開く。§3 の 5. の判定、§4、§6 の 9. の記入は人が行う。PR の merge は人が行う。自動実行が §6 の 4. で新しい `unmet peer` 行を見つけたときは、その行を PR 本文に列挙して §6 の 5. 以降を続け、PR を draft のままにする。
+- 自動実行が自分で commit と PR 作成をしてよいのは、§2 と、§3 の候補のうち代表名の昇順で最初の 1 つまでとする。§3 では「全アプリで試し、§6 の結果をアプリ別に報告する」までを行い、PR は draft で開く。次の候補の PR は、前の PR が merge された後の実行で開く。§3 の 5. の判定と §4 は人が行う。PR の merge は人が行う。自動実行が §6 の 4. で新しい `unmet peer` 行を見つけたときは、その行を PR 本文に列挙して §6 の 5. 以降を続け、PR を draft のままにする。
 - 自動実行が `--latest` を使うのは §3 の 2. の `pnpm update -r --latest <pkg>` だけとする。`<pkg>` を置いていく直書きで持つアプリがある場合は手順が手作業になるため、自動実行はそのパッケージを対象から外して PR 本文に列挙し、外したパッケージを飛ばした昇順で最初の候補を扱う。外したパッケージの PR は人が開き、自動実行はその merge を待たない。open な見送り Issue があるパッケージも同じく外し、再試行は人が行う。
 - ブランチと PR は §2 が `deps/range/<YYYY-MM-DD>` で 1 本、§3 が候補ごとに `deps/major/<pkg>-<version>` で 1 本の draft PR とする。
 - PR 本文に書く項目は次のとおりとする。候補一覧の各エントリのアプリ名、`package`、`current`、`compatible`、`latest`。実行時刻 (UTC)。`pnpm --version`。`minimumReleaseAge` の値。§1 で外したアプリ。未判定の Issue。置いていく直書きがあるため §3 の対象から外したパッケージ。§6 で再実行した検証名。§6 の 4. で新しく出た `unmet peer` 行。§6 の 7. で不合格になったアプリ名と失敗内容。§2 の 5. で一部のアプリだけ不合格になったパッケージ名と不合格アプリと失敗内容。§1 で解除候補としたが自動実行では解除しなかった Issue の題名と、Issue の無い解除候補のアプリ名、パッケージ名、値。§1 の「満たさないとき」で自動実行が中断した行。他の節の「PR 本文に書く」はこの一覧を指す。

@@ -15,7 +15,7 @@
     "generate:api": "openapi-typescript src/openapi.yaml -o src/types/openapi.d.ts"
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.9.1",
+    "@hookform/resolvers": "catalog:",
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@tanstack/zod-adapter": "^1.167.0",
@@ -23,7 +23,7 @@
     "openapi-msw": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "react-hook-form": "^7.87.0",
+    "react-hook-form": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

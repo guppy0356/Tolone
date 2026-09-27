@@ -14,22 +14,22 @@ export type IncidentSort = __TypedOpenapi.Schemas.IncidentSort;
 export const IncidentSort = z.enum(["openedAt", "-openedAt", "severity", "-severity"]);
 
 export type User = __TypedOpenapi.Schemas.User;
-export const User = z.object({ id: z.string(), name: z.string() }).catchall(z.unknown());
+export const User = z.strictObject({ id: z.string(), name: z.string() });
 
 export type IncidentSummary = __TypedOpenapi.Schemas.IncidentSummary;
-export const IncidentSummary = z.object({ id: z.string(), key: z.string(), title: z.string(), status: IncidentStatus, severity: IncidentSeverity, assignee: User.nullable(), openedAt: z.iso.datetime() }).catchall(z.unknown());
+export const IncidentSummary = z.strictObject({ id: z.string(), key: z.string(), title: z.string(), status: IncidentStatus, severity: IncidentSeverity, assignee: User.nullable(), openedAt: z.iso.datetime() });
 
 export type TimelineEvent = __TypedOpenapi.Schemas.TimelineEvent;
-export const TimelineEvent = z.object({ id: z.string(), at: z.iso.datetime(), kind: z.enum(["opened", "acknowledged", "resolved", "note"]), actor: z.string(), message: z.string() }).catchall(z.unknown());
+export const TimelineEvent = z.strictObject({ id: z.string(), at: z.iso.datetime(), kind: z.enum(["opened", "acknowledged", "resolved", "note"]), actor: z.string(), message: z.string() });
 
 export type IncidentDetail = __TypedOpenapi.Schemas.IncidentDetail;
-export const IncidentDetail = z.object({ id: z.string(), key: z.string(), title: z.string(), status: IncidentStatus, severity: IncidentSeverity, assignee: User.nullable(), openedAt: z.iso.datetime(), description: z.string(), timeline: z.array(TimelineEvent) }).catchall(z.unknown());
+export const IncidentDetail = z.strictObject({ id: z.string(), key: z.string(), title: z.string(), status: IncidentStatus, severity: IncidentSeverity, assignee: User.nullable(), openedAt: z.iso.datetime(), description: z.string(), timeline: z.array(TimelineEvent) });
 
 export type Comment = __TypedOpenapi.Schemas.Comment;
-export const Comment = z.object({ id: z.string(), author: z.string(), body: z.string(), postedAt: z.iso.datetime() }).catchall(z.unknown());
+export const Comment = z.strictObject({ id: z.string(), author: z.string(), body: z.string(), postedAt: z.iso.datetime() });
 
 export type IncidentPage = __TypedOpenapi.Schemas.IncidentPage;
-export const IncidentPage = z.object({ items: z.array(IncidentSummary), page: z.number().int(), perPage: z.number().int(), total: z.number().int(), totalPages: z.number().int() }).catchall(z.unknown());
+export const IncidentPage = z.strictObject({ items: z.array(IncidentSummary), page: z.number().int(), perPage: z.number().int(), total: z.number().int(), totalPages: z.number().int() });
 
 // </Schemas>
 
@@ -40,7 +40,7 @@ export const get__api_incidents = {
   path: z.literal("/api/incidents"),
   requestFormat: z.literal("json"),
   responseFormat: z.literal("json"),
-  parameters: { query: z.object({ status: z.array(IncidentStatus), severity: IncidentSeverity, assignee: z.string(), sort: IncidentSort, page: z.coerce.number().int().min(1).default(1) }).partial().strict().optional() },
+  parameters: { query: z.strictObject({ status: z.array(IncidentStatus), severity: IncidentSeverity, assignee: z.string(), sort: IncidentSort, page: z.coerce.number().int().min(1).default(1) }).partial().optional() },
   responses: { 200: IncidentPage },
 };
 
@@ -50,7 +50,7 @@ export const get__api_incidents_IncidentId = {
   path: z.literal("/api/incidents/{incidentId}"),
   requestFormat: z.literal("json"),
   responseFormat: z.literal("json"),
-  parameters: { path: z.object({ incidentId: z.string() }).strict() },
+  parameters: { path: z.strictObject({ incidentId: z.string() }) },
   responses: { 200: IncidentDetail, 404: z.unknown() },
 };
 
@@ -60,7 +60,7 @@ export const get__api_incidents_IncidentId_comments = {
   path: z.literal("/api/incidents/{incidentId}/comments"),
   requestFormat: z.literal("json"),
   responseFormat: z.literal("json"),
-  parameters: { path: z.object({ incidentId: z.string() }).strict() },
+  parameters: { path: z.strictObject({ incidentId: z.string() }) },
   responses: { 200: z.array(Comment), 404: z.unknown() },
 };
 
@@ -383,6 +383,12 @@ const runValidate = async (ctx: {
 
 
 // <ApiClient>
+const isPlainObject = (value: unknown): value is Record<string, unknown> => {
+  if (value === null || typeof value !== "object") return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+};
+
 export class ApiClient {
   baseUrl: string = "";
   successStatusCodes = successStatusCodes;
@@ -430,7 +436,7 @@ export class ApiClient {
       const explode = parameterStyle?.explode ?? false;
       if (style === "label") {
         if (Array.isArray(value)) return "." + value.filter((item) => item != null).map(encode).join(explode ? "." : ",");
-        if (value && typeof value === "object") {
+        if (isPlainObject(value)) {
           const entries = Object.entries(value as Record<string, unknown>).filter(([, item]) => item != null);
           return "." + (explode ? entries.map(([name, item]) => encode(name) + "=" + encode(item)).join(".") : entries.flatMap(([name, item]) => [encode(name), encode(item)]).join(","));
         }
@@ -438,14 +444,14 @@ export class ApiClient {
       }
       if (style === "matrix") {
         if (Array.isArray(value)) return explode ? value.filter((item) => item != null).map((item) => ";" + key + "=" + encode(item)).join("") : ";" + key + "=" + value.filter((item) => item != null).map(encode).join(",");
-        if (value && typeof value === "object") {
+        if (isPlainObject(value)) {
           const entries = Object.entries(value as Record<string, unknown>).filter(([, item]) => item != null);
           return explode ? entries.map(([name, item]) => ";" + encode(name) + "=" + encode(item)).join("") : ";" + key + "=" + entries.flatMap(([name, item]) => [encode(name), encode(item)]).join(",");
         }
         return ";" + key + "=" + encode(value);
       }
       if (Array.isArray(value)) return value.filter((item) => item != null).map(encode).join(",");
-      if (value && typeof value === "object") {
+      if (isPlainObject(value)) {
         return Object.entries(value as Record<string, unknown>)
           .filter(([, item]) => item != null)
           .map(([name, item]) => explode ? encode(name) + "=" + encode(item) : [encode(name), encode(item)])
@@ -495,7 +501,7 @@ export class ApiClient {
           else if (style === "pipeDelimited") append(key, value.filter((item) => item != null).map(String).join("|"), allowReserved);
           else if (explode) value.forEach((val) => val != null && append(key, val, allowReserved));
           else append(key, value.filter((item) => item != null).map(String).join(","), allowReserved);
-        } else if (typeof value === "object") {
+        } else if (isPlainObject(value)) {
           const entries = Object.entries(value as Record<string, unknown>).filter(([, nestedValue]) => nestedValue != null);
           if (style === "deepObject") {
             for (const [nestedKey, nestedValue] of entries) {

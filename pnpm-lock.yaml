@@ -438,6 +438,9 @@ importers:
 
   playgrounds/job-tracker:
     dependencies:
+      '@hookform/resolvers':
+        specifier: 'catalog:'
+        version: 5.9.1(@standard-schema/spec@1.1.0)(ajv@8.20.0)(arktype@2.2.3)(react-hook-form@7.88.0(react@19.3.0))(zod@4.6.5)
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.103.1(react@19.3.0)
@@ -453,6 +456,9 @@ importers:
       react-dom:
         specifier: 'catalog:'
         version: 19.3.0(react@19.3.0)
+      react-hook-form:
+        specifier: 'catalog:'
+        version: 7.88.0(react@19.3.0)
       zod:
         specifier: 'catalog:'
         version: 4.6.5

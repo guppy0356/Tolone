@@ -1,20 +1,23 @@
-import { createRootRoute, createRoute, Outlet } from "@tanstack/react-router";
+import { createRootRoute, createRoute, Outlet, redirect } from "@tanstack/react-router";
+import { Nav } from "./nav/Nav.component";
 
+// Layout shell + redirects. Imports no page code: page route files import
+// rootRoute back, so an import in the other direction is a cycle.
 export const rootRoute = createRootRoute({
   component: () => (
-    <main>
-      <Outlet />
-    </main>
+    <>
+      <Nav />
+      <main className="mx-auto max-w-3xl p-6">
+        <Outlet />
+      </main>
+    </>
   ),
 });
 
-// Placeholder until the first feature page registers its own route.
 export const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => (
-    <div>
-      <h1>Job-tracker Playground</h1>
-    </div>
-  ),
+  beforeLoad: () => {
+    throw redirect({ to: "/applications" });
+  },
 });

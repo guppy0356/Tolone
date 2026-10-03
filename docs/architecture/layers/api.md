@@ -40,8 +40,10 @@ the two apart.
   the contract's names from `@api`, so the contract still enters the app in one file
   ([ADR 0013](../../adr/0013-single-generator-hand-rolled-mock-typing.md))
 - Re-export types as named aliases for use by other layers
-- Responses arrive parsed and validated against the contract; fields the contract does
-  not declare are stripped. No `.json<T>()` casts
+- Responses arrive parsed and validated against the contract; a field the contract does
+  not declare fails that validation like a missing one — it is not stripped
+  ([ADR 0014](../../adr/0014-undeclared-response-fields-fail-validation.md)). No
+  `.json<T>()` casts
 - No error handling — delegate to the caller. Mapping a `TypedStatusError` to a domain
   flag is the [container hook](./container-hook.md)'s job
 - No query keys and no TanStack Query options — those live in the

@@ -19,7 +19,7 @@ other, and a page may need one, both, or neither.
 |---|---|---|
 | Does this page validate a form? | No → the file does not exist | — |
 | Where does normalization live? | In the schema (`.trim()`). The submit handler receives the schema's **parsed output**, so it never re-normalizes | ↓ Consuming it from the component hook |
-| How much does `satisfies` actually check? | Renamed field, wrong type, dropped required field → caught. A server widening an enum → **not** caught | ↓ What `satisfies` does and does not catch |
+| How much does `satisfies` actually check? | Wrong type, a required field the schema lacks, a renamed required field → caught. A renamed optional field, a field the API no longer takes, a server widening an enum → **not** caught | ↓ What `satisfies` does and does not catch |
 | Is this field a text input? | Any input is a controlled field. A non-text one computes its next value in a handler and calls the controller's `onChange` | ↓ Consuming it from the component hook |
 
 ## Rules
@@ -50,7 +50,10 @@ export type ReportFormValues = z.infer<typeof reportFormSchema>;
 ## What `satisfies` does and does not catch
 
 It asserts that the schema's output is *assignable to* the API input — so it catches a
-renamed field, a wrong type, a dropped required field.
+wrong type, a required field the schema lacks, and a renamed field as long as it is
+required, the usual case for a create input. An update input whose fields are all
+optional (`PATCH`) lets a rename through, and a field the API no longer takes compiles
+either way.
 
 It does **not** catch the server **widening** a union, because a narrower type is
 assignable to a wider one: add `archived` to a status enum server-side and a schema

@@ -149,15 +149,21 @@ Two things stay written by hand:
 
 ### What `satisfies` checks here
 
-`satisfies z.ZodType<IncidentListParams, unknown>` checks the schema against the
-endpoint's params: a renamed field, a wrong type, a parameter the endpoint no longer
-takes.
+`satisfies z.ZodType<IncidentListParams, unknown>` asserts that the schema's output is
+*assignable to* the endpoint's params. That catches a parameter whose type stops
+accepting what the schema produces, a newly required parameter the schema does not always
+supply, and a required parameter that is renamed.
 
 The second type argument is zod's **input** type, and it defaults to `unknown` — so
 spelling it out says the same thing as the form schema's one-argument form, and only
 documents that the input side is deliberately unvalidated.
 
-It does **not** notice a member added to an enum, because a narrower union is assignable
+It does **not** catch a parameter the endpoint no longer takes, or a renamed optional
+one: assignability accepts a property the params type does not have, and the absence of
+one it marks optional — which on a list endpoint is normally every parameter. Either is
+a manual follow-up, not a compiler-caught one.
+
+Nor does it notice a member added to an enum, because a narrower union is assignable
 to a wider one — the same limit as on a
 [form schema's `satisfies`](./layers/form-schema.md#what-satisfies-does-and-does-not-catch).
 Generating the members is what makes that harmless here, since no second copy is left

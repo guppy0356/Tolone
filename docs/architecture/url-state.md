@@ -161,7 +161,9 @@ documents that the input side is deliberately unvalidated.
 It does **not** catch a parameter the endpoint no longer takes, or a renamed optional
 one: assignability accepts a property the params type does not have, and the absence of
 one it marks optional — which on a list endpoint is normally every parameter. Either is
-a manual follow-up, not a compiler-caught one.
+a manual follow-up, not a compiler-caught one. Nothing catches it at runtime either: the
+client validates responses, not requests, so the stale key goes out as written
+([ADR 0014](../adr/0014-undeclared-response-fields-fail-validation.md)).
 
 Nor does it notice a member added to an enum, because a narrower union is assignable
 to a wider one — the same limit as on a

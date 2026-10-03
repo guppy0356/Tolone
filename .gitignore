@@ -5,3 +5,4 @@ dist
 storybook-static
 .vitest-attachments
 __screenshots__
+.vitest

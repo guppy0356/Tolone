@@ -1,6 +1,7 @@
 # ADR 0013: typed-openapi is the single generator; mock typing is hand-rolled over its output
 
-- Status: Accepted
+- Status: Accepted — the sub-decision that the first mutation endpoint adds its method to
+  the helper by hand is superseded by [ADR 0015](./0015-scaffold-writes-typed-http.md)
 - Date: 2026-08-19
 
 ## Context

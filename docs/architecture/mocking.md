@@ -19,20 +19,91 @@ on purpose.
 
 ## Typed handlers
 
-`src/mocks/typed-http.ts` — handwritten, ~95 lines over plain msw — exports the typed
-`http` object both instances build their handlers with. The path argument is a key of
-the generated `GetEndpoints` (the contract's own literal, `{param}` style, converted to
-msw's `:param` at runtime); `params` types from the endpoint's path parameters; and
-`response(status)` accepts only the statuses the contract declares for that path — a
-bodyless status offers `.empty()` alone, a body-bearing one `.json(body)` typed to the
-contract. `.json()` also runs the endpoint's runtime zod schema over the body, so a mock
-drifting in a way the types cannot see fails the test loudly.
+`src/mocks/typed-http.ts` — written by the scaffold, the same for every contract —
+exports the typed `http` object both instances build their handlers with. The path
+argument is a key of the method's entry in the generated `EndpointByMethod` (the
+contract's own literal, `{param}` style, converted to msw's `:param` at runtime);
+`params` types from the endpoint's path parameters and `request.json()` from its request
+body; and `response(status)` accepts only the statuses the contract declares for that
+path — a bodyless status offers `.empty()` alone, a body-bearing one `.json(body)` typed
+to the contract. `.json()` also runs the endpoint's runtime zod schema over the body, so
+a mock drifting in a way the types cannot see fails the test loudly.
 
-The helper carries exactly the methods the playground's contract uses. The first
-mutation endpoint adds its method to `typed-http.ts`, typing the request body from the
-endpoint's `parameters.body` the same way `params` already types. Why a handwritten
-helper rather than openapi-msw or generated handlers:
+`http` has exactly the methods the contract uses, read off the generated module: an
+endpoint with a new method needs `generate:api` and no edit here, and a method the
+contract does not use is a type error. The file names nothing from a particular
+contract, which is what lets the scaffold write it before the contract has a path:
+[ADR 0015](../adr/0015-scaffold-writes-typed-http.md). Why a handwritten helper rather
+than openapi-msw or generated handlers:
 [ADR 0013](../adr/0013-single-generator-hand-rolled-mock-typing.md).
+
+```ts
+import { http as mswHttp, HttpResponse, type HttpHandler, type JsonBodyType } from "msw";
+import { EndpointByMethod } from "../lib/api.gen";
+
+// Handlers typed against src/openapi.yaml through the generated module: the
+// path is the contract's own literal, params and the request body come from
+// the endpoint, and response(status) accepts only the statuses the contract
+// declares. The zod schema of the chosen status also runs over the body at
+// runtime, so a mock drifting in a way the types cannot see fails loudly.
+
+// The generated module has one key per method the contract uses, so `http`
+// has exactly those methods — no edit here when the contract gains one.
+type Method = Extract<keyof EndpointByMethod, keyof typeof mswHttp>;
+type Paths<M extends Method> = Extract<keyof EndpointByMethod[M], string>;
+type EndpointOf<M extends Method, P extends Paths<M>> = EndpointByMethod[M][P];
+
+type PathParamsOf<E> = E extends { parameters: { path: infer P } } ? P : Record<string, never>;
+type BodyOf<E> = E extends { parameters: { body: infer B } } ? B : never;
+type ResponsesOf<E> = E extends { responses: infer R } ? R : never;
+type StatusOf<E> = Extract<keyof ResponsesOf<E>, number>;
+
+// A bodyless status (declared with no content) is `unknown` in the contract
+// and offers `.empty()` alone; a body-bearing one offers `.json(body)`.
+type Responder<E> = <S extends StatusOf<E>>(
+  status: S,
+) => unknown extends ResponsesOf<E>[S]
+  ? { empty: () => Response }
+  : { json: (body: ResponsesOf<E>[S]) => Response };
+
+type TypedRequest<B> = [B] extends [never]
+  ? Request
+  : Omit<Request, "json"> & { json: () => Promise<B> };
+
+type Resolver<E> = (info: {
+  request: TypedRequest<BodyOf<E>>;
+  params: PathParamsOf<E>;
+  response: Responder<E>;
+}) => Response | Promise<Response>;
+
+interface RuntimeEndpoint {
+  responses: Record<number, { parse: (value: unknown) => unknown }>;
+}
+
+function define<M extends Method>(method: M) {
+  return <P extends Paths<M>>(path: P, resolver: Resolver<EndpointOf<M, P>>): HttpHandler => {
+    const endpoint = (EndpointByMethod[method] as Record<string, RuntimeEndpoint>)[path];
+    const response = (status: number) => ({
+      empty: () => new HttpResponse(null, { status }),
+      json: (body: unknown) =>
+        HttpResponse.json(endpoint.responses[status].parse(body) as JsonBodyType, { status }),
+    });
+    // The contract writes `{param}`; msw matches `:param`.
+    const mswPath = path.replace(/\{(\w+)\}/g, ":$1");
+    return (mswHttp[method] as typeof mswHttp.get)(mswPath, (info) =>
+      resolver({
+        request: info.request as never,
+        params: info.params as never,
+        response: response as never,
+      }),
+    );
+  };
+}
+
+export const http = Object.fromEntries(
+  (Object.keys(EndpointByMethod) as Method[]).map((method) => [method, define(method)]),
+) as { [M in Method]: ReturnType<typeof define<M>> };
+```
 
 ## Dev seed
 

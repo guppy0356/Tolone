@@ -53,11 +53,16 @@ Status becomes `Superseded by ADR N` rather than being edited.
 | [0010](./0010-worker-script-sync-at-the-root.md) | The worker scripts are synced by the root project's own postinstall | Accepted |
 | [0011](./0011-view-model-only-with-decisions.md) | A view model is written when the page's translation carries a decision, and skipped when it does not | Accepted |
 | [0012](./0012-generated-client-validates-responses.md) | Responses are validated at the fetch boundary by a client generated from the contract | Accepted¹ |
-| [0013](./0013-single-generator-hand-rolled-mock-typing.md) | typed-openapi is the single generator; mock typing is hand-rolled over its output | Accepted |
+| [0013](./0013-single-generator-hand-rolled-mock-typing.md) | typed-openapi is the single generator; mock typing is hand-rolled over its output | Accepted² |
 | [0014](./0014-undeclared-response-fields-fail-validation.md) | A response field the contract does not declare fails validation; generated objects stay closed | Accepted |
+| [0015](./0015-scaffold-writes-typed-http.md) | The scaffold writes typed-http, and its methods come from the contract | Accepted |
 
 ¹ 0012's type-source sub-decision (openapi-typescript remains beside typed-openapi) is
 superseded by 0013; its decision — the generated validating client — stands.
+
+² 0013's sub-decision that the first mutation endpoint adds its method to `typed-http.ts`
+by hand is superseded by 0015; its decision — the hand-rolled helper over plain msw —
+stands.
 
 Held back deliberately, as decisions whose rejected options are real but narrow: the
 sibling-key shape for sub-resources (`layers/queries.md`) and the exported-route-options

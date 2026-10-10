@@ -7,7 +7,7 @@ import { worker } from "../../../mocks/browser";
 import { useReportDetailContainer } from "./ReportDetail.container.hook";
 
 beforeAll(async () => {
-  await worker.start({ onUnhandledRequest: "bypass", quiet: true });
+  await worker.start({ onUnhandledFrame: "bypass", quiet: true });
 });
 
 afterEach(() => {

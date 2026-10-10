@@ -15,7 +15,7 @@ catalog:
   '@vitest/browser': ^5.0.3
   '@vitest/browser-playwright': ^5.0.3
   ky: ^2.1.0
-  msw: ^2.15.0
+  msw: ^3.0.2
   openapi-msw: ^2.1.0
   openapi-typescript: ^7.13.0
   playwright: ^1.63.0

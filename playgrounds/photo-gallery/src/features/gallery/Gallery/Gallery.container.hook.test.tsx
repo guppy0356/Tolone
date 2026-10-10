@@ -31,7 +31,7 @@ const pagedPhotosHandler = http.get("/api/photos", ({ request }) => {
 });
 
 beforeAll(async () => {
-  await worker.start({ onUnhandledRequest: "bypass", quiet: true });
+  await worker.start({ onUnhandledFrame: "bypass", quiet: true });
 });
 
 beforeEach(() => {

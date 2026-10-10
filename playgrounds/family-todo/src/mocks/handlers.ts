@@ -42,11 +42,9 @@ export const handlers = [
     return response(200).json(filtered);
   }),
 
-  http.post("/api/todos", async ({ request, response }) => {
+  http.post("/api/todos", async ({ request, response, cookies }) => {
     const body = await request.json();
-    const cookieHeader = request.headers.get("cookie") ?? "";
-    const ownerMatch = cookieHeader.match(/currentUser=(\w+)/);
-    const owner = (ownerMatch?.[1] ?? "Papa") as FamilyTodo["owner"];
+    const owner = (cookies.currentUser ?? "Papa") as FamilyTodo["owner"];
     const todo: FamilyTodo = {
       id: String(nextId++),
       title: body.title,

@@ -27,7 +27,7 @@ const detail: TravelRequestDetail = {
   items: [{ id: "i-1", label: "Rail fare", amount: 30000 }],
 };
 
-beforeAll(() => worker.start({ onUnhandledRequest: "error", quiet: true }));
+beforeAll(() => worker.start({ onUnhandledFrame: "error", quiet: true }));
 afterEach(() => worker.resetHandlers());
 afterAll(() => worker.stop());
 

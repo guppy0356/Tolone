@@ -14,7 +14,7 @@ disable-model-invocation: true
 process.md のプレースホルダをこのリポジトリの値に読み替える。
 
 - `<apps>` = `playgrounds`
-- 「アプリ」= `playgrounds/*` の 13 個。`packages/tailwind` とルートはアプリではない（前提の「各アプリは自分の typecheck / test / build を持つ」に当たらない）。ただし `pnpm update -r` はルートの package.json の直書きも更新し、それは §6 の 8. が扱う
+- 「アプリ」= `playgrounds/*` のすべて。`packages/tailwind` とルートはアプリではない（前提の「各アプリは自分の typecheck / test / build を持つ」に当たらない）。ただし `pnpm update -r` はルートの package.json の直書きも更新し、それは §6 の 8. が扱う
 - 「Issue」= GitHub Issue。`gh` で作成・検索・close する
 
 ## 実行主体

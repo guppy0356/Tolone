@@ -10,7 +10,7 @@
     "postinstall": "node scripts/sync-msw-worker.mjs"
   },
   "devDependencies": {
-    "lefthook": "^2.1.14",
+    "lefthook": "^2.1.16",
     "typescript": "catalog:"
   },
   "packageManager": "pnpm@10.30.3",

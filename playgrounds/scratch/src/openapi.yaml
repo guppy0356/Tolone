@@ -1,0 +1,33 @@
+openapi: 3.1.0
+info:
+  title: Scratch
+  version: 0.0.0
+paths:
+  /api/memos:
+    get:
+      operationId: listMemos
+      responses:
+        "200":
+          description: All memos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Memo"
+components:
+  schemas:
+    Memo:
+      type: object
+      required: [id, title, status, createdAt]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        status:
+          type: string
+          enum: [draft, published]
+        createdAt:
+          type: string
+          format: date-time

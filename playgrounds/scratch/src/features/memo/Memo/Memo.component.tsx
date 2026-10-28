@@ -1,7 +1,7 @@
-import { memo, useState } from "react";
+import { memo } from "react";
+import { useMemoComponent, type MemoFilter } from "./Memo.component.hook";
 import type { MemoContainerState } from "./Memo.container.hook";
 
-type MemoFilter = "all" | "draft" | "published";
 const FILTERS: MemoFilter[] = ["all", "draft", "published"];
 
 // Private memo'd body — the items, and nothing that survives loading
@@ -30,11 +30,11 @@ function MemoListSkeleton() {
   );
 }
 
-// Exported Component — renders the whole container state, so its props are the interface
+// Exported Component — renders the whole container state, so its props are the interface.
+// The component hook is called here, not in the body: the tab is local state and must
+// survive the Skeleton toggle, and the tabs themselves stay rendered while items load.
 export function MemoComponent({ memos, isPending, isRefetching }: MemoContainerState) {
-  // タブを足した。選択中タブの state と絞り込みがここに居座り始める。
-  const [filter, setFilter] = useState<MemoFilter>("all");
-  const visibleMemos = filter === "all" ? memos : memos.filter((m) => m.status === filter);
+  const { filter, setFilter, visibleMemos } = useMemoComponent({ memos });
 
   return (
     <>

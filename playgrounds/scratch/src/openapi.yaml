@@ -15,6 +15,18 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Memo"
+  /api/memos/{id}:
+    delete:
+      operationId: deleteMemo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
 components:
   schemas:
     Memo:

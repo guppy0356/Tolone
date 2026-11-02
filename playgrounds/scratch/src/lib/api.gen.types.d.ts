@@ -19,6 +19,22 @@
 },
       
     }
+export type delete_DeleteMemo = {
+      method: "DELETE",
+      path: "/api/memos/{id}",
+      requestFormat: "json",
+      responseFormat: "json",
+      parameters: {
+            
+        path:  { id: string },
+        
+        
+        
+          }
+      responses: {204: unknown,
+},
+      
+    }
 
   // </Endpoints>
   }
@@ -28,6 +44,9 @@
      export type EndpointByMethod = {
      get: {
            "/api/memos": Endpoints.get_ListMemos
+         },
+delete: {
+           "/api/memos/{id}": Endpoints.delete_DeleteMemo
          }
      }
      
@@ -36,5 +55,6 @@
 
     // <EndpointByMethod.Shorthands>
     export type GetEndpoints = EndpointByMethod["get"]
+export type DeleteEndpoints = EndpointByMethod["delete"]
     // </EndpointByMethod.Shorthands>
     

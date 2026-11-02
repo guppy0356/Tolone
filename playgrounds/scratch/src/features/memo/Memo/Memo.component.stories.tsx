@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { fn } from "storybook/test";
 import { MemoComponent } from "./Memo.component";
 
 const sampleMemos = [
@@ -12,7 +13,7 @@ const sampleMemos = [
 const meta = {
   title: "features/Memo",
   component: MemoComponent,
-  args: { memos: [], isPending: false, isRefetching: false },
+  args: { memos: [], isPending: false, isRefetching: false, deleteMemo: fn() },
 } satisfies Meta<typeof MemoComponent>;
 
 export default meta;

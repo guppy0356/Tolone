@@ -27,7 +27,7 @@ export const delete_DeleteMemo = {
   requestFormat: z.literal("json"),
   responseFormat: z.literal("json"),
   parameters: { path: z.strictObject({ id: z.string() }) },
-  responses: { 204: z.unknown() },
+  responses: { 204: z.unknown(), 404: z.unknown() },
 };
 
 // </Endpoints>

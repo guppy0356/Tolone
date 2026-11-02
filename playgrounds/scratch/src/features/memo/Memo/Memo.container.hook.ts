@@ -16,8 +16,20 @@ export function useMemoContainer(): MemoContainerState {
   const listQuery = memoQueries.list();
   const { data, isPending, isRefetching } = useQuery(listQuery);
 
+  // Optimistic update: the list stays on screen after a delete, so the user
+  // observes the mutated cache. Remove the row at once, roll back on error,
+  // and reconcile with the server afterwards.
   const deleteMutation = useMutation({
     mutationFn: (id: string) => memoApi.delete(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: listQuery.queryKey });
+      const previous = queryClient.getQueryData(listQuery.queryKey);
+      queryClient.setQueryData(listQuery.queryKey, (old) => old?.filter((m) => m.id !== id));
+      return { previous };
+    },
+    onError: (_error, _id, context) => {
+      queryClient.setQueryData(listQuery.queryKey, context?.previous);
+    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: listQuery.queryKey });
     },

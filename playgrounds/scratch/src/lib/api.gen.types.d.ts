@@ -32,6 +32,7 @@ export type delete_DeleteMemo = {
         
           }
       responses: {204: unknown,
+404: unknown,
 },
       
     }

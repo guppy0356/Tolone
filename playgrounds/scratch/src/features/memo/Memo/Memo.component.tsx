@@ -1,7 +1,8 @@
 import { memo } from "react";
 import { useMemoComponent } from "./Memo.component.hook";
 import type { MemoContainerState } from "./Memo.container.hook";
-import { MEMO_FILTER_OPTIONS, type MemoListRow, type MemoStatus } from "./Memo.view-model";
+import type { MemoStatus } from "@api/Memo.api";
+import { MEMO_FILTER_OPTIONS, type MemoListRow } from "./Memo.view-model";
 
 // Styling is the Component's, keyed from the raw member the view model keeps
 // beside its label.

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { api } from "../../../lib/api-client";
-import type { Memo } from "../../../lib/api.gen";
+import { memoQueries } from "@api/Memo.queries";
+import { memoApi, type Memo } from "@api/Memo.api";
 
 export interface MemoContainerState {
   memos: Memo[];
@@ -13,16 +13,13 @@ export interface MemoContainerState {
 export function useMemoContainer(): MemoContainerState {
   const queryClient = useQueryClient();
 
-  const { data, isPending, isRefetching } = useQuery({
-    queryKey: ["memos"],
-    queryFn: () => api.get("/api/memos"),
-  });
+  const listQuery = memoQueries.list();
+  const { data, isPending, isRefetching } = useQuery(listQuery);
 
-  // 削除したら一覧を取り直す。そのために同じ key をもう 1 回書いている。
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => api.delete("/api/memos/{id}", { path: { id } }),
+    mutationFn: (id: string) => memoApi.delete(id),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["memos"] });
+      queryClient.invalidateQueries({ queryKey: listQuery.queryKey });
     },
   });
 

@@ -24,6 +24,7 @@ const browserConfig = () => ({
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
+    alias: { "@api": path.join(dirname, "src/api") },
     // vitest-browser-react bundles its own React; without this the router's
     // hooks run against a second copy and every render throws Invalid hook call.
     dedupe: ["react", "react-dom"],

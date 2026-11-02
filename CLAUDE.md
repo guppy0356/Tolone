@@ -18,7 +18,7 @@ Keep this a plain link.
 
 ### Wiring rules & conventions
 
-The detailed wiring rules (Container/Component/hook responsibilities, routing-hook placement, Pick-over-spread) and conventions (1 page = 1 container hook, Queries-layer keys, loading-flag naming, optimistic-update policy, sub-component naming/placement/memo, no View suffix) are **not duplicated here** — each is stated once in the file that applies it, and [docs/architecture/overview.md](docs/architecture/overview.md) resolves every rule name above to that file. Read it before implementing a feature.
+The detailed wiring rules (Container/Component/hook responsibilities, app-shell hook placement, Pick-over-spread) and conventions (1 page = 1 container hook, Queries-layer keys, loading-flag naming, optimistic-update policy, sub-component naming/placement/memo, no View suffix) are **not duplicated here** — each is stated once in the file that applies it, and [docs/architecture/overview.md](docs/architecture/overview.md) resolves every rule name above to that file.
 
 ### Testing approach
 
@@ -30,18 +30,18 @@ A discussion that changes a rule produces two artifacts, and the order matters: 
 
 The gate is one question — **can you name an option that was rejected?**
 
-- **Yes → it is a decision.** Write `docs/adr/000N-*.md` before rewriting `docs/architecture/`, then state the new rule in the guide with a one-line link back. Writing the ADR is where a half-made decision falls apart, and finding that out is cheaper before the guide is rewritten than after.
+- **Yes → it is a decision.** Write `docs/adr/NNNN-*.md` before rewriting `docs/architecture/`, then state the new rule in the guide with a one-line link back. Writing the ADR is where a half-made decision falls apart, and finding that out is cheaper before the guide is rewritten than after.
 - **No → it is editing.** Fix the guide and stop. A clarification, a corrected example, a missing link earns no ADR. If the type system or a tool decided it, nobody decided it.
 
-Write it in the conversation that decided it — a week later the alternatives have to be reconstructed, and a reconstruction is not a record. When a change is only discovered to be a decision by attempting it, the rule still holds in its real form: **before the guide is rewritten**, not before the work starts.
+Write it in the conversation that decided it. When a change is only discovered to be a decision by attempting it, the rule still holds in its real form: **before the guide is rewritten**, not before the work starts.
 
-An ADR and the guide's link to it land in the same commit, so no dangling pointer ever reaches `main`. Criteria, format and the current records: [docs/adr/README.md](docs/adr/README.md).
+An ADR and the guide's link to it land in the same commit, so no dangling pointer ever reaches `main`. Criteria and the current records: [docs/adr/README.md](docs/adr/README.md).
 
 ## Commit Strategy
 
 When implementing a new feature, **commit after each step** of the checklist in [docs/architecture/workflow.md](docs/architecture/workflow.md). Do not batch multiple steps into one commit. The sequence is not duplicated here — it lives there, with the file to read at each step.
 
-Every commit must typecheck — a Lefthook pre-commit hook runs `tsc --noEmit` for each changed playground.
+Every commit must typecheck — a Lefthook pre-commit hook runs `tsc --noEmit` for each changed playground. The hook reads the working tree, not the staged snapshot, so a partial commit can pass while the commit itself is broken — after one, check a clean checkout.
 
 The one ordering that is easy to get wrong: **declare the URLs first, attach the Containers last.** `Link` / `useSearch({ from })` are typed against the registered route tree, so a navigating Component cannot typecheck before its routes exist — and the routes cannot name a Container that does not exist yet. Those are the checklist's two route steps.
 
@@ -53,6 +53,6 @@ Once a feature is working end-to-end, if a single Component contains multiple di
 
 - `playgrounds/` — feature playgrounds (each is a Vite React app)
 - `packages/tailwind/` — shared TailwindCSS base styles
-- `scripts/` — scaffold generators
-- `docs/architecture/` — full architecture specification (authoritative reference; start at `overview.md`)
+- `scripts/` — playground scaffold and MSW worker sync
+- `docs/architecture/` — full architecture specification (authoritative reference)
 - `docs/adr/` — architecture decision records (why a convention is what it is; revisit triggers)

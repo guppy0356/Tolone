@@ -11,7 +11,7 @@ sub-component, run by Vitest in browser mode via `vitest-browser-react`.
 |---|---|---|
 | What does the test render with? | Container-state props, passed directly. Never the container hook — that would drag a QueryClient and a server into the unit the Component boundary exists to keep them out of | [Anti-patterns](./overview.md#anti-patterns) |
 | Does the Component navigate? | It renders `<Link>` or calls `navigate` → wrap it in the shared minimal router | [Test wiring](./wiring.md) |
-| Is the text you are querying repeated on screen? | A chart legend and its axis can both say the same thing → narrow with `locator.first()` | Rules ↓ |
+| Is the text you are querying repeated on screen? | Every match proves the same thing — a chart legend and its axis, both always rendered → `locator.first()`. The repeat appears only in some state — a hover tooltip naming the same series, opened even by a pointer an earlier test file left over the chart → narrow the query to the element the assertion is about; `.first()` would check whichever one the DOM puts first | — |
 | Is the behavior really the Component's? | A search keyword reaching the query key is the hook's, not the Component's — test it there instead of rebuilding the wiring in a harness | [Hook tests](./hook.md) |
 
 ## Rules

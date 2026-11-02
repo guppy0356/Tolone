@@ -22,8 +22,17 @@ test("renders a bar per team and month inside a sized container", async () => {
     </div>,
   );
 
-  await expect.element(screen.getByText("Platform")).toBeInTheDocument();
-  await expect.element(screen.getByText("Mobile")).toBeInTheDocument();
+  // The tooltip repeats the series names whenever the pointer rests on the
+  // chart — a click in an earlier test file can leave it there — so read the
+  // legend items instead of getByText.
+  await expect
+    .poll(() =>
+      Array.from(
+        screen.container.querySelectorAll(".recharts-legend-item-text"),
+        (item) => item.textContent,
+      ),
+    )
+    .toEqual(expect.arrayContaining(series.map((s) => s.name)));
 
   await expect
     .poll(

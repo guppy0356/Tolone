@@ -9,8 +9,11 @@ const MemoList = memo(function MemoList({ memos }: { memos: MemoContainerState["
   return (
     <ul className="space-y-2">
       {memos.map((m) => (
-        <li key={m.id} className="rounded border p-2">
-          {m.title}
+        <li key={m.id} className="flex justify-between rounded border p-2">
+          <span>{m.title}</span>
+          <span className="text-sm text-gray-500">
+            {m.status === "draft" ? "下書き" : "公開済み"} · {m.createdAt.slice(0, 10).replaceAll("-", "/")}
+          </span>
         </li>
       ))}
     </ul>

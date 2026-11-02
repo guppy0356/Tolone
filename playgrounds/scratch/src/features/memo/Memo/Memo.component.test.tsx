@@ -7,6 +7,16 @@ const memos = [
   { id: "2", title: "会議の議事録", status: "published", createdAt: "2026-10-23T10:15:00Z" },
 ] as const;
 
+test("各行にステータスの日本語と日付が出る", async () => {
+  const screen = await render(
+    <MemoComponent memos={[...memos]} isPending={false} isRefetching={false} />,
+  );
+  // The composed string pins exactly what the user sees; the tab also says
+  // "下書き" alone, so the query is the row's whole text, not the word.
+  await expect.element(screen.getByText("下書き · 2026/10/20", { exact: true })).toBeInTheDocument();
+  await expect.element(screen.getByText("公開済み · 2026/10/23", { exact: true })).toBeInTheDocument();
+});
+
 test("下書きタブを選ぶと下書きだけが残る", async () => {
   const screen = await render(
     <MemoComponent memos={[...memos]} isPending={false} isRefetching={false} />,

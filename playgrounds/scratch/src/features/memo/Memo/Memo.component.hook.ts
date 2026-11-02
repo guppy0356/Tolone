@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import type { MemoContainerState } from "./Memo.container.hook";
-
-export type MemoFilter = "all" | "draft" | "published";
+import { toMemoListRow, type MemoFilter, type MemoListRow } from "./Memo.view-model";
 
 export interface MemoComponentParams {
   memos: MemoContainerState["memos"];
@@ -10,16 +9,18 @@ export interface MemoComponentParams {
 export interface MemoComponentState {
   filter: MemoFilter;
   setFilter: (filter: MemoFilter) => void;
-  visibleMemos: MemoContainerState["memos"];
+  rows: MemoListRow[];
 }
 
 export function useMemoComponent({ memos }: MemoComponentParams): MemoComponentState {
   const [filter, setFilter] = useState<MemoFilter>("all");
 
-  const visibleMemos = useMemo(
-    () => (filter === "all" ? memos : memos.filter((m) => m.status === filter)),
+  // The building lives in the view model; only the memoizing lives here.
+  const rows = useMemo(
+    () =>
+      (filter === "all" ? memos : memos.filter((m) => m.status === filter)).map(toMemoListRow),
     [memos, filter],
   );
 
-  return { filter, setFilter, visibleMemos };
+  return { filter, setFilter, rows };
 }

@@ -1,16 +1,25 @@
 import { memo } from "react";
-import { useMemoComponent, type MemoFilter } from "./Memo.component.hook";
+import { useMemoComponent } from "./Memo.component.hook";
 import type { MemoContainerState } from "./Memo.container.hook";
+import { MEMO_FILTER_OPTIONS, type MemoListRow, type MemoStatus } from "./Memo.view-model";
 
-const FILTERS: MemoFilter[] = ["all", "draft", "published"];
+// Styling is the Component's, keyed from the raw member the view model keeps
+// beside its label.
+const STATUS_TONE: Record<MemoStatus, string> = {
+  draft: "text-gray-500",
+  published: "text-green-700",
+};
 
-// Private memo'd body — the items, and nothing that survives loading
-const MemoList = memo(function MemoList({ memos }: { memos: MemoContainerState["memos"] }) {
+// Private memo'd body — the rows, and nothing that survives loading
+const MemoList = memo(function MemoList({ rows }: { rows: MemoListRow[] }) {
   return (
     <ul className="space-y-2">
-      {memos.map((m) => (
-        <li key={m.id} className="rounded border p-2">
-          {m.title}
+      {rows.map((row) => (
+        <li key={row.id} className="flex justify-between rounded border p-2">
+          <span>{row.title}</span>
+          <span className={`text-sm ${STATUS_TONE[row.status]}`}>
+            {row.statusLabel} · {row.createdOn}
+          </span>
         </li>
       ))}
     </ul>
@@ -34,26 +43,26 @@ function MemoListSkeleton() {
 // The component hook is called here, not in the body: the tab is local state and must
 // survive the Skeleton toggle, and the tabs themselves stay rendered while items load.
 export function MemoComponent({ memos, isPending, isRefetching }: MemoContainerState) {
-  const { filter, setFilter, visibleMemos } = useMemoComponent({ memos });
+  const { filter, setFilter, rows } = useMemoComponent({ memos });
 
   return (
     <>
       <div role="tablist" className="mb-4 flex gap-2">
-        {FILTERS.map((f) => (
+        {MEMO_FILTER_OPTIONS.map(({ value, label }) => (
           <button
-            key={f}
+            key={value}
             type="button"
             role="tab"
-            aria-selected={filter === f}
-            onClick={() => setFilter(f)}
-            className={`rounded px-3 py-1 ${filter === f ? "bg-blue-500 text-white" : "bg-gray-100"}`}
+            aria-selected={filter === value}
+            onClick={() => setFilter(value)}
+            className={`rounded px-3 py-1 ${filter === value ? "bg-blue-500 text-white" : "bg-gray-100"}`}
           >
-            {f === "all" ? "すべて" : f === "draft" ? "下書き" : "公開済み"}
+            {label}
           </button>
         ))}
       </div>
       <div className={`transition-opacity ${isRefetching ? "opacity-50" : ""}`}>
-        {isPending ? <MemoListSkeleton /> : <MemoList memos={visibleMemos} />}
+        {isPending ? <MemoListSkeleton /> : <MemoList rows={rows} />}
       </div>
     </>
   );

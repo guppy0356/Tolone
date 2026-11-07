@@ -1,7 +1,8 @@
 import { memo } from "react";
 import { useMemoComponent } from "./Memo.component.hook";
 import type { MemoContainerState } from "./Memo.container.hook";
-import { MEMO_FILTER_OPTIONS, type MemoListRow, type MemoStatus } from "./Memo.view-model";
+import type { MemoStatus } from "@api/Memo.api";
+import { MEMO_FILTER_OPTIONS, type MemoListRow } from "./Memo.view-model";
 
 // Styling is the Component's, keyed from the raw member the view model keeps
 // beside its label.
@@ -11,14 +12,30 @@ const STATUS_TONE: Record<MemoStatus, string> = {
 };
 
 // Private memo'd body — the rows, and nothing that survives loading
-const MemoList = memo(function MemoList({ rows }: { rows: MemoListRow[] }) {
+const MemoList = memo(function MemoList({
+  rows,
+  onDelete,
+}: {
+  rows: MemoListRow[];
+  onDelete: MemoContainerState["deleteMemo"];
+}) {
   return (
     <ul className="space-y-2">
       {rows.map((row) => (
-        <li key={row.id} className="flex justify-between rounded border p-2">
+        <li key={row.id} className="flex items-center justify-between rounded border p-2">
           <span>{row.title}</span>
-          <span className={`text-sm ${STATUS_TONE[row.status]}`}>
-            {row.statusLabel} · {row.createdOn}
+          <span className="flex items-center gap-3">
+            <span className={`text-sm ${STATUS_TONE[row.status]}`}>
+              {row.statusLabel} · {row.createdOn}
+            </span>
+            <button
+              type="button"
+              onClick={() => onDelete(row.id)}
+              aria-label={`${row.title} を削除`}
+              className="rounded px-2 py-0.5 text-sm text-red-600 hover:bg-red-50"
+            >
+              削除
+            </button>
           </span>
         </li>
       ))}
@@ -42,7 +59,12 @@ function MemoListSkeleton() {
 // Exported Component — renders the whole container state, so its props are the interface.
 // The component hook is called here, not in the body: the tab is local state and must
 // survive the Skeleton toggle, and the tabs themselves stay rendered while items load.
-export function MemoComponent({ memos, isPending, isRefetching }: MemoContainerState) {
+export function MemoComponent({
+  memos,
+  isPending,
+  isRefetching,
+  deleteMemo,
+}: MemoContainerState) {
   const { filter, setFilter, rows } = useMemoComponent({ memos });
 
   return (
@@ -62,7 +84,7 @@ export function MemoComponent({ memos, isPending, isRefetching }: MemoContainerS
         ))}
       </div>
       <div className={`transition-opacity ${isRefetching ? "opacity-50" : ""}`}>
-        {isPending ? <MemoListSkeleton /> : <MemoList rows={rows} />}
+        {isPending ? <MemoListSkeleton /> : <MemoList rows={rows} onDelete={deleteMemo} />}
       </div>
     </>
   );

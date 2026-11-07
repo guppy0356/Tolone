@@ -1,7 +1,5 @@
-// 契約の型はまだ生成モジュールから直接。4 段目で @api/Memo.api に移る。
-import type { Memo } from "../../../lib/api.gen";
+import type { Memo, MemoStatus } from "@api/Memo.api";
 
-export type MemoStatus = Memo["status"];
 export type MemoFilter = "all" | MemoStatus;
 
 export interface MemoListRow {

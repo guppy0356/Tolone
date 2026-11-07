@@ -20,6 +20,16 @@ export const get_ListMemos = {
   responses: { 200: z.array(Memo) },
 };
 
+export type delete_DeleteMemo = __TypedOpenapi.Endpoints.delete_DeleteMemo;
+export const delete_DeleteMemo = {
+  method: z.literal("DELETE"),
+  path: z.literal("/api/memos/{id}"),
+  requestFormat: z.literal("json"),
+  responseFormat: z.literal("json"),
+  parameters: { path: z.strictObject({ id: z.string() }) },
+  responses: { 204: z.unknown(), 404: z.unknown() },
+};
+
 // </Endpoints>
 
   
@@ -27,6 +37,9 @@ export const get_ListMemos = {
      export const EndpointByMethod = {
      get: {
            "/api/memos": get_ListMemos
+         },
+delete: {
+           "/api/memos/{id}": delete_DeleteMemo
          }
      } satisfies { [M in keyof __TypedOpenapi.EndpointByMethod]: { [P in keyof __TypedOpenapi.EndpointByMethod[M]]: unknown } }
      export type EndpointByMethod = __TypedOpenapi.EndpointByMethod;
@@ -35,6 +48,7 @@ export const get_ListMemos = {
 
     // <EndpointByMethod.Shorthands>
     export type GetEndpoints = EndpointByMethod["get"]
+export type DeleteEndpoints = EndpointByMethod["delete"]
     // </EndpointByMethod.Shorthands>
     
   
@@ -67,7 +81,7 @@ export type SecurityRequirements = readonly (readonly string[])[];
     export type ParameterSerialization = { style: string; explode: boolean; allowReserved: boolean };
     export type EndpointParameterStyles = Partial<Record<"query" | "path" | "header" | "cookie", Record<string, ParameterSerialization>>>;
     /** OpenAPI parameter styles used by the built-in encoders. */
-    export const endpointParameterStyles = {} as Partial<Record<string, Partial<Record<string, EndpointParameterStyles>>>>;
+    export const endpointParameterStyles = {"delete":{"/api/memos/{id}":{"path":{"id":{"style":"simple","explode":false,"allowReserved":false}}}}} as Partial<Record<string, Partial<Record<string, EndpointParameterStyles>>>>;
     // </EndpointParameterStyles>
     
 
@@ -534,6 +548,33 @@ export class ApiClient {
         return this.request("get", path, params[0] as never) as Promise<unknown>;
     }
     // </ApiClient.get>
+    
+// <ApiClient.delete>
+    delete<Path extends keyof DeleteEndpoints, TEndpoint extends DeleteEndpoints[Path]>(
+      path: Path,
+      ...params: MaybeOptionalArg<
+        (TEndpoint extends { parameters: infer UParams }
+          ? NotNever<InferSchemaInput<UParams>> extends true ? InferSchemaInput<UParams> & { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide } : { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide }
+          : { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse: true; throwOnStatusError?: boolean; validate?: ValidateSide })
+      >
+    ): Promise<SafeApiResponse<TEndpoint>>;
+
+    delete<Path extends keyof DeleteEndpoints, TEndpoint extends DeleteEndpoints[Path]>(
+      path: Path,
+      ...params: MaybeOptionalArg<
+        (TEndpoint extends { parameters: infer UParams }
+          ? NotNever<InferSchemaInput<UParams>> extends true ? InferSchemaInput<UParams> & { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide } : { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide }
+          : { overrides?: RequestInit; queryOptions?: ApiQueryOptions; withResponse?: false; throwOnStatusError?: boolean; validate?: ValidateSide })
+      >
+    ): Promise<InferSuccessData<TEndpoint>>;
+
+    delete<Path extends keyof DeleteEndpoints>(
+      path: Path,
+      ...params: [config?: unknown]
+    ): Promise<unknown> {
+        return this.request("delete", path, params[0] as never) as Promise<unknown>;
+    }
+    // </ApiClient.delete>
     
 
     // <ApiClient.request>

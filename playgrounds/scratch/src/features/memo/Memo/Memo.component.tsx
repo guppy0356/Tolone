@@ -1,8 +1,16 @@
 import { memo } from "react";
+import { Link } from "@tanstack/react-router";
+import type { MemoStatus } from "@api/Memo.api";
 import { useMemoComponent } from "./Memo.component.hook";
 import type { MemoContainerState } from "./Memo.container.hook";
-import type { MemoStatus } from "@api/Memo.api";
+import type { MemoSearch } from "./Memo.search";
 import { MEMO_FILTER_OPTIONS, type MemoListRow } from "./Memo.view-model";
+
+// The one addition the props take from outside the hook: the URL state the
+// Component renders and writes back.
+export interface MemoComponentProps extends MemoContainerState {
+  search: MemoSearch;
+}
 
 // Styling is the Component's, keyed from the raw member the view model keeps
 // beside its label.
@@ -56,31 +64,33 @@ function MemoListSkeleton() {
   );
 }
 
-// Exported Component — renders the whole container state, so its props are the interface.
-// The component hook is called here, not in the body: the tab is local state and must
-// survive the Skeleton toggle, and the tabs themselves stay rendered while items load.
+// Exported Component. The tabs are links: the Component writes the URL, and
+// a tab is a pane, not a destination, so it navigates with replace. Which tab
+// is current comes from the search prop, so a story can pin it through args.
 export function MemoComponent({
   memos,
   isPending,
   isRefetching,
   deleteMemo,
-}: MemoContainerState) {
-  const { filter, setFilter, rows } = useMemoComponent({ memos });
+  search,
+}: MemoComponentProps) {
+  const { rows } = useMemoComponent({ memos, status: search.status });
 
   return (
     <>
       <div role="tablist" className="mb-4 flex gap-2">
         {MEMO_FILTER_OPTIONS.map(({ value, label }) => (
-          <button
+          <Link
             key={value}
-            type="button"
+            to="/"
+            search={{ status: value }}
+            replace
             role="tab"
-            aria-selected={filter === value}
-            onClick={() => setFilter(value)}
-            className={`rounded px-3 py-1 ${filter === value ? "bg-blue-500 text-white" : "bg-gray-100"}`}
+            aria-selected={search.status === value}
+            className={`rounded px-3 py-1 ${search.status === value ? "bg-blue-500 text-white" : "bg-gray-100"}`}
           >
             {label}
-          </button>
+          </Link>
         ))}
       </div>
       <div className={`transition-opacity ${isRefetching ? "opacity-50" : ""}`}>

@@ -1,24 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { fn } from "storybook/test";
-import {
-  createMemoryHistory,
-  createRootRoute,
-  createRoute,
-  createRouter,
-  RouterProvider,
-} from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { MemoRouterHarness } from "../../../test/memo-router";
 import { MemoComponent } from "./Memo.component";
-
-// hook が useSearch を呼ぶので、story は router の中でしか描画できなくなった。
-function withRouter(children: ReactNode) {
-  const rootRoute = createRootRoute();
-  const routeTree = rootRoute.addChildren([
-    createRoute({ getParentRoute: () => rootRoute, path: "/", component: () => children }),
-  ]);
-  const router = createRouter({ routeTree, history: createMemoryHistory({ initialEntries: ["/"] }) });
-  return <RouterProvider router={router} />;
-}
 
 const sampleMemos = [
   { id: "1", title: "買い物リスト", status: "draft", createdAt: "2026-10-20T09:00:00Z" },
@@ -31,14 +14,28 @@ const sampleMemos = [
 const meta = {
   title: "features/Memo",
   component: MemoComponent,
-  args: { memos: [], isPending: false, isRefetching: false, deleteMemo: fn() },
-  decorators: [(Story) => withRouter(<Story />)],
+  args: {
+    memos: [],
+    isPending: false,
+    isRefetching: false,
+    deleteMemo: fn(),
+    search: { status: "all" },
+  },
+  // The Component renders <Link>, so it pays the minimal router — and nothing else.
+  decorators: [
+    (Story) => (
+      <MemoRouterHarness>
+        <Story />
+      </MemoRouterHarness>
+    ),
+  ],
 } satisfies Meta<typeof MemoComponent>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = { args: { memos: [...sampleMemos] } };
+export const Drafts: Story = { args: { memos: [...sampleMemos], search: { status: "draft" } } };
 export const Empty: Story = { args: { memos: [] } };
 export const Loading: Story = { args: { isPending: true, memos: [] } };
 export const Refetching: Story = { args: { memos: [...sampleMemos], isRefetching: true } };

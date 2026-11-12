@@ -1,15 +1,8 @@
-import { createRoute, createRouter } from "@tanstack/react-router";
+import { createRouter } from "@tanstack/react-router";
 import { rootRoute } from "./root.route";
-import { MemoContainer } from "./features/memo/Memo/Memo.container";
+import { memoRoute } from "./features/memo/Memo/Memo.route";
 
-// ルートはまだここに直書き。5 段目で Memo.route.ts に移る。
-const indexRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/",
-  component: MemoContainer,
-});
-
-const routeTree = rootRoute.addChildren([indexRoute]);
+const routeTree = rootRoute.addChildren([memoRoute]);
 
 export const router = createRouter({ routeTree });
 

@@ -7,10 +7,11 @@
     "new:playground": "node scripts/new-playground.mjs",
     "dev": "pnpm --filter @tolone/* dev",
     "test": "pnpm -r test",
-    "postinstall": "node scripts/sync-msw-worker.mjs"
+    "postinstall": "node scripts/sync-msw-worker.mjs && playwright install chromium"
   },
   "devDependencies": {
     "lefthook": "^2.2.2",
+    "playwright": "catalog:",
     "typescript": "catalog:"
   },
   "packageManager": "pnpm@10.34.6",

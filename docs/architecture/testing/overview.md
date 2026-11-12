@@ -61,5 +61,6 @@ Storybook's `play`-based path:
 
 - Tests verify DOM structure only — CSS layout and color regressions are not caught. Open
   the Storybook UI (the catalog) to eyeball visual changes
-- Playwright Chromium must be installed once per machine; see
-  [README.md](../../../README.md#setup) for the setup command
+- `pnpm install` installs the Playwright Chromium the tests need, through the root
+  `postinstall` ([ADR 0017](../../adr/0017-chromium-installed-by-root-postinstall.md)); see
+  [README.md](../../../README.md#setup)

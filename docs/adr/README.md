@@ -56,6 +56,7 @@ Status becomes `Superseded by ADR N` rather than being edited.
 | [0013](./0013-single-generator-hand-rolled-mock-typing.md) | typed-openapi is the single generator; mock typing is hand-rolled over its output | Accepted² |
 | [0014](./0014-undeclared-response-fields-fail-validation.md) | A response field the contract does not declare fails validation; generated objects stay closed | Accepted |
 | [0015](./0015-scaffold-writes-typed-http.md) | The scaffold writes typed-http, and its methods come from the contract | Accepted |
+| [0016](./0016-immature-transitive-pin-waits-with-an-issue.md) | A transitive version still under `minimumReleaseAge` is waited out, and every such stop gets an Issue | Accepted |
 
 ¹ 0012's type-source sub-decision (openapi-typescript remains beside typed-openapi) is
 superseded by 0013; its decision — the generated validating client — stands.

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { fn } from "storybook/test";
+import { MemoRouterHarness } from "../../../test/memo-router";
 import { MemoComponent } from "./Memo.component";
 
 const sampleMemos = [
@@ -13,13 +14,28 @@ const sampleMemos = [
 const meta = {
   title: "features/Memo",
   component: MemoComponent,
-  args: { memos: [], isPending: false, isRefetching: false, deleteMemo: fn() },
+  args: {
+    memos: [],
+    isPending: false,
+    isRefetching: false,
+    deleteMemo: fn(),
+    search: { status: "all" },
+  },
+  // The Component renders <Link>, so it pays the minimal router — and nothing else.
+  decorators: [
+    (Story) => (
+      <MemoRouterHarness>
+        <Story />
+      </MemoRouterHarness>
+    ),
+  ],
 } satisfies Meta<typeof MemoComponent>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = { args: { memos: [...sampleMemos] } };
+export const Drafts: Story = { args: { memos: [...sampleMemos], search: { status: "draft" } } };
 export const Empty: Story = { args: { memos: [] } };
 export const Loading: Story = { args: { isPending: true, memos: [] } };
 export const Refetching: Story = { args: { memos: [...sampleMemos], isRefetching: true } };

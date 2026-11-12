@@ -1,26 +1,25 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { MemoContainerState } from "./Memo.container.hook";
-import { toMemoListRow, type MemoFilter, type MemoListRow } from "./Memo.view-model";
+import type { MemoStatusFilter } from "./Memo.search";
+import { toMemoListRow, type MemoListRow } from "./Memo.view-model";
 
 export interface MemoComponentParams {
   memos: MemoContainerState["memos"];
+  status: MemoStatusFilter;
 }
 
 export interface MemoComponentState {
-  filter: MemoFilter;
-  setFilter: (filter: MemoFilter) => void;
   rows: MemoListRow[];
 }
 
-export function useMemoComponent({ memos }: MemoComponentParams): MemoComponentState {
-  const [filter, setFilter] = useState<MemoFilter>("all");
-
-  // The building lives in the view model; only the memoizing lives here.
+// No state left here: the selected status arrives from the URL as a param.
+// Purely derivation, and the memoizing is what the hook is for.
+export function useMemoComponent({ memos, status }: MemoComponentParams): MemoComponentState {
   const rows = useMemo(
     () =>
-      (filter === "all" ? memos : memos.filter((m) => m.status === filter)).map(toMemoListRow),
-    [memos, filter],
+      (status === "all" ? memos : memos.filter((m) => m.status === status)).map(toMemoListRow),
+    [memos, status],
   );
 
-  return { filter, setFilter, rows };
+  return { rows };
 }

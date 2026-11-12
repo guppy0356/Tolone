@@ -1,6 +1,5 @@
 import type { Memo, MemoStatus } from "@api/Memo.api";
-
-export type MemoFilter = "all" | MemoStatus;
+import type { MemoStatusFilter } from "./Memo.search";
 
 export interface MemoListRow {
   id: string;
@@ -21,7 +20,7 @@ const STATUS_LABELS: Record<MemoStatus, string> = {
 
 // Depends on neither server data nor current state — a constant, not a memo.
 // "すべて" first, then the statuses in this table's order.
-export const MEMO_FILTER_OPTIONS: { value: MemoFilter; label: string }[] = [
+export const MEMO_FILTER_OPTIONS: { value: MemoStatusFilter; label: string }[] = [
   { value: "all", label: "すべて" },
   ...(Object.entries(STATUS_LABELS) as [MemoStatus, string][]).map(([value, label]) => ({
     value,

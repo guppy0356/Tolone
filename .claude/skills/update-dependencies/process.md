@@ -26,6 +26,7 @@ pnpm workspace に複数の独立したアプリがある monorepo を対象に�
 - pnpm 10.20.0 以上を使う。この文書が前提にする動作は次の版で入った。`pnpm update` が catalog のエントリを書き換える (10.12.1)。`minimumReleaseAge` (10.16.0)。`pnpm outdated` が `minimumReleaseAge` を尊重する (10.18.0)。`minimumReleaseAgeExclude` に `<pkg>@<version>` を書ける (10.19.0)。dist-tag `latest` の版が `minimumReleaseAge` を経過していないとき、経過した版のうち最高の版に読み替える (10.20.0)。pnpm 10 系では、全版が `minimumReleaseAge` より新しいパッケージがあると `pnpm outdated` が `ERR_PNPM_NO_MATCHING_VERSION` で失敗する。pnpm 11 で修正されている。
 - pnpm 10.31.0 未満では、pnpm が `pnpm-workspace.yaml` を書き換えるとコメントが消え、キーが並び替わる。記録はコメントに置かず、Issue に置く。
 - `minimumReleaseAge` を設定している。公開直後の版は `pnpm outdated` にも `pnpm update` にも現れない。成熟した版を 1 つも含まない範囲を書いて `pnpm install` すると `ERR_PNPM_NO_MATURE_MATCHING_VERSION` で失敗し、lockfile は書かれない。設定していない workspace では、`minimumReleaseAge` に触れる項目を読み飛ばす。
+- `pnpm outdated` が `minimumReleaseAge` で判定するのは候補のパッケージ自身の版だけで、その版が完全一致で固定する推移的依存の版は判定しない。そのため、候補一覧に出た版を入れる `pnpm update` や `pnpm install` が、推移的依存の版で `ERR_PNPM_NO_MATURE_MATCHING_VERSION` を出して止まることがある。このときエラーには `This error happened while installing the dependencies of <pkg>@<版>` の行が付き、lockfile は書かれない。止まったらその実行を終える。変更を `git restore --staged --worktree .` で戻して `pnpm install --frozen-lockfile` を実行し、エラーに出た推移的依存のパッケージ名と版と、その版が公開から `minimumReleaseAge` を経過する時刻を Issue `deps: 実行失敗 <YYYY-MM-DD>` に書く。公開時刻は `pnpm view <pkg> time --json` で見る。その時刻まで次の実行を始めず、次の実行は §1 から始める。待つ時間が短くても、人が行うときも自動実行と同じ扱いにする。`minimumReleaseAgeExclude` は使わない。理由は [ADR 0016](../../../docs/adr/0016-immature-transitive-pin-waits-with-an-issue.md)。
 - `pnpm-workspace.yaml` に `catalogs:` を置かない。`catalogMode` は既定の `manual` のままにする。`strictPeerDependencies` は既定の `false` のままにする。`true` にすると peer の不一致で `pnpm install` が失敗し、§6 の 4. の判定に進めない。
 - 全アプリの package.json に `typecheck`、`test`、`build` のスクリプトがある。コードを生成するアプリは `generate` スクリプトを持つ。
 - §3 の 5. で使う修正試行の上限は、作業時間で決める。上限の値はチームで一度決めてこの文書に書く。決めるまでは 1 アプリにつき 4 時間とする。
@@ -46,6 +47,7 @@ pnpm workspace に複数の独立したアプリがある monorepo を対象に�
 | メジャー更新で対象アプリが全部不合格 | 見送る。Issue に記録する。次回また候補に出る | 3 |
 | peer の警告だけ出て typecheck、test、build は合格 | 合格。新しい警告は PR 本文に列挙する。`peerDependencyRules.allowedVersions` には書かない | 6 |
 | 欲しい版が `minimumReleaseAge` で出てこない | 待つ。severity high 以上の脆弱性対応のときだけ `minimumReleaseAgeExclude` に版を書く | 3 |
+| 候補の版を入れると、推移的依存の版が `minimumReleaseAge` を経過しておらず止まる | 実行を終え、成熟の時刻を Issue に書いて待つ | 前提 |
 | 置いていく直書きの解除条件を満たした | そのラウンドの §2 と §3 の PR を merge した後に、単独の PR で解除する | 4 |
 | 更新前から不合格のアプリがある | Issue に記録して検証対象から外し、更新は始める。そのアプリは共有 catalog に従わせる | 1 |
 
@@ -111,7 +113,7 @@ done
 2. まず対象アプリを全部上げてみる。判断は結果で行う。上げる先は候補一覧の `latest` とする。
    - `<pkg>` を置いていく直書きで持つアプリが無い場合: `pnpm update -r --latest <pkg>` を実行する。共有 catalog のエントリなら 1 行が書き換わって全アプリが新版に解決される。直書きなら全 package.json の行が書き換わる。実行後に、書き込まれた版が候補一覧の `latest` と一致することを確認する。`--latest` は候補一覧の `latest` の版と、今の範囲で `pnpm update` が選ぶ版の高い方を書く。§3 の候補は `latest` が `compatible` より高いので、書き込まれる版は候補一覧の `latest` と一致する。一致しなければ候補一覧が古い。変更を戻し、§1 からやり直す。
    - `<pkg>` を置いていく直書きで持つアプリがある場合: `pnpm update -r --latest <pkg>` はその直書きも新版に書き換える。代わりに共有 catalog の行を `^<latest>` に手で書き換え、`pnpm install` を実行する。置いていく直書きには触れない。
-   - `latest` より低いメジャーへ上げるのは、同じ実行で `latest` への更新が 4. で全部不合格になり見送りの Issue を作るかコメントを追記した直後に、別の PR で 1 つ低いメジャーを試す場合だけとする。試すのは 1 段だけで、それも全部不合格なら同じ Issue に「`<major>.0.0` も見送り」とコメントし、4. の表のとおり移行を計画する。移行を計画する Issue が open の間は、1 段低いメジャーを試さない。前回以前の見送り Issue が open でも、人が行うときは `latest` から試し、同じ版で再び全部不合格なら §8 のとおりその Issue にコメントを追記する。共有 catalog の行を `^<major>.0.0` に手で書き換えて `pnpm install` する。`<pkg>` が共有 catalog に無ければ、`<pkg>` を持つ全アプリの package.json の行を `^<major>.0.0` に手で書き換える。解決される版は pnpm が `minimumReleaseAge` を満たす範囲で選ぶ。`ERR_PNPM_NO_MATURE_MATCHING_VERSION` で失敗したら、そのメジャーにはまだ取り込める版が無い。変更を戻して見送る。`<major>` が 0 のときは試さない。ブランチ名の `<version>` と、全部不合格のときの見送り Issue の題名の `<version>` は `<major>.0.0` とする。§6 の 5. の「上げる先の版」は解決された版とする。`<pkg>@<major>` の形は対象アプリの `"catalog:"` を直書きに変えるので使わない。
+   - `latest` より低いメジャーへ上げるのは、同じ実行で `latest` への更新が 4. で全部不合格になり見送りの Issue を作るかコメントを追記した直後に、別の PR で 1 つ低いメジャーを試す場合だけとする。試すのは 1 段だけで、それも全部不合格なら同じ Issue に「`<major>.0.0` も見送り」とコメントし、4. の表のとおり移行を計画する。移行を計画する Issue が open の間は、1 段低いメジャーを試さない。前回以前の見送り Issue が open でも、人が行うときは `latest` から試し、同じ版で再び全部不合格なら §8 のとおりその Issue にコメントを追記する。共有 catalog の行を `^<major>.0.0` に手で書き換えて `pnpm install` する。`<pkg>` が共有 catalog に無ければ、`<pkg>` を持つ全アプリの package.json の行を `^<major>.0.0` に手で書き換える。解決される版は pnpm が `minimumReleaseAge` を満たす範囲で選ぶ。`<pkg>` 自身の版で `ERR_PNPM_NO_MATURE_MATCHING_VERSION` を出して失敗したら、そのメジャーにはまだ取り込める版が無い。推移的依存の版で出たときは前提に従う。変更を戻して見送る。`<major>` が 0 のときは試さない。ブランチ名の `<version>` と、全部不合格のときの見送り Issue の題名の `<version>` は `<major>.0.0` とする。§6 の 5. の「上げる先の版」は解決された版とする。`<pkg>@<major>` の形は対象アプリの `"catalog:"` を直書きに変えるので使わない。
 3. §6 の検証を全アプリで実行する。
 4. 結果を分類する。上から順に最初に該当した行を採る。分類に数えるアプリは 1. の対象アプリとする。対象アプリに含まれないアプリが不合格になった場合も、不合格アプリとして 5. の判定に回す。§1 で検証対象から外したアプリは §6 の 7. を実行していないので、ここには現れない。
 

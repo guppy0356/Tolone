@@ -54,14 +54,14 @@ The layer table, the wiring rules and the conventions are in
 
 ```bash
 pnpm install
-pnpm exec playwright install chromium
 ```
 
-The first command installs npm dependencies and runs MSW's postinstall to
-generate `mockServiceWorker.js` in each playground's `public/`. The second
-command downloads the Chromium binary to `~/Library/Caches/ms-playwright/`
+This installs npm dependencies, then the root `postinstall` copies MSW's
+`mockServiceWorker.js` into each playground's `public/` and downloads the
+Chromium that the installed Playwright expects to `~/Library/Caches/ms-playwright/`
 (or the OS-specific cache), which is used by the browser-mode test run.
-Run it once per machine; the cache is shared by all playgrounds.
+Run it again after pulling a lockfile change: a Playwright bump brings a new
+Chromium with it, and the install fetches it.
 
 ## Commands
 
